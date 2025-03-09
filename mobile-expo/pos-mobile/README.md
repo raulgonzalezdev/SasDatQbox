@@ -1,50 +1,116 @@
-# Welcome to your Expo app 👋
+# POS Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil para punto de venta (POS) desarrollada con React Native y Expo.
 
-## Get started
+## Requisitos
 
-1. Install dependencies
+- Node.js (v14 o superior)
+- npm o yarn
+- Expo CLI
+- Expo Go (aplicación móvil para probar la app)
 
+## Instalación
+
+1. Clona el repositorio
+2. Navega al directorio del proyecto:
+   ```bash
+   cd mobile-expo/pos-mobile
+   ```
+3. Instala las dependencias:
    ```bash
    npm install
+   # o
+   yarn install
    ```
 
-2. Start the app
+## Ejecución
 
-   ```bash
-    npx expo start
-   ```
+Hay varias formas de ejecutar la aplicación:
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Modo estándar (LAN)
 
 ```bash
-npm run reset-project
+npm start
+# o
+yarn start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Modo tunnel (para acceder desde redes externas)
 
-## Learn more
+```bash
+npm run start-tunnel
+# o
+yarn start-tunnel
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### Modo offline (sin conexión a internet)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run start-offline
+# o
+yarn start-offline
+```
 
-## Join the community
+### Limpiar caché y reiniciar
 
-Join our community of developers creating universal apps.
+Si tienes problemas con la aplicación, puedes limpiar la caché y reiniciar:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm run start-clear
+# o
+yarn start-clear
+```
+
+### Reinicio completo
+
+Para un reinicio completo (limpia caché, reinstala dependencias y reinicia):
+
+```bash
+npm run reset-app
+# o
+yarn reset-app
+```
+
+## Solución de problemas
+
+### Error "TypeError: fetch failed"
+
+Este error puede ocurrir cuando hay problemas de conexión con los servidores de Expo. Prueba las siguientes soluciones:
+
+1. Ejecuta la aplicación en modo offline:
+   ```bash
+   npm run start-offline
+   ```
+
+2. Limpia la caché y reinicia:
+   ```bash
+   npm run start-clear
+   ```
+
+3. Reinicia completamente la aplicación:
+   ```bash
+   npm run reset-app
+   ```
+
+### Error "Too many screens defined"
+
+Este error puede ocurrir cuando hay rutas duplicadas en la configuración de navegación. Asegúrate de que no haya rutas duplicadas en los archivos `_layout.tsx`.
+
+## Estructura del proyecto
+
+- `app/`: Contiene las pantallas y la configuración de navegación
+  - `(tabs)/`: Pestañas principales de la aplicación
+  - `auth/`: Pantallas de autenticación
+  - `pos/`: Pantallas del punto de venta
+- `components/`: Componentes reutilizables
+  - `auth/`: Componentes de autenticación
+  - `pos/`: Componentes del punto de venta
+  - `ui/`: Componentes de interfaz de usuario
+- `assets/`: Recursos estáticos (imágenes, fuentes, etc.)
+- `constants/`: Constantes y configuración
+- `hooks/`: Hooks personalizados
+- `scripts/`: Scripts de utilidad
+
+## Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT.

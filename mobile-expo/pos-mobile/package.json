@@ -5,6 +5,12 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "reset-app": "bash ./scripts/reset-app.sh",
+    "start-tunnel": "expo start --tunnel",
+    "start-tunnel-fixed": "bash ./scripts/start-tunnel-fixed.sh",
+    "start-tunnel-alt": "bash ./scripts/start-tunnel-alt.sh",
+    "start-clear": "expo start --clear",
+    "start-offline": "bash ./scripts/start-offline.sh",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -15,6 +21,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
