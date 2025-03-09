@@ -262,11 +262,7 @@ CREATE TABLE pos.stock_transfer_items (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-/**
- * SALES MANAGEMENT
- */
-
--- Customers
+-- Customers POS
 CREATE TABLE pos.customers_pos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
@@ -287,14 +283,12 @@ CREATE TABLE pos.payment_methods (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
   name TEXT NOT NULL,
+  code TEXT NOT NULL,
   description TEXT,
-  is_cash BOOLEAN DEFAULT FALSE,
-  is_card BOOLEAN DEFAULT FALSE,
-  is_bank_transfer BOOLEAN DEFAULT FALSE,
-  is_online BOOLEAN DEFAULT FALSE,
-  active BOOLEAN DEFAULT TRUE,
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(business_id, code)
 );
 
 -- Taxes
@@ -303,10 +297,12 @@ CREATE TABLE pos.taxes (
   business_id UUID REFERENCES pos.businesses NOT NULL,
   name TEXT NOT NULL,
   rate DECIMAL(5, 2) NOT NULL,
-  is_inclusive BOOLEAN DEFAULT TRUE,
-  active BOOLEAN DEFAULT TRUE,
+  type TEXT DEFAULT 'percentage',
+  is_compound BOOLEAN DEFAULT FALSE,
+  is_recoverable BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(business_id, name)
 );
 
 -- Discounts
@@ -314,14 +310,15 @@ CREATE TABLE pos.discounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
   name TEXT NOT NULL,
-  description TEXT,
-  discount_type TEXT NOT NULL,
-  discount_value DECIMAL(19, 4) NOT NULL,
-  starts_at TIMESTAMP WITH TIME ZONE,
-  ends_at TIMESTAMP WITH TIME ZONE,
-  active BOOLEAN DEFAULT TRUE,
+  type TEXT DEFAULT 'percentage',
+  value DECIMAL(19, 4) NOT NULL,
+  min_purchase_amount DECIMAL(19, 4) DEFAULT 0,
+  start_date TIMESTAMP WITH TIME ZONE,
+  end_date TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(business_id, name)
 );
 
 -- Sales
@@ -331,15 +328,14 @@ CREATE TABLE pos.sales (
   location_id UUID REFERENCES pos.business_locations NOT NULL,
   customer_id UUID REFERENCES pos.customers_pos,
   reference_no TEXT,
-  invoice_no TEXT,
   sale_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   status TEXT DEFAULT 'completed',
   payment_status TEXT DEFAULT 'paid',
   notes TEXT,
-  subtotal DECIMAL(19, 4) NOT NULL,
+  subtotal_amount DECIMAL(19, 4) DEFAULT 0,
   discount_amount DECIMAL(19, 4) DEFAULT 0,
   tax_amount DECIMAL(19, 4) DEFAULT 0,
-  total_amount DECIMAL(19, 4) NOT NULL,
+  total_amount DECIMAL(19, 4) DEFAULT 0,
   created_by UUID REFERENCES auth.users NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -362,21 +358,14 @@ CREATE TABLE pos.sale_items (
 -- Payments
 CREATE TABLE pos.payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  business_id UUID REFERENCES pos.businesses NOT NULL,
-  sale_id UUID REFERENCES pos.sales,
+  sale_id UUID REFERENCES pos.sales NOT NULL,
   payment_method_id UUID REFERENCES pos.payment_methods NOT NULL,
   amount DECIMAL(19, 4) NOT NULL,
-  payment_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   reference_no TEXT,
   notes TEXT,
-  created_by UUID REFERENCES auth.users NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
-/**
- * RESTAURANT MANAGEMENT
- */
 
 -- Tables
 CREATE TABLE pos.tables (
@@ -384,11 +373,9 @@ CREATE TABLE pos.tables (
   business_id UUID REFERENCES pos.businesses NOT NULL,
   location_id UUID REFERENCES pos.business_locations NOT NULL,
   name TEXT NOT NULL,
-  description TEXT,
-  capacity INTEGER DEFAULT 4,
+  capacity INTEGER,
   status TEXT DEFAULT 'available',
-  position JSONB,
-  active BOOLEAN DEFAULT TRUE,
+  notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -396,17 +383,11 @@ CREATE TABLE pos.tables (
 -- Table reservations
 CREATE TABLE pos.table_reservations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  business_id UUID REFERENCES pos.businesses NOT NULL,
-  location_id UUID REFERENCES pos.business_locations NOT NULL,
   table_id UUID REFERENCES pos.tables NOT NULL,
-  customer_id UUID REFERENCES pos.customers_pos,
-  customer_name TEXT,
-  customer_email TEXT,
-  customer_phone TEXT,
-  party_size INTEGER NOT NULL,
+  customer_id UUID REFERENCES pos.customers_pos NOT NULL,
   reservation_date TIMESTAMP WITH TIME ZONE NOT NULL,
-  end_time TIMESTAMP WITH TIME ZONE,
-  status TEXT DEFAULT 'confirmed',
+  number_of_guests INTEGER NOT NULL,
+  status TEXT DEFAULT 'pending',
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -416,18 +397,12 @@ CREATE TABLE pos.table_reservations (
 CREATE TABLE pos.menu_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
-  product_id UUID REFERENCES pos.products_inventory NOT NULL,
   category_id UUID REFERENCES pos.categories,
   name TEXT NOT NULL,
   description TEXT,
-  price DECIMAL(19, 4) NOT NULL,
   image_url TEXT,
-  preparation_time INTEGER,
-  is_vegetarian BOOLEAN DEFAULT FALSE,
-  is_vegan BOOLEAN DEFAULT FALSE,
-  is_gluten_free BOOLEAN DEFAULT FALSE,
-  spice_level INTEGER DEFAULT 0,
-  active BOOLEAN DEFAULT TRUE,
+  price DECIMAL(19, 4) NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -438,9 +413,9 @@ CREATE TABLE pos.menu_modifiers (
   business_id UUID REFERENCES pos.businesses NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
+  is_required BOOLEAN DEFAULT FALSE,
   min_selections INTEGER DEFAULT 0,
-  max_selections INTEGER DEFAULT 1,
-  active BOOLEAN DEFAULT TRUE,
+  max_selections INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -450,9 +425,8 @@ CREATE TABLE pos.menu_modifier_options (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   modifier_id UUID REFERENCES pos.menu_modifiers NOT NULL,
   name TEXT NOT NULL,
-  price DECIMAL(19, 4) DEFAULT 0,
-  is_default BOOLEAN DEFAULT FALSE,
-  active BOOLEAN DEFAULT TRUE,
+  price_adjustment DECIMAL(19, 4) DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -463,6 +437,7 @@ CREATE TABLE pos.menu_item_modifiers (
   menu_item_id UUID REFERENCES pos.menu_items NOT NULL,
   modifier_id UUID REFERENCES pos.menu_modifiers NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(menu_item_id, modifier_id)
 );
 
@@ -473,15 +448,14 @@ CREATE TABLE pos.orders (
   location_id UUID REFERENCES pos.business_locations NOT NULL,
   table_id UUID REFERENCES pos.tables,
   customer_id UUID REFERENCES pos.customers_pos,
-  sale_id UUID REFERENCES pos.sales,
-  order_number TEXT,
-  order_type TEXT NOT NULL,
+  order_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   status TEXT DEFAULT 'pending',
+  payment_status TEXT DEFAULT 'pending',
   notes TEXT,
-  subtotal DECIMAL(19, 4) NOT NULL,
+  subtotal_amount DECIMAL(19, 4) DEFAULT 0,
   discount_amount DECIMAL(19, 4) DEFAULT 0,
   tax_amount DECIMAL(19, 4) DEFAULT 0,
-  total_amount DECIMAL(19, 4) NOT NULL,
+  total_amount DECIMAL(19, 4) DEFAULT 0,
   created_by UUID REFERENCES auth.users NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -494,11 +468,7 @@ CREATE TABLE pos.order_items (
   menu_item_id UUID REFERENCES pos.menu_items NOT NULL,
   quantity INTEGER NOT NULL,
   unit_price DECIMAL(19, 4) NOT NULL,
-  discount_amount DECIMAL(19, 4) DEFAULT 0,
-  tax_amount DECIMAL(19, 4) DEFAULT 0,
-  total_amount DECIMAL(19, 4) NOT NULL,
   notes TEXT,
-  status TEXT DEFAULT 'pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -508,20 +478,15 @@ CREATE TABLE pos.order_item_modifiers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_item_id UUID REFERENCES pos.order_items NOT NULL,
   modifier_option_id UUID REFERENCES pos.menu_modifier_options NOT NULL,
-  price DECIMAL(19, 4) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Kitchen orders
 CREATE TABLE pos.kitchen_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  business_id UUID REFERENCES pos.businesses NOT NULL,
-  location_id UUID REFERENCES pos.business_locations NOT NULL,
   order_id UUID REFERENCES pos.orders NOT NULL,
-  ticket_number TEXT,
   status TEXT DEFAULT 'pending',
-  preparation_start_time TIMESTAMP WITH TIME ZONE,
-  preparation_end_time TIMESTAMP WITH TIME ZONE,
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -533,24 +498,20 @@ CREATE TABLE pos.kitchen_order_items (
   kitchen_order_id UUID REFERENCES pos.kitchen_orders NOT NULL,
   order_item_id UUID REFERENCES pos.order_items NOT NULL,
   status TEXT DEFAULT 'pending',
-  preparation_start_time TIMESTAMP WITH TIME ZONE,
-  preparation_end_time TIMESTAMP WITH TIME ZONE,
+  notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
-/**
- * REPORTING AND ANALYTICS
- */
 
 -- Reports
 CREATE TABLE pos.reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
-  name TEXT NOT NULL,
-  description TEXT,
-  report_type TEXT NOT NULL,
+  location_id UUID REFERENCES pos.business_locations NOT NULL,
+  type TEXT NOT NULL,
   parameters JSONB DEFAULT '{}'::jsonb,
+  status TEXT DEFAULT 'pending',
+  result JSONB,
   created_by UUID REFERENCES auth.users NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -560,14 +521,16 @@ CREATE TABLE pos.reports (
 CREATE TABLE pos.analytics_data (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
-  data_type TEXT NOT NULL,
-  data_date DATE NOT NULL,
-  data JSONB NOT NULL,
+  location_id UUID REFERENCES pos.business_locations NOT NULL,
+  date DATE NOT NULL,
+  type TEXT NOT NULL,
+  data JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(business_id, location_id, date, type)
 );
 
--- Enable Row Level Security
+-- Enable Row Level Security on all tables
 ALTER TABLE pos.businesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.business_locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.business_settings ENABLE ROW LEVEL SECURITY;
@@ -604,344 +567,4 @@ ALTER TABLE pos.order_item_modifiers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.kitchen_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.kitchen_order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.reports ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pos.analytics_data ENABLE ROW LEVEL SECURITY;
-
--- Create policies for each table
-CREATE POLICY "Users can view their own businesses" ON pos.businesses
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can view their own business locations" ON pos.business_locations
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = business_locations.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view their own business settings" ON pos.business_settings
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = business_settings.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view roles in their businesses" ON pos.roles
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = roles.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view permissions" ON pos.permissions
-  FOR SELECT USING (true);
-
-CREATE POLICY "Users can view role permissions in their businesses" ON pos.role_permissions
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.roles r
-      JOIN pos.businesses b ON b.id = r.business_id
-      WHERE r.id = role_permissions.role_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view their own roles" ON pos.user_roles
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can view categories in their businesses" ON pos.categories
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = categories.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view products in their businesses" ON pos.products_inventory
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = products_inventory.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view product locations in their businesses" ON pos.product_inventory_locations
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.products_inventory pi
-      JOIN pos.businesses b ON b.id = pi.business_id
-      WHERE pi.id = product_inventory_locations.product_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view suppliers in their businesses" ON pos.suppliers
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = suppliers.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view purchase orders in their businesses" ON pos.purchase_orders
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = purchase_orders.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view purchase order items in their businesses" ON pos.purchase_order_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.purchase_orders po
-      JOIN pos.businesses b ON b.id = po.business_id
-      WHERE po.id = purchase_order_items.purchase_order_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view stock adjustments in their businesses" ON pos.stock_adjustments
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = stock_adjustments.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view stock adjustment items in their businesses" ON pos.stock_adjustment_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.stock_adjustments sa
-      JOIN pos.businesses b ON b.id = sa.business_id
-      WHERE sa.id = stock_adjustment_items.stock_adjustment_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view stock transfers in their businesses" ON pos.stock_transfers
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = stock_transfers.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view stock transfer items in their businesses" ON pos.stock_transfer_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.stock_transfers st
-      JOIN pos.businesses b ON b.id = st.business_id
-      WHERE st.id = stock_transfer_items.stock_transfer_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view customers in their businesses" ON pos.customers_pos
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = customers_pos.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view payment methods in their businesses" ON pos.payment_methods
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = payment_methods.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view taxes in their businesses" ON pos.taxes
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = taxes.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view discounts in their businesses" ON pos.discounts
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = discounts.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view sales in their businesses" ON pos.sales
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = sales.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view sale items in their businesses" ON pos.sale_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.sales s
-      JOIN pos.businesses b ON b.id = s.business_id
-      WHERE s.id = sale_items.sale_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view payments in their businesses" ON pos.payments
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.sales s
-      JOIN pos.businesses b ON b.id = s.business_id
-      WHERE s.id = payments.sale_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view tables in their businesses" ON pos.tables
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = tables.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view table reservations in their businesses" ON pos.table_reservations
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = table_reservations.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view menu items in their businesses" ON pos.menu_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = menu_items.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view menu modifiers in their businesses" ON pos.menu_modifiers
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = menu_modifiers.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view menu modifier options in their businesses" ON pos.menu_modifier_options
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.menu_modifiers mm
-      JOIN pos.businesses b ON b.id = mm.business_id
-      WHERE mm.id = menu_modifier_options.modifier_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view menu item modifiers in their businesses" ON pos.menu_item_modifiers
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.menu_items mi
-      JOIN pos.businesses b ON b.id = mi.business_id
-      WHERE mi.id = menu_item_modifiers.menu_item_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view orders in their businesses" ON pos.orders
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = orders.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view order items in their businesses" ON pos.order_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.orders o
-      JOIN pos.businesses b ON b.id = o.business_id
-      WHERE o.id = order_items.order_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view order item modifiers in their businesses" ON pos.order_item_modifiers
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.order_items oi
-      JOIN pos.orders o ON o.id = oi.order_id
-      JOIN pos.businesses b ON b.id = o.business_id
-      WHERE oi.id = order_item_modifiers.order_item_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view kitchen orders in their businesses" ON pos.kitchen_orders
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = kitchen_orders.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view kitchen order items in their businesses" ON pos.kitchen_order_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.kitchen_orders ko
-      JOIN pos.businesses b ON b.id = ko.business_id
-      WHERE ko.id = kitchen_order_items.kitchen_order_id
-      AND b.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view reports in their businesses" ON pos.reports
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = reports.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can view analytics data in their businesses" ON pos.analytics_data
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM pos.businesses
-      WHERE id = analytics_data.business_id
-      AND user_id = auth.uid()
-    )
-  );
-
--- Add the pos schema tables to realtime publication
-DROP PUBLICATION IF EXISTS supabase_realtime;
-CREATE PUBLICATION supabase_realtime FOR TABLE 
-  products, 
-  prices, 
-  pos.businesses, 
-  pos.business_locations, 
-  pos.products_inventory, 
-  pos.sales, 
-  pos.orders; 
+ALTER TABLE pos.analytics_data ENABLE ROW LEVEL SECURITY; 
