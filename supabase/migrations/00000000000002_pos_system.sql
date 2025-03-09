@@ -606,14 +606,332 @@ ALTER TABLE pos.kitchen_order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.analytics_data ENABLE ROW LEVEL SECURITY;
 
--- Create basic RLS policies
+-- Create policies for each table
 CREATE POLICY "Users can view their own businesses" ON pos.businesses
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view their business locations" ON pos.business_locations
+CREATE POLICY "Users can view their own business locations" ON pos.business_locations
   FOR SELECT USING (
-    business_id IN (
-      SELECT id FROM pos.businesses WHERE user_id = auth.uid()
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = business_locations.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view their own business settings" ON pos.business_settings
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = business_settings.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view roles in their businesses" ON pos.roles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = roles.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view permissions" ON pos.permissions
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can view role permissions in their businesses" ON pos.role_permissions
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.roles r
+      JOIN pos.businesses b ON b.id = r.business_id
+      WHERE r.id = role_permissions.role_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view their own roles" ON pos.user_roles
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view categories in their businesses" ON pos.categories
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = categories.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view products in their businesses" ON pos.products_inventory
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = products_inventory.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view product locations in their businesses" ON pos.product_inventory_locations
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.products_inventory pi
+      JOIN pos.businesses b ON b.id = pi.business_id
+      WHERE pi.id = product_inventory_locations.product_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view suppliers in their businesses" ON pos.suppliers
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = suppliers.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view purchase orders in their businesses" ON pos.purchase_orders
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = purchase_orders.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view purchase order items in their businesses" ON pos.purchase_order_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.purchase_orders po
+      JOIN pos.businesses b ON b.id = po.business_id
+      WHERE po.id = purchase_order_items.purchase_order_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view stock adjustments in their businesses" ON pos.stock_adjustments
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = stock_adjustments.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view stock adjustment items in their businesses" ON pos.stock_adjustment_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.stock_adjustments sa
+      JOIN pos.businesses b ON b.id = sa.business_id
+      WHERE sa.id = stock_adjustment_items.stock_adjustment_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view stock transfers in their businesses" ON pos.stock_transfers
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = stock_transfers.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view stock transfer items in their businesses" ON pos.stock_transfer_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.stock_transfers st
+      JOIN pos.businesses b ON b.id = st.business_id
+      WHERE st.id = stock_transfer_items.stock_transfer_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view customers in their businesses" ON pos.customers_pos
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = customers_pos.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view payment methods in their businesses" ON pos.payment_methods
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = payment_methods.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view taxes in their businesses" ON pos.taxes
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = taxes.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view discounts in their businesses" ON pos.discounts
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = discounts.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view sales in their businesses" ON pos.sales
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = sales.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view sale items in their businesses" ON pos.sale_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.sales s
+      JOIN pos.businesses b ON b.id = s.business_id
+      WHERE s.id = sale_items.sale_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view payments in their businesses" ON pos.payments
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.sales s
+      JOIN pos.businesses b ON b.id = s.business_id
+      WHERE s.id = payments.sale_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view tables in their businesses" ON pos.tables
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = tables.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view table reservations in their businesses" ON pos.table_reservations
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = table_reservations.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view menu items in their businesses" ON pos.menu_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = menu_items.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view menu modifiers in their businesses" ON pos.menu_modifiers
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = menu_modifiers.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view menu modifier options in their businesses" ON pos.menu_modifier_options
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.menu_modifiers mm
+      JOIN pos.businesses b ON b.id = mm.business_id
+      WHERE mm.id = menu_modifier_options.modifier_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view menu item modifiers in their businesses" ON pos.menu_item_modifiers
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.menu_items mi
+      JOIN pos.businesses b ON b.id = mi.business_id
+      WHERE mi.id = menu_item_modifiers.menu_item_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view orders in their businesses" ON pos.orders
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = orders.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view order items in their businesses" ON pos.order_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.orders o
+      JOIN pos.businesses b ON b.id = o.business_id
+      WHERE o.id = order_items.order_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view order item modifiers in their businesses" ON pos.order_item_modifiers
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.order_items oi
+      JOIN pos.orders o ON o.id = oi.order_id
+      JOIN pos.businesses b ON b.id = o.business_id
+      WHERE oi.id = order_item_modifiers.order_item_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view kitchen orders in their businesses" ON pos.kitchen_orders
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = kitchen_orders.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view kitchen order items in their businesses" ON pos.kitchen_order_items
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.kitchen_orders ko
+      JOIN pos.businesses b ON b.id = ko.business_id
+      WHERE ko.id = kitchen_order_items.kitchen_order_id
+      AND b.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view reports in their businesses" ON pos.reports
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = reports.business_id
+      AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view analytics data in their businesses" ON pos.analytics_data
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM pos.businesses
+      WHERE id = analytics_data.business_id
+      AND user_id = auth.uid()
     )
   );
 
