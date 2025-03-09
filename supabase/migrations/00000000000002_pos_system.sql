@@ -6,7 +6,7 @@
 -- Create schema for POS system
 CREATE SCHEMA IF NOT EXISTS pos;
 
--- Enable Row Level Security on all tables
+-- Grant privileges
 ALTER DEFAULT PRIVILEGES IN SCHEMA pos GRANT ALL ON TABLES TO postgres, service_role;
 
 /**
@@ -262,7 +262,11 @@ CREATE TABLE pos.stock_transfer_items (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Customers POS
+/**
+ * SALES MANAGEMENT
+ */
+
+-- Customers
 CREATE TABLE pos.customers_pos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
@@ -358,14 +362,21 @@ CREATE TABLE pos.sale_items (
 -- Payments
 CREATE TABLE pos.payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sale_id UUID REFERENCES pos.sales NOT NULL,
+  business_id UUID REFERENCES pos.businesses NOT NULL,
+  sale_id UUID REFERENCES pos.sales,
   payment_method_id UUID REFERENCES pos.payment_methods NOT NULL,
   amount DECIMAL(19, 4) NOT NULL,
+  payment_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   reference_no TEXT,
   notes TEXT,
+  created_by UUID REFERENCES auth.users NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+/**
+ * RESTAURANT MANAGEMENT
+ */
 
 -- Tables
 CREATE TABLE pos.tables (
@@ -373,9 +384,11 @@ CREATE TABLE pos.tables (
   business_id UUID REFERENCES pos.businesses NOT NULL,
   location_id UUID REFERENCES pos.business_locations NOT NULL,
   name TEXT NOT NULL,
-  capacity INTEGER,
+  description TEXT,
+  capacity INTEGER DEFAULT 4,
   status TEXT DEFAULT 'available',
-  notes TEXT,
+  position JSONB,
+  active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -383,11 +396,17 @@ CREATE TABLE pos.tables (
 -- Table reservations
 CREATE TABLE pos.table_reservations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID REFERENCES pos.businesses NOT NULL,
+  location_id UUID REFERENCES pos.business_locations NOT NULL,
   table_id UUID REFERENCES pos.tables NOT NULL,
-  customer_id UUID REFERENCES pos.customers_pos NOT NULL,
+  customer_id UUID REFERENCES pos.customers_pos,
+  customer_name TEXT,
+  customer_email TEXT,
+  customer_phone TEXT,
+  party_size INTEGER NOT NULL,
   reservation_date TIMESTAMP WITH TIME ZONE NOT NULL,
-  number_of_guests INTEGER NOT NULL,
-  status TEXT DEFAULT 'pending',
+  end_time TIMESTAMP WITH TIME ZONE,
+  status TEXT DEFAULT 'confirmed',
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -397,12 +416,18 @@ CREATE TABLE pos.table_reservations (
 CREATE TABLE pos.menu_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID REFERENCES pos.businesses NOT NULL,
+  product_id UUID REFERENCES pos.products_inventory NOT NULL,
   category_id UUID REFERENCES pos.categories,
   name TEXT NOT NULL,
   description TEXT,
-  image_url TEXT,
   price DECIMAL(19, 4) NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE,
+  image_url TEXT,
+  preparation_time INTEGER,
+  is_vegetarian BOOLEAN DEFAULT FALSE,
+  is_vegan BOOLEAN DEFAULT FALSE,
+  is_gluten_free BOOLEAN DEFAULT FALSE,
+  spice_level INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -413,9 +438,9 @@ CREATE TABLE pos.menu_modifiers (
   business_id UUID REFERENCES pos.businesses NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
-  is_required BOOLEAN DEFAULT FALSE,
   min_selections INTEGER DEFAULT 0,
-  max_selections INTEGER,
+  max_selections INTEGER DEFAULT 1,
+  active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -425,8 +450,9 @@ CREATE TABLE pos.menu_modifier_options (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   modifier_id UUID REFERENCES pos.menu_modifiers NOT NULL,
   name TEXT NOT NULL,
-  price_adjustment DECIMAL(19, 4) DEFAULT 0,
-  is_active BOOLEAN DEFAULT TRUE,
+  price DECIMAL(19, 4) DEFAULT 0,
+  is_default BOOLEAN DEFAULT FALSE,
+  active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -437,7 +463,6 @@ CREATE TABLE pos.menu_item_modifiers (
   menu_item_id UUID REFERENCES pos.menu_items NOT NULL,
   modifier_id UUID REFERENCES pos.menu_modifiers NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(menu_item_id, modifier_id)
 );
 
@@ -448,14 +473,15 @@ CREATE TABLE pos.orders (
   location_id UUID REFERENCES pos.business_locations NOT NULL,
   table_id UUID REFERENCES pos.tables,
   customer_id UUID REFERENCES pos.customers_pos,
-  order_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  sale_id UUID REFERENCES pos.sales,
+  order_number TEXT,
+  order_type TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
-  payment_status TEXT DEFAULT 'pending',
   notes TEXT,
-  subtotal_amount DECIMAL(19, 4) DEFAULT 0,
+  subtotal DECIMAL(19, 4) NOT NULL,
   discount_amount DECIMAL(19, 4) DEFAULT 0,
   tax_amount DECIMAL(19, 4) DEFAULT 0,
-  total_amount DECIMAL(19, 4) DEFAULT 0,
+  total_amount DECIMAL(19, 4) NOT NULL,
   created_by UUID REFERENCES auth.users NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -468,7 +494,11 @@ CREATE TABLE pos.order_items (
   menu_item_id UUID REFERENCES pos.menu_items NOT NULL,
   quantity INTEGER NOT NULL,
   unit_price DECIMAL(19, 4) NOT NULL,
+  discount_amount DECIMAL(19, 4) DEFAULT 0,
+  tax_amount DECIMAL(19, 4) DEFAULT 0,
+  total_amount DECIMAL(19, 4) NOT NULL,
   notes TEXT,
+  status TEXT DEFAULT 'pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -478,15 +508,20 @@ CREATE TABLE pos.order_item_modifiers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_item_id UUID REFERENCES pos.order_items NOT NULL,
   modifier_option_id UUID REFERENCES pos.menu_modifier_options NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  price DECIMAL(19, 4) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Kitchen orders
 CREATE TABLE pos.kitchen_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID REFERENCES pos.businesses NOT NULL,
+  location_id UUID REFERENCES pos.business_locations NOT NULL,
   order_id UUID REFERENCES pos.orders NOT NULL,
+  ticket_number TEXT,
   status TEXT DEFAULT 'pending',
+  preparation_start_time TIMESTAMP WITH TIME ZONE,
+  preparation_end_time TIMESTAMP WITH TIME ZONE,
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -498,10 +533,15 @@ CREATE TABLE pos.kitchen_order_items (
   kitchen_order_id UUID REFERENCES pos.kitchen_orders NOT NULL,
   order_item_id UUID REFERENCES pos.order_items NOT NULL,
   status TEXT DEFAULT 'pending',
-  notes TEXT,
+  preparation_start_time TIMESTAMP WITH TIME ZONE,
+  preparation_end_time TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+/**
+ * REPORTING AND ANALYTICS
+ */
 
 -- Reports
 CREATE TABLE pos.reports (
@@ -567,4 +607,30 @@ ALTER TABLE pos.order_item_modifiers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.kitchen_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.kitchen_order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pos.reports ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pos.analytics_data ENABLE ROW LEVEL SECURITY; 
+ALTER TABLE pos.analytics_data ENABLE ROW LEVEL SECURITY;
+
+-- Create basic RLS policies
+CREATE POLICY "Users can view their own businesses" ON pos.businesses
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their business locations" ON pos.business_locations
+  FOR SELECT USING (
+    business_id IN (
+      SELECT id FROM pos.businesses WHERE user_id = auth.uid()
+    )
+  );
+
+/**
+ * REALTIME SUBSCRIPTIONS
+ * Only allow realtime listening on public tables.
+ */
+drop publication if exists supabase_realtime;
+
+create publication supabase_realtime for table 
+  pos.products,
+  pos.prices,
+  pos.businesses,
+  pos.business_locations,
+  pos.products_inventory,
+  pos.sales,
+  pos.orders; 
