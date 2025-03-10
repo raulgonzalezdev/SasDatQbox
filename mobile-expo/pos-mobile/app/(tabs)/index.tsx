@@ -1,403 +1,293 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Modal, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Modal, SafeAreaView, Text } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { Header } from '@/components/ui/Header';
+import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
+import { HelpModal } from '@/components/ui/HelpModal';
+import { PremiumFeature } from '@/components/ui/PremiumFeature';
+import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
+import { useAppStore, getCurrentUser, isUserPremium, shouldShowPromotions } from '@/store/appStore';
 
 export default function HomeScreen() {
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const user = getCurrentUser();
+  const isPremium = isUserPremium();
+  const showPromotions = shouldShowPromotions();
   
   // Datos simulados del usuario logueado
   const loggedUser = {
-    name: "Varas Grill",
-    role: "Propietario",
-    store: "Varas Grill"
+    name: user?.name || "Usuario",
+    role: user?.role || "Propietario",
+    store: user?.businessName || "Varas Grill"
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.userIconButton}>
-            <Ionicons name="person" size={24} color="black" />
-          </TouchableOpacity>
-          <View>
-            <ThemedText style={styles.storeName}>{loggedUser.name}</ThemedText>
-            <ThemedText style={styles.userRole}>{loggedUser.role}</ThemedText>
-          </View>
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.helpButton}
-          onPress={() => setHelpModalVisible(true)}
-        >
-          <Ionicons name="help-circle" size={28} color="black" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={CommonStyles.safeArea}>
+      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+      
+      <Header 
+        title={loggedUser.store}
+        subtitle={loggedUser.role}
+        onHelpPress={() => setHelpModalVisible(true)}
+      />
 
-      <ScrollView style={styles.content}>
-        {/* Accesos rápidos */}
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Accesos rápidos</ThemedText>
-          <View style={styles.quickAccessGrid}>
-            <TouchableOpacity 
-              style={styles.quickAccessItem}
-              onPress={() => router.push('/pos')}
-            >
-              <View style={styles.quickAccessIconContainer}>
-                <Ionicons name="stats-chart" size={24} color="white" />
-              </View>
-              <ThemedText style={styles.quickAccessText}>Registrar Venta</ThemedText>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.quickAccessItem}
-              onPress={() => router.push('/pos/new-expense')}
-            >
-              <View style={[styles.quickAccessIconContainer, {backgroundColor: '#FFFFFF'}]}>
-                <Ionicons name="trending-up" size={24} color="#FFD700" />
-              </View>
-              <ThemedText style={styles.quickAccessText}>Registrar Gasto</ThemedText>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.quickAccessItem}
-            >
-              <View style={styles.quickAccessIconContainer}>
-                <Ionicons name="menu" size={24} color="white" />
-              </View>
-              <ThemedText style={styles.quickAccessText}>Ver Menú</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </View>
-        
-        {/* Banner promocional */}
-        <View style={styles.promotionBanner}>
-          <View style={styles.promotionContent}>
-            <ThemedText style={styles.promotionTitle}>¡Mejora tu operación!</ThemedText>
-            <ThemedText style={styles.promotionText}>
-              Con nuestro plan pago imprime tickets de tus ventas.
+      <ThemedView style={CommonStyles.container}>
+        <ScrollView style={CommonStyles.content}>
+          {/* Bienvenida a DatqboxPos */}
+          <View style={styles.welcomeContainer}>
+            <ThemedText style={styles.welcomeText}>
+              Bienvenido a <ThemedText style={styles.appName}>DatqboxPos</ThemedText>
             </ThemedText>
-            <TouchableOpacity style={styles.promotionButton}>
-              <ThemedText style={styles.promotionButtonText}>Explorar planes</ThemedText>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.promotionImageContainer}>
-            <Ionicons name="receipt" size={50} color="#FFFFFF" />
-          </View>
-        </View>
-        
-        {/* Sugeridos para ti */}
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Sugeridos para ti</ThemedText>
-          <View style={styles.suggestionsGrid}>
-            <TouchableOpacity style={styles.suggestionItem}>
-              <View style={styles.suggestionIconContainer}>
-                <Ionicons name="restaurant" size={32} color="#FFD700" />
-              </View>
-              <ThemedText style={styles.suggestionText}>Mesas</ThemedText>
-            </TouchableOpacity>
+            <ThemedText style={styles.welcomeSubtext}>
+              Tu solución completa para la gestión de tu negocio
+            </ThemedText>
             
-            <TouchableOpacity style={styles.suggestionItem}>
-              <View style={styles.suggestionIconContainer}>
-                <Ionicons name="cash" size={32} color="#FFD700" />
+            {isPremium && (
+              <View style={styles.premiumBadge}>
+                <Ionicons name="star" size={16} color={Colors.white} />
+                <ThemedText style={styles.premiumBadgeText}>Premium</ThemedText>
               </View>
-              <ThemedText style={styles.suggestionText}>Deudas</ThemedText>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.suggestionItem}>
-              <View style={styles.suggestionIconContainer}>
-                <Ionicons name="bar-chart" size={32} color="#FFD700" />
-              </View>
-              <ThemedText style={styles.suggestionText}>Estadísticas</ThemedText>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.suggestionItem}>
-              <View style={styles.suggestionIconContainer}>
-                <Ionicons name="people" size={32} color="#FFD700" />
-              </View>
-              <ThemedText style={styles.suggestionText}>Clientes</ThemedText>
-            </TouchableOpacity>
+            )}
           </View>
-        </View>
-      </ScrollView>
 
-      {/* Modal de ayuda */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={helpModalVisible}
-        onRequestClose={() => setHelpModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Centro de Ayuda</ThemedText>
-              <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+          {/* Accesos rápidos */}
+          <View style={CommonStyles.section}>
+            <ThemedText style={CommonStyles.sectionTitle}>Accesos rápidos</ThemedText>
+            <View style={styles.quickAccessGrid}>
+              <TouchableOpacity 
+                style={styles.quickAccessItem}
+                onPress={() => router.push('/pos')}
+              >
+                <View style={[styles.quickAccessIconContainer, { backgroundColor: Colors.secondary }]}>
+                  <Ionicons name="stats-chart" size={24} color={Colors.white} />
+                </View>
+                <ThemedText style={styles.quickAccessText}>Registrar Venta</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.quickAccessItem}
+                onPress={() => router.push('/pos/expenses')}
+              >
+                <View style={[styles.quickAccessIconContainer, { backgroundColor: Colors.white }]}>
+                  <Ionicons name="cash-outline" size={24} color={Colors.dark} />
+                </View>
+                <ThemedText style={styles.quickAccessText}>Registrar Gasto</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.quickAccessItem}
+                onPress={() => router.push('/pos/menu')}
+              >
+                <View style={[styles.quickAccessIconContainer, { backgroundColor: Colors.success }]}>
+                  <Ionicons name="restaurant-outline" size={24} color={Colors.white} />
+                </View>
+                <ThemedText style={styles.quickAccessText}>Ver Menú</ThemedText>
               </TouchableOpacity>
             </View>
-            
-            <ScrollView style={styles.modalBody}>
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="home" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Pantalla Principal</ThemedText>
-                </View>
-                <ThemedText style={styles.helpText}>
-                  Aquí encontrarás accesos rápidos a las funciones más utilizadas y sugerencias personalizadas para tu negocio.
-                </ThemedText>
-              </View>
-              
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="cart" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Ventas</ThemedText>
-                </View>
-                <ThemedText style={styles.helpText}>
-                  • Registra ventas rápidamente seleccionando productos.
-                </ThemedText>
-                <ThemedText style={styles.helpText}>
-                  • Aplica descuentos y promociones.
-                </ThemedText>
-                <ThemedText style={styles.helpText}>
-                  • Genera tickets y comprobantes.
-                </ThemedText>
-              </View>
-              
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="cash-outline" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Gastos</ThemedText>
-                </View>
-                <ThemedText style={styles.helpText}>
-                  • Registra gastos por categoría.
-                </ThemedText>
-                <ThemedText style={styles.helpText}>
-                  • Lleva control de pagos a proveedores.
-        </ThemedText>
-                <ThemedText style={styles.helpText}>
-                  • Visualiza reportes de gastos.
-        </ThemedText>
-              </View>
-              
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="people" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Soporte</ThemedText>
-                </View>
-                <ThemedText style={styles.helpText}>
-                  Si necesitas ayuda adicional, contacta a nuestro equipo:
-        </ThemedText>
-                <View style={styles.supportContact}>
-                  <Ionicons name="mail" size={20} color="#666" />
-                  <ThemedText style={styles.supportContactText}>soporte@varasgrill.com</ThemedText>
-                </View>
-                <View style={styles.supportContact}>
-                  <Ionicons name="call" size={20} color="#666" />
-                  <ThemedText style={styles.supportContactText}>(123) 456-7890</ThemedText>
-                </View>
-              </View>
-            </ScrollView>
           </View>
-        </View>
-      </Modal>
+
+          {/* Banner promocional - Solo se muestra si showPromotions es true */}
+          {showPromotions && (
+            <PremiumFeature featureName="Impresión de tickets">
+              <View style={styles.promotionBanner}>
+                <View style={styles.promotionContent}>
+                  <ThemedText style={styles.promotionTitle}>¡Mejora tu operación!</ThemedText>
+                  <ThemedText style={styles.promotionText}>
+                    Con nuestro plan pago imprime tickets de tus ventas.
+                  </ThemedText>
+                  <TouchableOpacity style={styles.promotionButton}>
+                    <ThemedText style={styles.promotionButtonText}>Explorar planes</ThemedText>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.promotionImageContainer}>
+                  <Ionicons name="receipt-outline" size={60} color={Colors.dark} />
+                </View>
+              </View>
+            </PremiumFeature>
+          )}
+
+          {/* Sugeridos para ti */}
+          <View style={CommonStyles.section}>
+            <ThemedText style={CommonStyles.sectionTitle}>Sugeridos para ti</ThemedText>
+            <View style={styles.suggestedGrid}>
+              <TouchableOpacity style={styles.suggestedItem}>
+                <View style={styles.suggestedIconContainer}>
+                  <Ionicons name="restaurant" size={32} color={Colors.primary} />
+                </View>
+                <ThemedText style={styles.suggestedText}>Mesas</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.suggestedItem}>
+                <View style={styles.suggestedIconContainer}>
+                  <Ionicons name="cash" size={32} color={Colors.primary} />
+                </View>
+                <ThemedText style={styles.suggestedText}>Deudas</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.suggestedItem}>
+                <View style={styles.suggestedIconContainer}>
+                  <Ionicons name="bar-chart" size={32} color={Colors.primary} />
+                </View>
+                <ThemedText style={styles.suggestedText}>Estadísticas</ThemedText>
+              </TouchableOpacity>
+
+              {/* Clientes - Se muestra directamente si el usuario es premium */}
+              {isPremium ? (
+                <TouchableOpacity style={styles.suggestedItem}>
+                  <View style={styles.suggestedIconContainer}>
+                    <Ionicons name="people" size={32} color={Colors.primary} />
+                  </View>
+                  <ThemedText style={styles.suggestedText}>Clientes</ThemedText>
+                </TouchableOpacity>
+              ) : (
+                showPromotions && (
+                  <PremiumFeature featureName="Gestión de clientes">
+                    <View style={styles.suggestedItem}>
+                      <View style={styles.suggestedIconContainer}>
+                        <Ionicons name="people" size={32} color={Colors.primary} />
+                      </View>
+                      <ThemedText style={styles.suggestedText}>Clientes</ThemedText>
+                    </View>
+                  </PremiumFeature>
+                )
+              )}
+            </View>
+          </View>
+        </ScrollView>
       </ThemedView>
+
+      {/* Modal de ayuda */}
+      <HelpModal
+        visible={helpModalVisible}
+        onClose={() => setHelpModalVisible(false)}
+        screenName="home"
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
+  welcomeContainer: {
+    marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+    position: 'relative',
   },
-  header: {
+  welcomeText: {
+    fontSize: Typography.fontSizes.lg,
+    color: Colors.dark,
+    marginBottom: Spacing.xs,
+  },
+  appName: {
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.secondary,
+  },
+  welcomeSubtext: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+  },
+  premiumBadge: {
+    position: 'absolute',
+    top: 0,
+    right: Spacing.md,
+    backgroundColor: Colors.secondary,
+    borderRadius: BordersAndShadows.borderRadius.circle,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFD700',
-    padding: 16,
-    paddingTop: 16,
-  },
-  headerLeft: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
-  userIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  storeName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  userRole: {
-    fontSize: 12,
-    color: 'black',
-    opacity: 0.8,
-  },
-  helpButton: {
-    padding: 4,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
+  premiumBadgeText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.sm,
+    fontWeight: Typography.fontWeights.bold,
+    marginLeft: Spacing.xs,
   },
   quickAccessGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   quickAccessItem: {
-    width: '30%',
     alignItems: 'center',
+    width: '30%',
   },
   quickAccessIconContainer: {
     width: 60,
     height: 60,
-    borderRadius: 10,
-    backgroundColor: '#1E2F3E',
+    borderRadius: BordersAndShadows.borderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   quickAccessText: {
-    fontSize: 14,
+    fontSize: Typography.fontSizes.sm,
     textAlign: 'center',
-    color: '#333',
+    color: Colors.dark,
   },
   promotionBanner: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 20,
     flexDirection: 'row',
+    backgroundColor: Colors.success,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xxl,
   },
   promotionContent: {
     flex: 3,
   },
   promotionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 8,
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.white,
+    marginBottom: Spacing.xs,
   },
   promotionText: {
-    fontSize: 14,
-    color: 'white',
-    marginBottom: 12,
+    fontSize: Typography.fontSizes.md,
+    color: Colors.white,
+    marginBottom: Spacing.md,
   },
   promotionButton: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.circle,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
     alignSelf: 'flex-start',
   },
   promotionButtonText: {
-    color: '#2E7D32',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: Colors.success,
+    fontWeight: Typography.fontWeights.bold,
+    fontSize: Typography.fontSizes.sm,
   },
   promotionImageContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  suggestionsGrid: {
+  suggestedGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  suggestionItem: {
+  suggestedItem: {
+    alignItems: 'center',
     width: '48%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
+    marginBottom: Spacing.lg,
+  },
+  suggestedIconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
   },
-  suggestionIconContainer: {
-    marginBottom: 8,
-  },
-  suggestionText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  modalBody: {
-    maxHeight: '90%',
-  },
-  helpSection: {
-    marginBottom: 25,
-  },
-  helpSectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  helpSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
-    color: '#333',
-  },
-  helpText: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: '#666',
-    paddingLeft: 34,
-  },
-  supportContact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-    paddingLeft: 34,
-  },
-  supportContactText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 10,
+  suggestedText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
   },
 });
 
