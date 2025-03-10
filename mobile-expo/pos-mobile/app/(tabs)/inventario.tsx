@@ -1,289 +1,337 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
+import { Header } from '@/components/ui/Header';
+import { HelpModal } from '@/components/ui/HelpModal';
+import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
+import { PremiumFeature } from '@/components/ui/PremiumFeature';
+import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
+import { isUserPremium, getCurrentUser } from '@/store/appStore';
+import { router } from 'expo-router';
 
 export default function InventarioScreen() {
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const isPremium = isUserPremium();
+  const user = getCurrentUser();
   
-  // Datos simulados del usuario logueado
-  const loggedUser = {
-    name: "Varas Grill",
-    role: "Propietario",
-    store: "Varas Grill"
-  };
-
   // Datos simulados de productos
   const productos = [
-    { id: 1, nombre: 'Hamburguesa', precio: 8.99, stock: 25 },
-    { id: 2, nombre: 'Pizza', precio: 12.99, stock: 15 },
-    { id: 3, nombre: 'Ensalada', precio: 6.99, stock: 20 },
-    { id: 4, nombre: 'Refresco', precio: 2.50, stock: 50 },
-    { id: 5, nombre: 'Papas fritas', precio: 3.99, stock: 30 },
-    { id: 6, nombre: 'Helado', precio: 4.50, stock: 18 },
+    { id: 1, nombre: 'Hamburguesa', precio: 8.99, stock: 25, categoria: 'Comida' },
+    { id: 2, nombre: 'Pizza', precio: 12.99, stock: 15, categoria: 'Comida' },
+    { id: 3, nombre: 'Ensalada', precio: 6.99, stock: 20, categoria: 'Comida' },
+    { id: 4, nombre: 'Refresco', precio: 2.50, stock: 50, categoria: 'Bebida' },
+    { id: 5, nombre: 'Papas fritas', precio: 3.99, stock: 30, categoria: 'Acompañamiento' },
+    { id: 6, nombre: 'Helado', precio: 4.50, stock: 18, categoria: 'Postre' },
   ];
 
+  // Filtrar productos según la búsqueda
+  const filteredProducts = searchQuery
+    ? productos.filter(p => 
+        p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.categoria.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : productos;
+
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.userIconButton}>
-            <Ionicons name="person" size={24} color="black" />
-          </TouchableOpacity>
-          <View>
-            <ThemedText style={styles.storeName}>{loggedUser.name}</ThemedText>
-            <ThemedText style={styles.userRole}>{loggedUser.role}</ThemedText>
-          </View>
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.helpButton}
-          onPress={() => setHelpModalVisible(true)}
-        >
-          <Ionicons name="help-circle" size={28} color="black" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={CommonStyles.safeArea}>
+      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+      
+      <Header 
+        title={user?.businessName || "Varas Grill"}
+        subtitle={user?.role || "Propietario"}
+        onHelpPress={() => setHelpModalVisible(true)}
+      />
 
-      <ScrollView style={styles.content}>
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Inventario de Productos</ThemedText>
-          
-          <View style={styles.tableHeader}>
-            <ThemedText style={[styles.tableHeaderText, { flex: 2 }]}>Producto</ThemedText>
-            <ThemedText style={[styles.tableHeaderText, { flex: 1 }]}>Precio</ThemedText>
-            <ThemedText style={[styles.tableHeaderText, { flex: 1 }]}>Stock</ThemedText>
-          </View>
-          
-          {productos.map(producto => (
-            <View key={producto.id} style={styles.tableRow}>
-              <ThemedText style={[styles.tableCell, { flex: 2 }]}>{producto.nombre}</ThemedText>
-              <ThemedText style={[styles.tableCell, { flex: 1 }]}>${producto.precio.toFixed(2)}</ThemedText>
-              <ThemedText style={[styles.tableCell, { flex: 1 }]}>{producto.stock}</ThemedText>
+      <ThemedView style={CommonStyles.container}>
+        <ScrollView style={CommonStyles.content}>
+          {/* Indicador de Premium */}
+          {isPremium && (
+            <View style={styles.premiumIndicator}>
+              <Ionicons name="star" size={16} color={Colors.white} />
+              <ThemedText style={styles.premiumIndicatorText}>Premium</ThemedText>
             </View>
-          ))}
+          )}
           
-          <TouchableOpacity style={styles.addButton}>
-            <Ionicons name="add-circle" size={24} color="#FFD700" />
-            <ThemedText style={styles.addButtonText}>Agregar Producto</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+          {/* Buscador */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar productos..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery ? (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={20} color={Colors.darkGray} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
 
-      {/* Modal de ayuda */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={helpModalVisible}
-        onRequestClose={() => setHelpModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Centro de Ayuda</ThemedText>
-              <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+          {/* Categorías */}
+          <View style={CommonStyles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={CommonStyles.sectionTitle}>Categorías</ThemedText>
+              
+              {/* Gestión de categorías - Premium */}
+              <PremiumFeature featureName="Gestión de categorías" forceShow={isPremium}>
+                <TouchableOpacity style={styles.manageCategoriesButton}>
+                  <Ionicons name="settings-outline" size={18} color={Colors.secondary} />
+                  <ThemedText style={styles.manageCategoriesText}>Gestionar</ThemedText>
+                </TouchableOpacity>
+              </PremiumFeature>
+            </View>
+            
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
+              <TouchableOpacity style={[styles.categoryItem, styles.categoryItemActive]}>
+                <ThemedText style={[styles.categoryText, styles.categoryTextActive]}>Todos</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.categoryItem}>
+                <ThemedText style={styles.categoryText}>Comida</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.categoryItem}>
+                <ThemedText style={styles.categoryText}>Bebida</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.categoryItem}>
+                <ThemedText style={styles.categoryText}>Acompañamiento</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.categoryItem}>
+                <ThemedText style={styles.categoryText}>Postre</ThemedText>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
+          {/* Lista de productos */}
+          <View style={CommonStyles.section}>
+            <View style={styles.productListHeader}>
+              <ThemedText style={CommonStyles.sectionTitle}>Productos</ThemedText>
+              <TouchableOpacity style={styles.addButton}>
+                <Ionicons name="add" size={20} color={Colors.white} />
+                <ThemedText style={styles.addButtonText}>Añadir</ThemedText>
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={styles.modalBody}>
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="cube" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Inventario</ThemedText>
+            {filteredProducts.map(producto => (
+              <View key={producto.id} style={styles.productItem}>
+                <View style={styles.productInfo}>
+                  <ThemedText style={styles.productName}>{producto.nombre}</ThemedText>
+                  <ThemedText style={styles.productCategory}>{producto.categoria}</ThemedText>
                 </View>
-                <ThemedText style={styles.helpText}>
-                  En esta pantalla puedes gestionar tu inventario de productos.
-                </ThemedText>
+                <View style={styles.productDetails}>
+                  <ThemedText style={styles.productPrice}>${producto.precio.toFixed(2)}</ThemedText>
+                  <View style={styles.stockContainer}>
+                    <ThemedText style={[
+                      styles.stockText,
+                      producto.stock < 20 ? styles.stockLow : null
+                    ]}>
+                      Stock: {producto.stock}
+                    </ThemedText>
+                  </View>
+                </View>
+                <TouchableOpacity style={styles.editButton}>
+                  <Ionicons name="create-outline" size={20} color={Colors.secondary} />
+                </TouchableOpacity>
               </View>
-              
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="list" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Productos</ThemedText>
-                </View>
-                <ThemedText style={styles.helpText}>
-                  • Visualiza todos tus productos en stock.
-                </ThemedText>
-                <ThemedText style={styles.helpText}>
-                  • Controla precios y cantidades disponibles.
-                </ThemedText>
-                <ThemedText style={styles.helpText}>
-                  • Agrega nuevos productos a tu inventario.
-                </ThemedText>
-              </View>
-              
-              <View style={styles.helpSection}>
-                <View style={styles.helpSectionHeader}>
-                  <Ionicons name="people" size={24} color="#FFD700" />
-                  <ThemedText style={styles.helpSectionTitle}>Soporte</ThemedText>
-                </View>
-                <ThemedText style={styles.helpText}>
-                  Si necesitas ayuda adicional, contacta a nuestro equipo:
-                </ThemedText>
-                <View style={styles.supportContact}>
-                  <Ionicons name="mail" size={20} color="#666" />
-                  <ThemedText style={styles.supportContactText}>soporte@varasgrill.com</ThemedText>
-                </View>
-                <View style={styles.supportContact}>
-                  <Ionicons name="call" size={20} color="#666" />
-                  <ThemedText style={styles.supportContactText}>(123) 456-7890</ThemedText>
-                </View>
-              </View>
-            </ScrollView>
+            ))}
           </View>
-        </View>
-      </Modal>
-    </ThemedView>
+          
+          {/* Acciones premium */}
+          <PremiumFeature featureName="Gestión avanzada de inventario" forceShow={isPremium}>
+            <View style={styles.premiumActionsContainer}>
+              <TouchableOpacity style={styles.premiumActionButton}>
+                <Ionicons name="download-outline" size={20} color={Colors.white} />
+                <ThemedText style={styles.premiumActionText}>Exportar inventario</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.premiumActionButton}>
+                <Ionicons name="cloud-upload-outline" size={20} color={Colors.white} />
+                <ThemedText style={styles.premiumActionText}>Importar productos</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.premiumActionButton}>
+                <Ionicons name="analytics-outline" size={20} color={Colors.white} />
+                <ThemedText style={styles.premiumActionText}>Análisis de inventario</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </PremiumFeature>
+        </ScrollView>
+      </ThemedView>
+
+      {/* Modal de ayuda */}
+      <HelpModal
+        visible={helpModalVisible}
+        onClose={() => setHelpModalVisible(false)}
+        screenName="menu"
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
+  premiumIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    backgroundColor: Colors.secondary,
+    borderRadius: BordersAndShadows.borderRadius.circle,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    marginBottom: Spacing.md,
   },
-  header: {
+  premiumIndicatorText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.sm,
+    fontWeight: Typography.fontWeights.bold,
+    marginLeft: Spacing.xs,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.xl,
+    ...BordersAndShadows.shadows.sm,
+  },
+  searchIcon: {
+    marginRight: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFD700',
-    padding: 16,
-    paddingTop: 16,
+    marginBottom: Spacing.md,
   },
-  headerLeft: {
+  manageCategoriesButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  userIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    justifyContent: 'center',
+  manageCategoriesText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.secondary,
+    marginLeft: Spacing.xs,
+  },
+  categoriesContainer: {
+    flexDirection: 'row',
+    marginBottom: Spacing.md,
+  },
+  categoryItem: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.circle,
+    marginRight: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+  },
+  categoryItemActive: {
+    backgroundColor: Colors.secondary,
+    borderColor: Colors.secondary,
+  },
+  categoryText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+  },
+  categoryTextActive: {
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold,
+  },
+  productListHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginRight: 12,
-  },
-  storeName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  userRole: {
-    fontSize: 12,
-    color: 'black',
-    opacity: 0.8,
-  },
-  helpButton: {
-    padding: 4,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#FFD700',
-    padding: 12,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
-  tableHeaderText: {
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  tableCell: {
-    color: '#333',
+    marginBottom: Spacing.md,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    padding: 12,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    marginTop: 1,
+    backgroundColor: Colors.success,
+    borderRadius: BordersAndShadows.borderRadius.circle,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
   },
   addButtonText: {
-    color: '#333',
-    fontWeight: 'bold',
-    marginLeft: 8,
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold,
+    fontSize: Typography.fontSizes.sm,
+    marginLeft: Spacing.xs,
   },
-  modalContainer: {
+  productItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
+  },
+  productInfo: {
+    flex: 2,
+  },
+  productName: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.medium,
+    color: Colors.dark,
+    marginBottom: Spacing.xs,
+  },
+  productCategory: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+  },
+  productDetails: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'flex-end',
   },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '80%',
+  productPrice: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.dark,
+    marginBottom: Spacing.xs,
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  modalBody: {
-    maxHeight: '90%',
-  },
-  helpSection: {
-    marginBottom: 25,
-  },
-  helpSectionHeader: {
+  stockContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
   },
-  helpSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
-    color: '#333',
+  stockText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.success,
   },
-  helpText: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: '#666',
-    paddingLeft: 34,
+  stockLow: {
+    color: Colors.warning,
   },
-  supportContact: {
+  editButton: {
+    marginLeft: Spacing.md,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  premiumActionsContainer: {
+    marginBottom: Spacing.xl,
+  },
+  premiumActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
-    paddingLeft: 34,
+    backgroundColor: Colors.secondary,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
   },
-  supportContactText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 10,
+  premiumActionText: {
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.medium,
+    fontSize: Typography.fontSizes.md,
+    marginLeft: Spacing.md,
   },
 }); 
