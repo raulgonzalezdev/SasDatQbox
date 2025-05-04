@@ -36,7 +36,12 @@ COPY .env .env.local
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
-RUN npm run build
+# Verificar que la compilación produzca la carpeta standalone
+RUN npm run build && \
+    if [ ! -d .next/standalone ]; then \
+    echo "Error: La compilación no generó la carpeta standalone. Verifica la configuración de Next.js." && \
+    exit 1; \
+    fi
 
 # Imagen de producción
 FROM base AS runner
