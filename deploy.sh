@@ -27,12 +27,14 @@ if ! [ -x "$(command -v docker)" ] || ! docker compose version > /dev/null 2>&1;
   exit 1
 fi
 
-# Verificar si existe el archivo .env
-if [ ! -f .env ]; then
-  echo -e "${YELLOW}No se encontró el archivo .env${NC}"
-  echo -e "Creando archivo .env a partir de .env.example"
-  cp .env.example .env
-  echo -e "${YELLOW}Por favor, edite el archivo .env con sus credenciales antes de continuar${NC}"
+# Dar permisos de ejecución al script check-env.sh
+chmod +x check-env.sh
+
+# Ejecutar la verificación de variables de entorno
+echo -e "${YELLOW}Verificando variables de entorno...${NC}"
+./check-env.sh
+if [ $? -ne 0 ]; then
+  echo -e "${RED}La verificación de variables de entorno falló. Siga las instrucciones anteriores.${NC}"
   exit 1
 fi
 
