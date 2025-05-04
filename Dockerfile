@@ -5,7 +5,7 @@ FROM base AS deps
 WORKDIR /app
 
 COPY sass_front/package.json sass_front/package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 # Construir la aplicación
 FROM base AS builder
