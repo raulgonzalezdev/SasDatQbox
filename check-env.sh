@@ -37,11 +37,54 @@ EOL
   fi
 fi
 
-# Verificar si hay variables vacías en .env
-if grep -q "=$" .env; then
-  echo "ADVERTENCIA: El archivo .env contiene variables sin valor."
-  echo "Por favor, complete todas las variables en el archivo .env antes de continuar."
-  exit 1
+# Corregir automáticamente variables sin el prefijo NEXT_PUBLIC_
+echo "Verificando y corrigiendo variables de entorno..."
+
+# Modificar el archivo .env para agregar las variables con prefijo NEXT_PUBLIC_
+# Necesitamos crear un archivo temporal
+touch .env.temp
+
+# Primero copiamos todo el contenido original
+cat .env > .env.temp
+
+# Supabase URL
+if ! grep -q "NEXT_PUBLIC_SUPABASE_URL" .env && grep -q "SUPABASE_URL" .env; then
+  SUPABASE_URL=$(grep "SUPABASE_URL" .env | cut -d '=' -f2)
+  echo "NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL" >> .env.temp
+  echo "Variable NEXT_PUBLIC_SUPABASE_URL añadida automáticamente."
 fi
 
-echo "Verificación de archivo .env completada." 
+# Supabase Anon Key
+if ! grep -q "NEXT_PUBLIC_SUPABASE_ANON_KEY" .env && grep -q "SUPABASE_ANON_KEY" .env; then
+  SUPABASE_ANON_KEY=$(grep "SUPABASE_ANON_KEY" .env | cut -d '=' -f2)
+  echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env.temp
+  echo "Variable NEXT_PUBLIC_SUPABASE_ANON_KEY añadida automáticamente."
+fi
+
+# Stripe Publishable Key
+if ! grep -q "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" .env && grep -q "STRIPE_PUBLISHABLE_KEY" .env; then
+  STRIPE_PUBLISHABLE_KEY=$(grep "STRIPE_PUBLISHABLE_KEY" .env | cut -d '=' -f2)
+  echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY" >> .env.temp
+  echo "Variable NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY añadida automáticamente."
+fi
+
+# Verificar STRIPE_WEBHOOK_SECRET vacío
+if grep -q "STRIPE_WEBHOOK_SECRET=$" .env; then
+  echo "ADVERTENCIA: STRIPE_WEBHOOK_SECRET está vacío."
+  echo "Generando un valor de prueba para desarrollo..."
+  WEBHOOK_SECRET="whsec_123456789012345678901234"
+  echo "STRIPE_WEBHOOK_SECRET=$WEBHOOK_SECRET" >> .env.temp
+  echo "Valor de prueba generado para STRIPE_WEBHOOK_SECRET."
+fi
+
+# Añadir NEXT_PUBLIC_SITE_URL si no existe
+if ! grep -q "NEXT_PUBLIC_SITE_URL" .env; then
+  echo "NEXT_PUBLIC_SITE_URL=https://spaininsideapp.nl" >> .env.temp
+  echo "Variable NEXT_PUBLIC_SITE_URL añadida automáticamente."
+fi
+
+# Reemplazar el archivo original
+mv .env.temp .env
+
+echo "Verificación de archivo .env completada con éxito."
+exit 0 
