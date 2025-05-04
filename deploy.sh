@@ -20,8 +20,8 @@ if ! [ -x "$(command -v docker)" ]; then
   exit 1
 fi
 
-# Verificar si docker-compose está instalado
-if ! [ -x "$(command -v docker-compose)" ]; then
+# Verificar si docker compose está instalado
+if ! [ -x "$(command -v docker)" ] || ! docker compose version > /dev/null 2>&1; then
   echo -e "${RED}Error: Docker Compose no está instalado.${NC}" >&2
   echo -e "Instale Docker Compose: https://docs.docker.com/compose/install/"
   exit 1
@@ -51,26 +51,26 @@ if [ ! -d certbot/conf/live/spaininsideapp.nl ]; then
   echo -e "${YELLOW}Solicitando certificado SSL para spaininsideapp.nl${NC}"
   
   # Iniciar nginx para verificación de dominio
-  docker-compose up -d nginx
+  docker compose up -d nginx
   
   # Solicitar certificado
-  docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot \
+  docker compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot \
     --email admin@spaininsideapp.nl --agree-tos --no-eff-email \
     -d spaininsideapp.nl -d www.spaininsideapp.nl
   
   # Reiniciar nginx para cargar certificados
-  docker-compose restart nginx
+  docker compose restart nginx
 fi
 
 # Construir y levantar contenedores
 echo -e "${GREEN}Construyendo contenedores...${NC}"
-docker-compose build
+docker compose build
 
 echo -e "${GREEN}Iniciando servicios...${NC}"
-docker-compose up -d
+docker compose up -d
 
 echo -e "${GREEN}=== Despliegue completado con éxito ===${NC}"
 echo -e "La aplicación ahora está disponible en: https://spaininsideapp.nl"
 echo ""
-echo -e "${YELLOW}Para verificar el estado de los contenedores:${NC} docker-compose ps"
-echo -e "${YELLOW}Para ver logs:${NC} docker-compose logs -f" 
+echo -e "${YELLOW}Para verificar el estado de los contenedores:${NC} docker compose ps"
+echo -e "${YELLOW}Para ver logs:${NC} docker compose logs -f" 

@@ -10,7 +10,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 REM Verificar si Docker Compose está instalado
-where docker-compose >nul 2>nul
+docker compose version >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Docker Compose no esta instalado.
     echo Instale Docker Compose: https://docs.docker.com/compose/install/
@@ -57,13 +57,13 @@ if not exist nginx\conf.d\app.conf (
 
 REM Construir y levantar contenedores
 echo Construyendo contenedores...
-docker-compose build
+docker compose build
 
 echo Iniciando servicios...
-docker-compose up -d
+docker compose up -d
 
 echo === Despliegue completado con exito ===
 echo La aplicacion ahora esta disponible en: https://spaininsideapp.nl
 echo.
-echo Para verificar el estado de los contenedores: docker-compose ps
-echo Para ver logs: docker-compose logs -f 
+echo Para verificar el estado de los contenedores: docker compose ps
+echo Para ver logs: docker compose logs -f 
