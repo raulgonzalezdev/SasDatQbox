@@ -59,8 +59,13 @@ Este proyecto implementa un sistema POS (Point of Sale) completo como SaaS (Soft
    npm run dev
    ```
 
+2. Iniciar la aplicación móvil:
+   ```
+   cd ../mobile-lynx/pos-mobile
+   npm run dev
+   ```
 
-2. Acceder a la aplicación web en [http://localhost:3000](http://localhost:3000)
+3. Acceder a la aplicación web en [http://localhost:3000](http://localhost:3000)
 
 ## Estructura de la Base de Datos
 
