@@ -53,9 +53,10 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiMzAzMjNlNTktZTgyZi00NWU0LTkzMTgtN2Y4OTM2NjJmODZkIiwicyI6IlpHRmpNR0kxT1RJdE1tVXhaUzAwWldKbExUZzBNVEF0WlRJNVlqazRaakl4TVdJeiJ9
+    command: tunnel run
+    volumes:
+      - ./config.yml:/etc/cloudflared/config.yml
+      - ./creds.json:/etc/cloudflared/creds.json
     networks:
       - app-network
 

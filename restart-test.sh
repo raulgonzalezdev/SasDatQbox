@@ -15,6 +15,13 @@ echo -e "${GREEN}=== Reiniciando contenedores para prueba básica ===${NC}"
 echo -e "${YELLOW}Deteniendo contenedores existentes...${NC}"
 docker compose down
 
+# Verificar que los archivos de configuración de cloudflared existen
+if [ ! -f config.yml ] || [ ! -f creds.json ]; then
+  echo -e "${RED}Error: No se encontraron los archivos de configuración de cloudflared${NC}"
+  echo -e "${YELLOW}Asegúrate de que config.yml y creds.json existen en el directorio actual${NC}"
+  exit 1
+fi
+
 # Iniciar Nginx y app para prueba
 echo -e "${YELLOW}Iniciando Nginx para prueba...${NC}"
 docker compose up -d app nginx

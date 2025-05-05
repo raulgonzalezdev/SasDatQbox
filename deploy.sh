@@ -82,6 +82,28 @@ EOF
   echo -e "${GREEN}Configuración de Nginx creada.${NC}"
 fi
 
+# Verificar si existen los archivos de configuración de cloudflared
+if [ ! -f config.yml ] || [ ! -f creds.json ]; then
+  echo -e "${YELLOW}No se encontraron los archivos de configuración de cloudflared. Creando archivos básicos...${NC}"
+  
+  # Crear archivo de configuración de cloudflared
+  cat > config.yml << EOF
+tunnel: 30323e59-e82f-45e4-9318-7f893662f86d
+credentials-file: /etc/cloudflared/creds.json
+ingress:
+  - hostname: spaininsideapp.nl
+    service: http://nginx:80
+  - service: http_status:404
+EOF
+
+  # Crear archivo de credenciales de cloudflared
+  cat > creds.json << EOF
+{"AccountTag":"c33abce795d62231b161d59f22d44dee5","TunnelID":"30323e59-e82f-45e4-9318-7f893662f86d","TunnelSecret":"ZGFjMGI1OTItMmUxZS00ZWJlLTg0MTAtZTI5Yjk4ZjIxMWIz"}
+EOF
+
+  echo -e "${GREEN}Archivos de configuración de cloudflared creados.${NC}"
+fi
+
 # Crear página HTML básica para pruebas
 if [ ! -f nginx/html/index.html ]; then
   echo -e "${YELLOW}Creando página HTML básica para pruebas...${NC}"
