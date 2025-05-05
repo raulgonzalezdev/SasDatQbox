@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
-      - TUNNEL_TOKEN=eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiODJlMDkyMTAtNDdlNC00YTE4LTlmMTQtOTU2ZDc3MjY0ZTBlIiwicyI6Ik1EYzRZemxpTjJZdE5EWXdPQzAwWm1ZNUxXRmlPRGN0TWpjek5tSmtZelV4TlRWbCJ9
+      - TUNNEL_TOKEN=eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiMzAzMjNlNTktZTgyZi00NWU0LTkzMTgtN2Y4OTM2NjJmODZkIiwicyI6IlpHRmpNR0kxT1RJdE1tVXhaUzAwWldKbExUZzBNVEF0WlRJNVlqazRaakl4TVdJeiJ9
     networks:
       - app-network
 

@@ -27,7 +27,7 @@ echo -e "${GREEN}Iniciando túnel Cloudflare...${NC}"
 docker compose up -d cloudflared
 
 echo -e "${GREEN}=== Túnel Cloudflare iniciado correctamente ===${NC}"
-echo -e "El servicio debería estar disponible en: https://spaininsideapp.spaininsideapp.nl"
+echo -e "El servicio debería estar disponible en: https://spaininsideapp.nl"
 echo ""
 echo -e "${YELLOW}Para verificar el estado:${NC} docker compose ps"
 echo -e "${YELLOW}Para ver logs del túnel:${NC} docker compose logs -f cloudflared"
