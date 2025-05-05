@@ -30,7 +30,8 @@ services:
     image: nginx:alpine
     restart: always
     ports:
-      - "8090:80"
+      - "80:80"      # Puerto HTTP estándar
+      - "8090:80"    # Puerto alternativo por si necesitas acceso directo
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/html:/usr/share/nginx/html
