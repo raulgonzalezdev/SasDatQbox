@@ -1,4 +1,5 @@
-version: '3.8'
+# Configuración de servicios para SasDatQbox
+# Compatible con Cloudflare Tunnel
 
 services:
   app:
@@ -30,13 +31,10 @@ services:
     restart: always
     ports:
       - "8090:80"
-      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/html:/usr/share/nginx/html
       - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - app
     networks:
