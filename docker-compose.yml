@@ -16,7 +16,7 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SITE_URL=https://spaininsideapp.nl
+      - NEXT_PUBLIC_SITE_URL=https://simuladorparametrica.com
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
@@ -53,7 +53,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel run --token eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiMzAzMjNlNTktZTgyZi00NWU0LTkzMTgtN2Y4OTM2NjJmODZkIiwicyI6IlpHRmpNR0kxT1RJdE1tVXhaUzAwWldKbExUZzBNVEF0WlRJNVlqazRaakl4TVdJeiJ9
+    command: tunnel run --token eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiMmI1OWY2OGUtMjdiNC00NzM4LWFmYTktMTI4OTQ0MThiMTI4IiwicyI6Ik1qSTRNemc0WkdVdE1qVmtNQzAwTVRRNUxXRTFNbUl0WmpVM05qY3lOelptTURVMCJ9
     networks:
       - app-network
 

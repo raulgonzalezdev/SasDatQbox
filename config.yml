@@ -1,6 +1,6 @@
-tunnel: 30323e59-e82f-45e4-9318-7f893662f86d
+tunnel: 2b59f68e-27b4-4738-afa9-12894418b128
 credentials-file: /etc/cloudflared/creds.json
 ingress:
-  - hostname: spaininsideapp.nl
+  - hostname: simuladorparametrica.com
     service: http://nginx:80
   - service: http_status:404 
