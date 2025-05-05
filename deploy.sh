@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de despliegue para SasDatQbox con Cloudflare Tunnel
-# Para el dominio simuladorparametrica.com
+# Para el dominio datqbox.online
 
 set -e
 
@@ -51,7 +51,7 @@ if [ ! -f nginx/conf.d/app.conf ]; then
   cat > nginx/conf.d/app.conf << EOF
 server {
     listen 80;
-    server_name simuladorparametrica.com www.simuladorparametrica.com;
+    server_name datqbox.online www.datqbox.online;
 
     # Ruta para la verificación de Let's Encrypt
     location /.well-known/acme-challenge/ {
@@ -88,17 +88,17 @@ if [ ! -f config.yml ] || [ ! -f creds.json ]; then
   
   # Crear archivo de configuración de cloudflared
   cat > config.yml << EOF
-tunnel: 2b59f68e-27b4-4738-afa9-12894418b128
+tunnel: 8525ce28-9177-4c1e-ad4d-c2ff582f8c28
 credentials-file: /etc/cloudflared/creds.json
 ingress:
-  - hostname: simuladorparametrica.com
+  - hostname: datqbox.online
     service: http://nginx:80
   - service: http_status:404
 EOF
 
   # Crear archivo de credenciales de cloudflared
   cat > creds.json << EOF
-{"AccountTag":"c33abce795d62231b161d59f22d44dee5","TunnelID":"2b59f68e-27b4-4738-afa9-12894418b128","TunnelSecret":"MjI4Mzg4ZGUtMjVkMC00MTQ5LWE1MmItZjU3NjcyNzZmMDU0"}
+{"AccountTag":"c33abce795d62231b161d59f22d44dee5","TunnelID":"8525ce28-9177-4c1e-ad4d-c2ff582f8c28","TunnelSecret":"YzcwMDY1YTMtZGM4Yy00OTljLTk2NTctZmY0OWI0OTZjODdm"}
 EOF
 
   echo -e "${GREEN}Archivos de configuración de cloudflared creados.${NC}"
@@ -112,7 +112,7 @@ if [ ! -f nginx/html/index.html ]; then
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simulador Paramétrica</title>
+    <title>DatQbox</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -122,7 +122,7 @@ if [ ! -f nginx/html/index.html ]; then
             text-align: center;
         }
         h1 {
-            color: #e63946;
+            color: #0070f3;
         }
         .info {
             background-color: #f1faee;
@@ -133,7 +133,7 @@ if [ ! -f nginx/html/index.html ]; then
     </style>
 </head>
 <body>
-    <h1>Simulador Paramétrica</h1>
+    <h1>DatQbox</h1>
     <p>Esta es una página de prueba para verificar la correcta configuración del servidor.</p>
     <div class="info">
         <p>Si estás viendo esta página, Nginx está funcionando correctamente.</p>
@@ -157,7 +157,7 @@ echo -e "${GREEN}Iniciando túnel Cloudflare...${NC}"
 docker compose up -d cloudflared
 
 echo -e "${GREEN}=== Despliegue completado con éxito ===${NC}"
-echo -e "La aplicación ahora está disponible en: https://simuladorparametrica.com"
+echo -e "La aplicación ahora está disponible en: https://datqbox.online"
 echo ""
 echo -e "${YELLOW}Para verificar el estado de los contenedores:${NC} docker compose ps"
 echo -e "${YELLOW}Para ver logs:${NC} docker compose logs -f"

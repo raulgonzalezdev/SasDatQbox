@@ -18,7 +18,7 @@ services:
       - "3000:3000"  # Exponer el puerto 3000 directamente
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SITE_URL=https://simuladorparametrica.com
+      - NEXT_PUBLIC_SITE_URL=https://datqbox.online
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
@@ -58,7 +58,7 @@ services:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     network_mode: "host"  # Usar la red del host en lugar de la red Docker
-    command: tunnel run --token eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiMmI1OWY2OGUtMjdiNC00NzM4LWFmYTktMTI4OTQ0MThiMTI4IiwicyI6Ik1qSTRNemc0WkdVdE1qVmtNQzAwTVRRNUxXRTFNbUl0WmpVM05qY3lOelptTURVMCJ9
+    command: tunnel run --token eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiODUyNWNlMjgtOTE3Ny00YzFlLWFkNGQtYzJmZjU4MmY4YzI4IiwicyI6Ill6Y3dNRFkxWVRNdFpHTTRZeTAwT1RsakxUazJOVGN0Wm1ZME9XSTBPVFpqT0RkbSJ9
 
 networks:
   app-network:
