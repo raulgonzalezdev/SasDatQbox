@@ -24,7 +24,7 @@ Este proyecto implementa un sistema POS (Point of Sale) completo como SaaS (Soft
 - npm o pnpm
 - Supabase CLI
 - Git
-
+ssh devweb@192.168.1.102
 ### Instalación
 
 1. Clonar el repositorio:
