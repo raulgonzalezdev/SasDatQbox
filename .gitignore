@@ -32,6 +32,18 @@ next-env.d.ts
 .rspack/
 .rsbuild/
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.ipynb_checkpoints/
+
 # IDE
 .idea/
 .vscode/
@@ -55,4 +67,4 @@ coverage/
 # Misc
 .DS_Store
 *.pem
-Thumbs.db 
+Thumbs.db
