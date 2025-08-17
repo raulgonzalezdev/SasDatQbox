@@ -1,8 +1,9 @@
-import { type NextRequest } from 'next/server';
-import { updateSession } from '@/utils/supabase/middleware';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  // For now, we are not handling sessions in the middleware.
+  // If session management is needed, it will be reimplemented using the FastAPI backend.
+  return NextResponse.next();
 }
 
 export const config = {

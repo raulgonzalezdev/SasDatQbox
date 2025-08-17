@@ -1,12 +1,5 @@
 import Stripe from 'stripe';
-import { stripe } from '@/utils/stripe/config';
-import {
-  upsertProductRecord,
-  upsertPriceRecord,
-  manageSubscriptionStatusChange,
-  deleteProductRecord,
-  deletePriceRecord
-} from '@/utils/supabase/admin';
+// import { stripe } from '@/utils/stripe/config'; // Eliminado, ya no se usa
 
 const relevantEvents = new Set([
   'product.created',
@@ -30,11 +23,11 @@ export async function POST(req: Request) {
   try {
     if (!sig || !webhookSecret)
       return new Response('Webhook secret not found.', { status: 400 });
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    console.log(`🔔  Webhook received: ${event.type}`);
+    // event = stripe.webhooks.constructEvent(body, sig, webhookSecret); // Descomentar y usar la instancia de Stripe si es necesario
+    console.log(`🔔  Webhook recibido: ${event.type}`);
   } catch (err: any) {
-    console.log(`❌ Error message: ${err.message}`);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+    console.log(`❌ Mensaje de error: ${err.message}`);
+    return new Response(`Error de Webhook: ${err.message}`, { status: 400 });
   }
 
   if (relevantEvents.has(event.type)) {
@@ -42,53 +35,40 @@ export async function POST(req: Request) {
       switch (event.type) {
         case 'product.created':
         case 'product.updated':
-          await upsertProductRecord(event.data.object as Stripe.Product);
+          console.log('Producto creado/actualizado - Llamar endpoint de FastAPI');
           break;
         case 'price.created':
         case 'price.updated':
-          await upsertPriceRecord(event.data.object as Stripe.Price);
+          console.log('Precio creado/actualizado - Llamar endpoint de FastAPI');
           break;
         case 'price.deleted':
-          await deletePriceRecord(event.data.object as Stripe.Price);
+          console.log('Precio eliminado - Llamar endpoint de FastAPI');
           break;
         case 'product.deleted':
-          await deleteProductRecord(event.data.object as Stripe.Product);
+          console.log('Producto eliminado - Llamar endpoint de FastAPI');
           break;
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
-          const subscription = event.data.object as Stripe.Subscription;
-          await manageSubscriptionStatusChange(
-            subscription.id,
-            subscription.customer as string,
-            event.type === 'customer.subscription.created'
-          );
+          console.log('Cambio de estado de suscripción - Llamar endpoint de FastAPI');
           break;
         case 'checkout.session.completed':
-          const checkoutSession = event.data.object as Stripe.Checkout.Session;
-          if (checkoutSession.mode === 'subscription') {
-            const subscriptionId = checkoutSession.subscription;
-            await manageSubscriptionStatusChange(
-              subscriptionId as string,
-              checkoutSession.customer as string,
-              true
-            );
-          }
+          console.log('Sesión de checkout completada - Llamar endpoint de FastAPI');
           break;
         default:
-          throw new Error('Unhandled relevant event!');
+          throw new Error('Evento relevante no manejado!');
       }
     } catch (error) {
       console.log(error);
       return new Response(
-        'Webhook handler failed. View your Next.js function logs.',
+        'Fallo el manejador del Webhook. Revise los logs de su función Next.js.',
         {
           status: 400
         }
       );
     }
   } else {
-    return new Response(`Unsupported event type: ${event.type}`, {
+    return new Response(`Tipo de evento no soportado: ${event.type}`, {
       status: 400
     });
   }

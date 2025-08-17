@@ -1,18 +1,18 @@
 import Pricing from '@/components/ui/Pricing/Pricing';
-import { createClient } from '@/utils/supabase/server';
-import {
-  getProducts,
-  getSubscription,
-  getUser
-} from '@/utils/supabase/queries';
+import { useUserDetails, useProducts, useSubscription } from '@/lib/hooks/useData';
 
-export default async function PricingPage() {
-  const supabase = createClient();
-  const [user, products, subscription] = await Promise.all([
-    getUser(supabase),
-    getProducts(supabase),
-    getSubscription(supabase)
-  ]);
+export default function PricingPage() {
+  const { data: user, isLoading: loadingUser, error: userError } = useUserDetails();
+  const { data: products, isLoading: loadingProducts, error: productsError } = useProducts();
+  const { data: subscription, isLoading: loadingSubscription, error: subscriptionError } = useSubscription();
+
+  if (loadingUser || loadingProducts || loadingSubscription) {
+    return <div>Cargando planes de precios...</div>;
+  }
+
+  if (userError || productsError || subscriptionError) {
+    return <div>Error: {userError?.message || productsError?.message || subscriptionError?.message}</div>;
+  }
 
   return (
     <Pricing

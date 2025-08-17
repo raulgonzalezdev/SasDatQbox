@@ -1,112 +1,59 @@
-import Link from 'next/link';
-
-import Logo from '@/components/icons/Logo';
-import GitHub from '@/components/icons/GitHub';
+import { AppBar, Toolbar, Typography, Box, Link, IconButton } from '@mui/material';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import React from 'react';
 
 export default function Footer() {
   return (
-    <footer className="mx-auto max-w-[1920px] px-6 bg-zinc-900">
-      <div className="grid grid-cols-1 gap-8 py-12 text-white transition-colors duration-150 border-b lg:grid-cols-12 border-zinc-600 bg-zinc-900">
-        <div className="col-span-1 lg:col-span-2">
-          <Link
-            href="/"
-            className="flex items-center flex-initial font-bold md:mr-24"
-          >
-            <span className="mr-2 border rounded-full border-zinc-700">
-              <Logo />
-            </span>
-            <span>ACME</span>
+    <AppBar position="static" color="primary" sx={{ mt: 5 }}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            ACME
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, mb: { xs: 2, md: 0 } }}>
+          <Link color="inherit" href="/" underline="none">
+            Home
           </Link>
-        </div>
-        <div className="col-span-1 lg:col-span-2">
-          <ul className="flex flex-col flex-initial md:flex-1">
-            <li className="py-3 md:py-0 md:pb-4">
-              <Link
-                href="/"
-                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
-              >
-                Home
-              </Link>
-            </li>
-            <li className="py-3 md:py-0 md:pb-4">
-              <Link
-                href="/"
-                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
-              >
-                About
-              </Link>
-            </li>
-            <li className="py-3 md:py-0 md:pb-4">
-              <Link
-                href="/"
-                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
-              >
-                Careers
-              </Link>
-            </li>
-            <li className="py-3 md:py-0 md:pb-4">
-              <Link
-                href="/"
-                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
-              >
-                Blog
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="col-span-1 lg:col-span-2">
-          <ul className="flex flex-col flex-initial md:flex-1">
-            <li className="py-3 md:py-0 md:pb-4">
-              <p className="font-bold text-white transition duration-150 ease-in-out hover:text-zinc-200">
-                LEGAL
-              </p>
-            </li>
-            <li className="py-3 md:py-0 md:pb-4">
-              <Link
-                href="/"
-                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
-              >
-                Privacy Policy
-              </Link>
-            </li>
-            <li className="py-3 md:py-0 md:pb-4">
-              <Link
-                href="/"
-                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
-              >
-                Terms of Use
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="flex items-start col-span-1 text-white lg:col-span-6 lg:justify-end">
-          <div className="flex items-center h-10 space-x-6">
-            <a
-              aria-label="Github Repository"
-              href="https://github.com/vercel/nextjs-subscription-payments"
-            >
-              <GitHub />
-            </a>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-col items-center justify-between py-12 space-y-4 md:flex-row bg-zinc-900">
-        <div>
-          <span>
-            &copy; {new Date().getFullYear()} ACME, Inc. All rights reserved.
-          </span>
-        </div>
-        <div className="flex items-center">
-          <span className="text-white">Crafted by</span>
-          <a href="https://vercel.com" aria-label="Vercel.com Link">
-            <img
-              src="/vercel.svg"
-              alt="Vercel.com Logo"
-              className="inline-block h-6 ml-4 text-white"
-            />
-          </a>
-        </div>
-      </div>
-    </footer>
+          <Link color="inherit" href="/" underline="none">
+            About
+          </Link>
+          <Link color="inherit" href="/" underline="none">
+            Careers
+          </Link>
+          <Link color="inherit" href="/" underline="none">
+            Blog
+          </Link>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, mb: { xs: 2, md: 0 } }}>
+          <Link color="inherit" href="/" underline="none">
+            Privacy Policy
+          </Link>
+          <Link color="inherit" href="/" underline="none">
+            Terms of Use
+          </Link>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
+          <IconButton color="inherit" href="https://github.com/vercel/nextjs-subscription-payments" target="_blank">
+            <GitHubIcon />
+          </IconButton>
+        </Box>
+      </Toolbar>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', bgcolor: 'primary.dark' }}>
+        <Typography variant="body2" color="inherit">
+          &copy; {new Date().getFullYear()} ACME, Inc. All rights reserved.
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2" color="inherit" sx={{ mr: 1 }}>
+            Crafted by
+          </Typography>
+          <img
+            src="/vercel.svg"
+            alt="Vercel.com Logo"
+            style={{ height: '24px', filter: 'invert(1)' }} // Adjust styling for dark background
+          />
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }

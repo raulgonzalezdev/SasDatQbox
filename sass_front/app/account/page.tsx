@@ -2,42 +2,40 @@ import CustomerPortalForm from '@/components/ui/AccountForms/CustomerPortalForm'
 import EmailForm from '@/components/ui/AccountForms/EmailForm';
 import NameForm from '@/components/ui/AccountForms/NameForm';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/utils/supabase/server';
-import {
-  getUserDetails,
-  getSubscription,
-  getUser
-} from '@/utils/supabase/queries';
+import { useUserDetails, useSubscription } from '@/lib/hooks/useData';
+import { Box, Typography, Container } from '@mui/material';
 
-export default async function Account() {
-  const supabase = createClient();
-  const [user, userDetails, subscription] = await Promise.all([
-    getUser(supabase),
-    getUserDetails(supabase),
-    getSubscription(supabase)
-  ]);
+export default function Account() {
+  const { data: userDetails, isLoading: loadingUserDetails, error: userDetailsError } = useUserDetails();
+  const { data: subscription, isLoading: loadingSubscription, error: subscriptionError } = useSubscription();
 
-  if (!user) {
+  if (loadingUserDetails || loadingSubscription) {
+    return <Typography>Cargando...</Typography>; // O un componente de carga más sofisticado
+  }
+
+  if (userDetailsError || subscriptionError) {
+    return <Typography color="error">Error: {userDetailsError?.message || subscriptionError?.message}</Typography>; // Manejo de errores
+  }
+
+  if (!userDetails) {
     return redirect('/signin');
   }
 
   return (
-    <section className="mb-32 bg-black">
-      <div className="max-w-6xl px-4 py-8 mx-auto sm:px-6 sm:pt-24 lg:px-8">
-        <div className="sm:align-center sm:flex sm:flex-col">
-          <h1 className="text-4xl font-extrabold text-white sm:text-center sm:text-6xl">
-            Account
-          </h1>
-          <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
-            We partnered with Stripe for a simplified billing.
-          </p>
-        </div>
-      </div>
-      <div className="p-4">
+    <Container component="section" maxWidth="lg" sx={{ py: 8 }}>
+      <Box sx={{ textAlign: 'center', mb: 5 }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Cuenta
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          Nos asociamos con Stripe para una facturación simplificada.
+        </Typography>
+      </Box>
+      <Box sx={{ p: 2 }}>
         <CustomerPortalForm subscription={subscription} />
         <NameForm userName={userDetails?.full_name ?? ''} />
-        <EmailForm userEmail={user.email} />
-      </div>
-    </section>
+        <EmailForm userEmail={userDetails?.email} />
+      </Box>
+    </Container>
   );
 }
