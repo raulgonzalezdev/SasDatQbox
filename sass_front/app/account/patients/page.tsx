@@ -7,12 +7,29 @@ import PatientsTable from '@/components/ui/Dashboard/PatientsTable';
 import { useQuery } from '@tanstack/react-query';
 import { customFetch } from '@/utils/api';
 
-const fetchPatients = async () => {
-  return await customFetch('/patients/');
+// Suponiendo que esta es la estructura de datos del paciente
+interface Patient {
+  id: string;
+  first_name: string;
+  last_name: string;
+  contact_info: {
+    email: string;
+    phone_number: string;
+  };
+  // Agrega otros campos que necesites
+}
+
+const fetchPatients = async (): Promise<Patient[]> => {
+  const res = await customFetch('/api/v1/patients/');
+  if (!res.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return res.json();
 };
 
+
 export default function PatientsPage() {
-  const { data: patients, isLoading, isError } = useQuery({
+  const { data: patients, error, isLoading } = useQuery<Patient[]>({
     queryKey: ['patients'],
     queryFn: fetchPatients
   });
@@ -21,31 +38,27 @@ export default function PatientsPage() {
     return <CircularProgress />;
   }
 
-  if (isError) {
-    return <Typography>Error al cargar la lista de pacientes.</Typography>;
+  if (error) {
+    return <Typography>Error: {error.message}</Typography>;
   }
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4">
+        <Typography variant="h4" component="h1">
           Pacientes
         </Typography>
         <Button
           variant="contained"
+          color="primary"
           startIcon={<AddIcon />}
           component={Link}
           href="/account/patients/new"
         >
-          Añadir Paciente
+          Añadir Nuevo Paciente
         </Button>
       </Box>
-      
-      {patients && patients.length > 0 ? (
-        <PatientsTable patients={patients} />
-      ) : (
-        <Typography>No se han encontrado pacientes. Añade uno para empezar.</Typography>
-      )}
+      <PatientsTable patients={patients || []} />
     </Box>
   );
 }

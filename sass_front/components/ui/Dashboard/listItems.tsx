@@ -11,6 +11,8 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import EventIcon from '@mui/icons-material/Event';
 import ChatIcon from '@mui/icons-material/Chat';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PaymentIcon from '@mui/icons-material/Payment';
 
 // Items principales del menú, comunes a todos los roles
 export const mainListItems = (
@@ -33,11 +35,23 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Consultas" />
     </ListItemButton>
+    <ListItemButton component={Link} href="/account/prescriptions">
+      <ListItemIcon>
+        <DescriptionIcon />
+      </ListItemIcon>
+      <ListItemText primary="Recetas" />
+    </ListItemButton>
     <ListItemButton component={Link} href="/account/chat">
       <ListItemIcon>
         <ChatIcon />
       </ListItemIcon>
       <ListItemText primary="Chat" />
+    </ListItemButton>
+    <ListItemButton component={Link} href="/account/payments">
+      <ListItemIcon>
+        <PaymentIcon />
+      </ListItemIcon>
+      <ListItemText primary="Pagos" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>

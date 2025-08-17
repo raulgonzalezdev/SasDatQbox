@@ -1,172 +1,163 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { z } from 'zod';
 import {
   TextField,
   Button,
   Box,
   Grid,
   CircularProgress,
-  Paper,
+  MenuItem
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { customFetch } from '@/utils/api';
-import { handleApiError } from '@/utils/api-helpers';
-import toast from 'react-hot-toast';
+import { Patient } from '@/app/schemas/patient'; // Asumiendo que tienes un schema de Zod para Patient
 
-// Esquema de validación con Zod
+// Schema de validación para el formulario
 const patientFormSchema = z.object({
-  first_name: z.string().min(1, 'El nombre es requerido'),
-  last_name: z.string().min(1, 'El apellido es requerido'),
-  date_of_birth: z.string().min(1, 'La fecha de nacimiento es requerida'),
-  email: z.string().email('Correo electrónico inválido').optional().or(z.literal('')),
-  phone: z.string().optional(),
+  first_name: z.string().min(1, 'El nombre es requerido.'),
+  last_name: z.string().min(1, 'El apellido es requerido.'),
+  email: z.string().email('Email inválido.').min(1, 'El email es requerido.'),
+  phone_number: z.string().optional(),
+  date_of_birth: z.string().min(1, 'La fecha de nacimiento es requerida.'),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
 });
 
 type PatientFormData = z.infer<typeof patientFormSchema>;
 
-// Función para enviar los datos a la API
-const createPatient = async (data: PatientFormData) => {
-  const payload = { ...data, contact_info: { email: data.email, phone: data.phone } };
-  return await customFetch('/patients/', { method: 'POST', body: JSON.stringify(payload) });
-};
-
-// Nueva función para actualizar un paciente
-const updatePatient = async ({ id, data }: { id: string; data: PatientFormData }) => {
-  const payload = { ...data, contact_info: { email: data.email, phone: data.phone } };
-  return await customFetch(`/patients/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
-};
-
 interface PatientFormProps {
-  patient?: any; // Hacemos el paciente opcional
+  patient?: Patient; // Opcional, para modo edición
+  onSubmit: (data: PatientFormData) => void;
+  isSubmitting: boolean;
 }
 
-export default function PatientForm({ patient }: PatientFormProps) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const isEditMode = !!patient;
-
+export default function PatientForm({ patient, onSubmit, isSubmitting }: PatientFormProps) {
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<PatientFormData>({
     resolver: zodResolver(patientFormSchema),
-    // Establecemos los valores por defecto si estamos en modo edición
     defaultValues: {
       first_name: patient?.first_name || '',
       last_name: patient?.last_name || '',
-      date_of_birth: patient?.date_of_birth ? new Date(patient.date_of_birth).toISOString().split('T')[0] : '',
       email: patient?.contact_info?.email || '',
-      phone: patient?.contact_info?.phone || '',
+      phone_number: patient?.contact_info?.phone_number || '',
+      date_of_birth: patient?.demographics?.date_of_birth ? new Date(patient.demographics.date_of_birth).toISOString().split('T')[0] : '',
+      gender: patient?.demographics?.gender || 'OTHER',
     },
   });
-
-  const { mutate: mutatePatient, isPending } = useMutation({
-    mutationFn: isEditMode ? updatePatient : createPatient,
-    onSuccess: () => {
-      toast.success(`Paciente ${isEditMode ? 'actualizado' : 'creado'} exitosamente`);
-      queryClient.invalidateQueries({ queryKey: ['patients'] });
-      router.push('/account/patients');
-    },
-    onError: handleApiError,
-  });
-
-  const onSubmit = (data: PatientFormData) => {
-    if (isEditMode) {
-      mutatePatient({ id: patient.id, data });
-    } else {
-      mutatePatient(data);
-    }
-  };
 
   return (
-    <Paper sx={{ p: 4 }}>
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              id="first_name"
-              label="Nombre"
-              {...register('first_name')}
-              error={!!errors.first_name}
-              helperText={errors.first_name?.message}
-              disabled={isPending}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              id="last_name"
-              label="Apellido"
-              {...register('last_name')}
-              error={!!errors.last_name}
-              helperText={errors.last_name?.message}
-              disabled={isPending}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              id="date_of_birth"
-              label="Fecha de Nacimiento"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              {...register('date_of_birth')}
-              error={!!errors.date_of_birth}
-              helperText={errors.date_of_birth?.message}
-              disabled={isPending}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              id="email"
-              label="Correo Electrónico"
-              type="email"
-              {...register('email')}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-              disabled={isPending}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              id="phone"
-              label="Teléfono"
-              {...register('phone')}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
-              disabled={isPending}
-            />
-          </Grid>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="first_name"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Nombre"
+                required
+                fullWidth
+                error={!!errors.first_name}
+                helperText={errors.first_name?.message}
+              />
+            )}
+          />
         </Grid>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-          <Button
-            variant="text"
-            onClick={() => router.back()}
-            disabled={isPending}
-            sx={{ mr: 2 }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isPending}
-          >
-            {isPending ? <CircularProgress size={24} /> : 'Guardar Paciente'}
-          </Button>
-        </Box>
-      </Box>
-    </Paper>
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="last_name"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Apellido"
+                required
+                fullWidth
+                error={!!errors.last_name}
+                helperText={errors.last_name?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Email"
+                type="email"
+                required
+                fullWidth
+                error={!!errors.email}
+                helperText={errors.email?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name="phone_number"
+            control={control}
+            render={({ field }) => (
+              <TextField {...field} label="Número de Teléfono" fullWidth />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="date_of_birth"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Fecha de Nacimiento"
+                type="date"
+                required
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                error={!!errors.date_of_birth}
+                helperText={errors.date_of_birth?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="gender"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                label="Género"
+                fullWidth
+                required
+                error={!!errors.gender}
+                helperText={errors.gender?.message}
+              >
+                <MenuItem value="MALE">Masculino</MenuItem>
+                <MenuItem value="FEMALE">Femenino</MenuItem>
+                <MenuItem value="OTHER">Otro</MenuItem>
+              </TextField>
+            )}
+          />
+        </Grid>
+      </Grid>
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, mb: 2 }}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? <CircularProgress size={24} /> : (patient ? 'Guardar Cambios' : 'Crear Paciente')}
+      </Button>
+    </Box>
   );
 }

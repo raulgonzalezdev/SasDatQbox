@@ -1,81 +1,88 @@
 'use client';
 
-import * as React from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  CircularProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, IconButton, Menu, MenuItem, Chip,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, CircularProgress
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { customFetch } from '@/utils/api';
 import { handleApiError } from '@/utils/api-helpers';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
-// TODO: Usar el tipo de Patient real
-type Patient = any;
-
-interface PatientsTableProps {
-  patients: Patient[];
+interface Patient {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  status: 'Active' | 'Inactive'; // Example status
 }
 
-// --- API Function for Deletion ---
-const deletePatient = async (patientId: string) => {
-  return await customFetch(`/patients/${patientId}`, {
-    method: 'DELETE',
-  });
+const statusMap = {
+  Active: { label: 'Activo', color: 'success' as const },
+  Inactive: { label: 'Inactivo', color: 'default' as const },
 };
 
-export default function PatientsTable({ patients }: PatientsTableProps) {
+const deletePatient = async (patientId: string) => {
+  const res = await customFetch(`/api/v1/patients/${patientId}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.detail || 'Error al eliminar el paciente');
+  }
+  return res.json();
+};
+
+export default function PatientsTable({ patients }: { patients: Patient[] }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [selectedPatientId, setSelectedPatientId] = React.useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [isConfirmOpen, setConfirmOpen] = useState(false);
 
-  const { mutate: triggerDelete, isPending } = useMutation({
+  const mutation = useMutation({
     mutationFn: deletePatient,
     onSuccess: () => {
       toast.success('Paciente eliminado exitosamente');
       queryClient.invalidateQueries({ queryKey: ['patients'] });
     },
-    onError: handleApiError,
+    onError: (error) => handleApiError(error),
+    onSettled: () => {
+      handleMenuClose();
+      handleConfirmClose();
+    },
   });
 
-  const handleEdit = (patientId: string) => {
-    router.push(`/account/patients/${patientId}/edit`);
-  };
-
-  const handleOpenConfirm = (patientId: string) => {
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, patientId: string) => {
+    setAnchorEl(event.currentTarget);
     setSelectedPatientId(patientId);
-    setOpenConfirm(true);
   };
 
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-    setSelectedPatientId(null);
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const handleEdit = () => {
+    if (selectedPatientId) {
+      router.push(`/account/patients/${selectedPatientId}/edit`);
+    }
+    handleMenuClose();
+  };
+
+  const handleConfirmOpen = () => {
+    setConfirmOpen(true);
+  };
+  
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+    setSelectedPatientId(null); // Deseleccionar al cerrar
   };
 
   const handleDelete = () => {
     if (selectedPatientId) {
-      triggerDelete(selectedPatientId, {
-        onSettled: () => handleCloseConfirm(),
-      });
+      mutation.mutate(selectedPatientId);
     }
   };
 
@@ -85,63 +92,69 @@ export default function PatientsTable({ patients }: PatientsTableProps) {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Apellido</TableCell>
+              <TableCell>Nombre Completo</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>Teléfono</TableCell>
+              <TableCell>Estado</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {patients.map((patient) => (
-              <TableRow
-                key={patient.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {patient.first_name}
-                </TableCell>
-                <TableCell>{patient.last_name}</TableCell>
-                <TableCell>{patient.contact_info?.email || 'N/A'}</TableCell>
-                <TableCell align="right">
-                  <Tooltip title="Ver Detalles">
-                    <IconButton onClick={() => alert(`Ver ${patient.id}`)}>
-                      <VisibilityIcon />
+            {patients.length > 0 ? (
+              patients.map((patient) => (
+                <TableRow
+                  key={patient.id}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row">
+                    {`${patient.first_name} ${patient.last_name}`}
+                  </TableCell>
+                  <TableCell>{patient.email}</TableCell>
+                  <TableCell>{patient.phone_number}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={statusMap[patient.status]?.label || 'Desconocido'}
+                      color={statusMap[patient.status]?.color || 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <IconButton onClick={(e) => handleMenuClick(e, patient.id)}>
+                      <MoreVertIcon />
                     </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Editar">
-                    <IconButton onClick={() => handleEdit(patient.id)}>
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Eliminar">
-                    <IconButton onClick={() => handleOpenConfirm(patient.id)} disabled={isPending}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <Typography sx={{ py: 3 }}>No hay pacientes registrados.</Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={openConfirm}
-        onClose={handleCloseConfirm}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
       >
+        <MenuItem onClick={handleMenuClose}>Ver Expediente</MenuItem>
+        <MenuItem onClick={handleEdit}>Editar</MenuItem>
+        <MenuItem onClick={handleConfirmOpen} sx={{ color: 'error.main' }}>Eliminar</MenuItem>
+      </Menu>
+      <Dialog open={isConfirmOpen} onClose={handleConfirmClose}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Estás seguro de que quieres eliminar a este paciente? Esta acción no se puede deshacer.
+            ¿Estás seguro de que quieres eliminar a este paciente? Esta acción es permanente y no se puede deshacer.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseConfirm} disabled={isPending}>
-            Cancelar
-          </Button>
-          <Button onClick={handleDelete} color="error" disabled={isPending}>
-            {isPending ? <CircularProgress size={24} /> : 'Eliminar'}
+          <Button onClick={handleConfirmClose} disabled={mutation.isPending}>Cancelar</Button>
+          <Button onClick={handleDelete} color="error" disabled={mutation.isPending}>
+            {mutation.isPending ? <CircularProgress size={24} /> : 'Eliminar'}
           </Button>
         </DialogActions>
       </Dialog>
