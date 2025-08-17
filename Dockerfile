@@ -20,11 +20,19 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el resto del código del backend
 COPY fastapi_backend/ .
 
+# Asegurar que los scripts de Alembic (incluyendo versions) estén presentes en la imagen
+RUN mkdir -p /usr/src/app/alembic/versions
+COPY fastapi_backend/alembic/ /usr/src/app/alembic/
+COPY fastapi_backend/alembic/versions/ /usr/src/app/alembic/versions/
+
 
 # --- Etapa 2: Backend Production ---
 # Imagen final y optimizada para el backend.
 FROM python:3.10-slim as backend-production
 WORKDIR /usr/src/app
+
+# Install postgresql-client for psql command
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
 # Copiar el entorno virtual con las dependencias desde la etapa anterior
 COPY --from=backend-builder /opt/venv /opt/venv

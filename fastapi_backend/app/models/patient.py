@@ -8,7 +8,7 @@ import enum
 
 class Patient(Base):
     __tablename__ = "patients"
-    __table_args__ = {'schema': 'pos'}
+    __table_args__ = {'schema': 'pos', 'extend_existing': True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("pos.users.id"), nullable=False)

@@ -21,7 +21,7 @@ class DocumentType(str, enum.Enum):
 
 class Appointment(Base):
     __tablename__ = "appointments"
-    __table_args__ = {'schema': 'pos'}
+    __table_args__ = {'schema': 'pos', 'extend_existing': True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     doctor_id = Column(UUID(as_uuid=True), ForeignKey("pos.users.id"), nullable=False)
@@ -41,7 +41,7 @@ class Appointment(Base):
 
 class AppointmentDocument(Base):
     __tablename__ = "appointment_documents"
-    __table_args__ = {'schema': 'pos'}
+    __table_args__ = {'schema': 'pos', 'extend_existing': True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     appointment_id = Column(UUID(as_uuid=True), ForeignKey("pos.appointments.id"), nullable=False)

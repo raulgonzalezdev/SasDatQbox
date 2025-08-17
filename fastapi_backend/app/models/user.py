@@ -29,3 +29,5 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     customer = relationship("Customer", back_populates="user", uselist=False)
+    sent_messages = relationship("Message", back_populates="sender")
+    conversations = relationship("Conversation", secondary="pos.conversation_participants", back_populates="participants")

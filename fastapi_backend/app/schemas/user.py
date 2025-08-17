@@ -3,6 +3,12 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
+import enum
+
+class UserRole(str, enum.Enum):
+    DOCTOR = "doctor"
+    PATIENT = "patient"
+    ADMIN = "admin"
 
 # Shared properties
 class UserBase(BaseModel):
@@ -13,15 +19,18 @@ class UserBase(BaseModel):
     avatar_url: Optional[str] = None
     billing_address: Optional[dict] = None  # Assuming JSON field maps to dict
     payment_method: Optional[dict] = None  # Assuming JSON field maps to dict
+    role: Optional[UserRole] = None # Added role
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     email: EmailStr = Field(..., description="Email of the user")
     password: str = Field(..., min_length=8, description="Password of the user")
+    role: Optional[UserRole] = UserRole.PATIENT # Allow setting role on creation, default to PATIENT
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
     password: Optional[str] = Field(None, min_length=8, description="New password for the user")
+    role: Optional[UserRole] = None # Allow updating role
 
 # Properties shared by models stored in DB
 class UserInDBBase(UserBase):

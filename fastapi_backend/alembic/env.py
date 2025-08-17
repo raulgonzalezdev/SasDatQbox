@@ -15,11 +15,12 @@ from app.db.base import Base
 from app.models.user import User
 from app.models.business import Business, BusinessLocation
 from app.models.customer import Customer
-from app.models.subscription import SubscriptionProduct, Price, Subscription
+from app.models.subscription import SubscriptionProduct, Subscription
 from app.models.product import Product
 from app.models.inventory import Inventory, StockTransfer, StockTransferItem
 from app.models.patient import Patient
 from app.models.appointment import Appointment, AppointmentDocument
+from app.models.chat import Conversation, ConversationParticipant, Message
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -87,6 +88,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Ensure schema 'pos' exists so Alembic can create version table there
+        connection.exec_driver_sql("CREATE SCHEMA IF NOT EXISTS pos;")
+        # Ensure type lookup finds enums created in public when creating tables in schema 'pos'
+        connection.exec_driver_sql("SET search_path TO pos,public;")
+
         # Configure online migration context with explicit comparators so
         # autogenerate produces incremental ALTER statements instead of
         # destructive DROP/CREATE when possible.

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, UserRole # Import UserRole
 from app.core.security import get_password_hash
 from uuid import UUID
 from app.services.customer_service import CustomerService
@@ -27,7 +27,8 @@ class UserService:
             phone=user_in.phone,
             avatar_url=user_in.avatar_url,
             billing_address=user_in.billing_address,
-            payment_method=user_in.payment_method
+            payment_method=user_in.payment_method,
+            role=user_in.role # Add role
         )
         try:
             self.db.add(db_user)
@@ -53,6 +54,10 @@ class UserService:
         if "password" in update_data and update_data["password"]:
             update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
         
+        # Handle role update separately if it's not None
+        if "role" in update_data and update_data["role"] is not None:
+            db_user.role = update_data.pop("role") # Update role and remove from update_data
+
         for key, value in update_data.items():
             setattr(db_user, key, value)
         
