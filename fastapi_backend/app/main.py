@@ -1,24 +1,41 @@
-from fastapi import FastAPI
-from app.api.v1.endpoints import auth, users, businesses, customers, product, inventory, stock_transfer, subscription, appointments, patients, chat
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import IntegrityError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.api.v1.api import api_router
+from app.core.config import settings
 
 app = FastAPI(
-    title="SasDatQbox API",
-    description="API para el sistema SasDatQbox, incluyendo autenticación, gestión de negocios y suscripciones.",
-    version="1.0.0"
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# API v1 Routers
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
-app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
-app.include_router(businesses.router, prefix="/api/v1/businesses", tags=["Businesses"])
-app.include_router(customers.router, prefix="/api/v1/customers", tags=["Customers"])
-app.include_router(product.router, prefix="/api/v1/products", tags=["Products"])
-app.include_router(inventory.router, prefix="/api/v1/inventory", tags=["Inventory"])
-app.include_router(stock_transfer.router, prefix="/api/v1", tags=["Stock Transfers"])
-app.include_router(subscription.router, prefix="/api/v1/subscriptions", tags=["Subscriptions"])
-app.include_router(appointments.router, prefix="/api/v1", tags=["Appointments"])
-app.include_router(patients.router, prefix="/api/v1", tags=["Patients"])
-app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
+
+@app.exception_handler(IntegrityError)
+async def integrity_exception_handler(request: Request, exc: IntegrityError):
+    # Log the error for debugging
+    print(f"IntegrityError: {exc.orig}")
+    return JSONResponse(
+        status_code=409,  # Conflict
+        content={"detail": "Database integrity error. A resource may already exist."},
+    )
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/", tags=["Root"])
 async def read_root():

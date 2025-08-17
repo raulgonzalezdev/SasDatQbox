@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, Dict
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
@@ -32,7 +32,7 @@ class SubscriptionProductBase(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     image: Optional[str] = None
-    metadata: Optional[dict] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 class SubscriptionProductCreate(SubscriptionProductBase):
     pass
@@ -48,8 +48,10 @@ class SubscriptionProductInDB(SubscriptionProductBase):
     class Config:
         from_attributes = True
 
-class SubscriptionProduct(SubscriptionProductInDB):
-    pass
+class SubscriptionProduct(SubscriptionProductBase):
+    
+    class Config:
+        orm_mode = True
 
 # --- Price Schemas ---
 class PriceBase(BaseModel):

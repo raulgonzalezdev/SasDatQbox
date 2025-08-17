@@ -26,16 +26,25 @@ def register_user(
     """
     Create new user.
     """
+    print(f"Attempting to register user with data: {user_in.model_dump()}")
     user_service = UserService(db)
     user = user_service.get_by_email(db, email=user_in.email)
     if user:
+        print("User with this email already exists.")
         raise HTTPException(
             status_code=400,
             detail="Email already registered",
         )
-    
-    new_user = user_service.create_user(user_in=user_in)
-    return new_user
+    try:
+        user = user_service.create(db, obj_in=user_in)
+        print(f"User created successfully: {user.email}")
+        return user
+    except Exception as e:
+        print(f"An error occurred during user creation: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred during user creation.",
+        )
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token( # Made async
