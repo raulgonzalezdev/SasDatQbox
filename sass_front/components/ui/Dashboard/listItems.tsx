@@ -1,63 +1,59 @@
 import * as React from 'react';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import Link from 'next/link';
+import { ListItemButton, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import Link from 'next/link';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import LayersIcon from '@mui/icons-material/Layers';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import EventIcon from '@mui/icons-material/Event';
 import ChatIcon from '@mui/icons-material/Chat';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PaymentIcon from '@mui/icons-material/Payment';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import HomeIcon from '@mui/icons-material/Home';
+import BookIcon from '@mui/icons-material/Book';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
-// Items principales del menú, comunes a todos los roles
 export const mainListItems = (
   <React.Fragment>
+    {/* Links de la aplicación */}
     <ListItemButton component={Link} href="/account">
-      <ListItemIcon>
-        <DashboardIcon />
-      </ListItemIcon>
+      <ListItemIcon><DashboardIcon /></ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItemButton>
     <ListItemButton component={Link} href="/account/patients">
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
+      <ListItemIcon><PeopleIcon /></ListItemIcon>
       <ListItemText primary="Pacientes" />
     </ListItemButton>
     <ListItemButton component={Link} href="/account/appointments">
-      <ListItemIcon>
-        <EventIcon />
-      </ListItemIcon>
+      <ListItemIcon><EventIcon /></ListItemIcon>
       <ListItemText primary="Consultas" />
     </ListItemButton>
     <ListItemButton component={Link} href="/account/prescriptions">
-      <ListItemIcon>
-        <DescriptionIcon />
-      </ListItemIcon>
+      <ListItemIcon><DescriptionIcon /></ListItemIcon>
       <ListItemText primary="Recetas" />
     </ListItemButton>
     <ListItemButton component={Link} href="/account/chat">
-      <ListItemIcon>
-        <ChatIcon />
-      </ListItemIcon>
+      <ListItemIcon><ChatIcon /></ListItemIcon>
       <ListItemText primary="Chat" />
     </ListItemButton>
     <ListItemButton component={Link} href="/account/payments">
-      <ListItemIcon>
-        <PaymentIcon />
-      </ListItemIcon>
+      <ListItemIcon><PaymentIcon /></ListItemIcon>
       <ListItemText primary="Pagos" />
     </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
+    <ListItemButton component={Link} href="/account/reports">
+      <ListItemIcon><BarChartIcon /></ListItemIcon>
       <ListItemText primary="Reportes" />
+    </ListItemButton>
+    
+    <Divider sx={{ my: 1 }} />
+    
+    {/* Links al sitio público */}
+    <ListItemButton component={Link} href="/">
+      <ListItemIcon><HomeIcon /></ListItemIcon>
+      <ListItemText primary="Sitio Principal" />
+    </ListItemButton>
+    <ListItemButton component={Link} href="/blog">
+      <ListItemIcon><BookIcon /></ListItemIcon>
+      <ListItemText primary="Blog" />
     </ListItemButton>
   </React.Fragment>
 );

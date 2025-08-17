@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { Box, Typography, Grid, Paper } from '@mui/material';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
@@ -9,13 +9,15 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ChatIcon from '@mui/icons-material/Chat';
 import PaymentIcon from '@mui/icons-material/Payment';
 import { ReactElement } from 'react';
+import { useTranslations, useMessages } from 'next-intl';
 
 interface Feature {
   icon: ReactElement;
   title: string;
 }
 
-const features: Feature[] = [
+// default labels kept for fallback when translations are missing
+const defaultFeatures: Feature[] = [
   { icon: <VideocamIcon sx={{ fontSize: 40 }} />, title: 'Consultas por vídeo' },
   { icon: <SystemUpdateAltIcon sx={{ fontSize: 40 }} />, title: 'Integración de EMR y EHR' },
   { icon: <AccessibilityNewIcon sx={{ fontSize: 40 }} />, title: 'Herramientas para el paciente' },
@@ -27,14 +29,19 @@ const features: Feature[] = [
 ];
 
 export default function FeaturesSection() {
+  const t = useTranslations('Features');
+  const messages = useMessages();
+  const translations = messages?.Features?.items as Array<{ title: string }>; 
+  const features = translations && translations.length ? translations.map((it, i) => ({ ...defaultFeatures[i], title: it.title })) : defaultFeatures;
+
   return (
     <Box id="features" sx={{ bgcolor: 'background.paper', py: { xs: 10, md: 16 } }}>
       <Box sx={{ maxWidth: 'lg', mx: 'auto', px: 3 }}>
         <Typography variant="h2" component="h2" textAlign="center" fontWeight="bold" sx={{ mb: 2, color: 'primary.main' }}>
-          Servicios de telemedicina de vanguardia
+          {t('title')}
         </Typography>
         <Typography variant="h5" color="text.secondary" textAlign="center" sx={{ mb: 8 }}>
-          Experimente la telemedicina avanzada, diseñada para las necesidades de salud actuales.
+          {t('subtitle')}
         </Typography>
         <Grid container spacing={4}>
           {features.map((feature) => (

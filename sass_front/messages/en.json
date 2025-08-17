@@ -1,0 +1,163 @@
+{
+	"Hero": {
+		"title": "Welcome",
+		"subtitle": "Transform your practice with telemedicine and clinic management",
+		"cta": "Get started"
+	},
+	"Navbar": {
+		"features": "Features",
+		"pricing": "Pricing",
+		"blog": "Blog",
+		"help": "Help",
+		"dashboard": "Dashboard",
+		"logout": "Logout",
+		"login": "Login",
+		"downloadApp": "Download App"
+	},
+	"Footer": {
+		"product": "Product",
+		"features": "Features",
+		"pricing": "Pricing",
+		"company": "Company",
+		"about": "About Us",
+		"blog": "Blog",
+		"legal": "Legal",
+		"security": "Security",
+		"contact": "Contact",
+		"contactSales": "Contact Sales"
+		,"rights": "All rights reserved."
+	},
+	"Pricing": {
+		"title": "Flexible Pricing Plans",
+		"subtitle": "Choose the plan that fits your medical practice. No long-term commitments.",
+		"mostPopular": "Most Popular",
+		"subscribe": "Subscribe",
+		"contactSales": "Contact Sales",
+		"perMonth": "/month",
+		"plans": [
+			{
+				"name": "Free",
+				"description": "Ideal to start digitizing your practice. Up to 15 patients.",
+				"price": 0,
+				"buttonText": "Subscribe",
+				"action": "subscribe"
+			},
+			{
+				"name": "Standard",
+				"description": "All features, up to 500 patients and unlimited consultations.",
+				"price": 49,
+				"isPopular": true,
+				"buttonText": "Subscribe",
+				"action": "subscribe"
+			},
+			{
+				"name": "Premium",
+				"description": "For clinics with multiple offices and assistants. Unlimited patients.",
+				"price": 199,
+				"buttonText": "Subscribe",
+				"action": "subscribe"
+			},
+			{
+				"name": "Corporate",
+				"description": "Custom solution for hospitals and large organizations.",
+				"price": "Contact",
+				"buttonText": "Contact Sales",
+				"action": "contact"
+			}
+		]
+	},
+	"Blog": {
+		"title": "Our Blog",
+		"subtitle": "Tips, news and best practices for healthcare professionals in the digital age.",
+		"continueReading": "Continue reading"
+	}
+		,
+		"FAQ": {
+			"title": "Frequently Asked Questions",
+			"questions": [
+				{
+					"question": "Is BoxDoctor secure and HIPAA-compliant?",
+					"answer": "Yes. BoxDoctor is designed to meet HIPAA requirements: end-to-end encryption, secure video and audio channels, optional two-factor authentication, and fine-grained access controls protect patient health information and help your clinic maintain regulatory compliance. Security is implemented across the platform to help providers and patients connect with confidence."
+				},
+				{
+					"question": "How will BoxDoctor integrate with my current systems?",
+					"answer": "Our platform is built to be flexible. We provide a robust API and will work with your IT team to ensure smooth integration with your Electronic Health Record (EHR) systems and other practice management software you already use."
+				},
+				{
+					"question": "Can I white-label the product?",
+					"answer": "Absolutely. We offer white-label solutions that let you customize the platform with your own logo, colors and domain, reinforcing your clinic's brand and patient trust."
+				},
+				{
+					"question": "What are the benefits of implementing telehealth with BoxDoctor?",
+					"answer": "Benefits include lower operational costs, increased efficiency, access to more patients without geographic barriers, improved continuity of care, and higher satisfaction for both patients and providers."
+				},
+				{
+					"question": "What types of telehealth does BoxDoctor support?",
+					"answer": "We support a wide range of services, including real-time video consultations, remote patient monitoring, secure asynchronous messaging and store-and-forward consults that allow sending medical information for later review."
+				},
+				{
+					"question": "How does BoxDoctor improve patient engagement?",
+					"answer": "We improve engagement with automated appointment reminders, an intuitive patient portal for accessing records and prescriptions, and secure direct communication tools with clinicians — all accessible from the patient's home."
+				}
+			]
+		}
+	,
+	"Features": {
+		"title": "Cutting-edge telemedicine services",
+		"subtitle": "Experience advanced telemedicine designed for today's healthcare needs.",
+		"items": [
+			{ "title": "Video consultations" },
+			{ "title": "EMR and EHR integration" },
+			{ "title": "Patient tools" },
+			{ "title": "Language support" },
+			{ "title": "Appointment scheduling" },
+			{ "title": "Prescription management" },
+			{ "title": "Real-time messaging" },
+			{ "title": "Payment processing" }
+		]
+	},
+	"SocialProof": {
+		"stats": [
+			{ "value": "10,000+", "label": "Video consultations completed" },
+			{ "value": "4.9 ★", "label": "Play Store rating" },
+			{ "value": "500+", "label": "Healthcare professionals" },
+			{ "value": "50+", "label": "White-label deployments" }
+		]
+	},
+	"LogoCloud": {
+		"trustedBy": "Trusted by clinics, startups and industry leaders in healthcare"
+	}
+	,
+	"Testimonials": {
+		"title": "Our users love us",
+		"subtitle": "Hundreds of thousands of users worldwide trust BoxDoctor",
+		"items": [
+			{ "name": "Mariana López", "initial": "M", "rating": 5, "quote": "Great initiative, very useful and simple..." },
+			{ "name": "Carlos", "initial": "C", "rating": 4.5, "quote": "The app works very well..." },
+			{ "name": "Pipo", "initial": "P", "rating": 5, "quote": "Saves me a lot for payments..." }
+		]
+	}
+	,
+	"Security": {
+		"title": "Security & Compliance",
+		"subtitle": "At BoxDoctor, the security and privacy of your data and your patients' data is our top priority.",
+		"p1": "Our platform is designed from the ground up to meet the highest industry standards, including HIPAA (Health Insurance Portability and Accountability Act). We use end-to-end encryption for all communications to ensure only you and your patients can access shared information.",
+		"p2": "Additionally, our servers are hosted on secure infrastructures that comply with certifications such as ISO 27001 and SOC 2, ensuring the integrity and availability of your data at all times. We perform regular security audits and are committed to continuous improvement of our practices to protect your information against threats."
+	},
+	"ContactDrawer": {
+		"title": "Contact Sales",
+		"subtitle": "Leave your details and we'll reach out to schedule a demo.",
+		"form": {
+			"name": "Full name",
+			"email": "Work email",
+			"message": "How can we help?",
+			"submit": "Send Message"
+		},
+		"successMessage": "Thanks for your message — we'll contact you soon.",
+		"errors": {
+			"nameRequired": "Name is required.",
+			"invalidEmail": "Please enter a valid email.",
+			"messageMin": "Message must be at least 10 characters."
+		}
+	}
+}

@@ -22,6 +22,7 @@
     "date-fns": "3.6.0",
     "dayjs": "1.11.10",
     "next": "14.2.3",
+    "next-intl": "^4.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "7.51.3",

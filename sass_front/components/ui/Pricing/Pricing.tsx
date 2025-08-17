@@ -1,179 +1,125 @@
-'use client';
-
+"use client";
+import { Box, Typography, Grid, Card, CardContent, Button, Chip } from '@mui/material';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Typography, Box, Card, CardContent, CardActions, Grid, ToggleButtonGroup, ToggleButton, Container, Chip } from '@mui/material';
-import Link from 'next/link';
 
-interface Product {
-  id: string;
+// Tipos de datos
+type Interval = 'month' | 'year';
+interface Plan {
   name: string;
   description: string;
+  price: string | number;
+  isPopular?: boolean;
+  buttonText: string;
+  action: 'subscribe' | 'contact';
 }
 
-interface Price {
-  id: string;
-  unit_amount: number;
-  currency: string;
-  interval: 'month' | 'year';
-}
+// Default plans (fallback if translations not provided)
+const defaultPlans: Plan[] = [
+  {
+    name: 'Gratis',
+    description: 'Ideal para empezar a digitalizar tu consulta. 15 pacientes máximo.',
+    price: 0,
+    buttonText: 'Suscribirse',
+    action: 'subscribe',
+  },
+  {
+    name: 'Estándar',
+    description: 'Todas las funcionalidades, hasta 500 pacientes y consultas ilimitadas.',
+    price: 49,
+    isPopular: true,
+    buttonText: 'Suscribirse',
+    action: 'subscribe',
+  },
+  {
+    name: 'Premium',
+    description: 'Para clínicas con múltiples consultorios y asistentes. Pacientes ilimitados.',
+    price: 199,
+    buttonText: 'Suscribirse',
+    action: 'subscribe',
+  },
+  {
+    name: 'Corporativo',
+    description: 'Solución a medida para hospitales y grandes organizaciones.',
+    price: 'Contactar',
+    buttonText: 'Contactar Ventas',
+    action: 'contact',
+  },
+];
 
-interface ProductWithPrices extends Product {
-  prices: Price[];
-  mostPopular?: boolean;
-}
-
-interface Subscription {
-  id: string;
-  status: string;
-  // Add other subscription fields as needed
-}
-
-interface Props {
-  user: any; // TODO: Replace with actual User type
-  products: ProductWithPrices[];
-  subscription: Subscription | null;
-}
-
-type BillingInterval = 'year' | 'month';
-
-export default function Pricing({ user, products, subscription }: Props) {
-  const intervals = Array.from(
-    new Set(
-      products.flatMap((product) =>
-        product?.prices?.map((price) => price?.interval)
-      )
-    )
-  );
-  const router = useRouter();
-  const [billingInterval, setBillingInterval] =
-    useState<BillingInterval>('month');
-  const [priceIdLoading, setPriceIdLoading] = useState<string>();
-
-  const handleStripeCheckout = async (price: Price) => {
-    setPriceIdLoading(price.id);
-
-    if (!user) {
-      setPriceIdLoading(undefined);
-      return router.push('/signin'); // Redirigir a la página de inicio de sesión
-    }
-
-    // TODO: Implement actual Stripe checkout logic with FastAPI backend
-    console.log(`Iniciando checkout para el precio: ${price.id}`);
-    alert('Funcionalidad de checkout no implementada aún.');
-
-    setPriceIdLoading(undefined);
-  };
-
-  if (!products.length) {
-    return (
-      <Box sx={{ py: 8, textAlign: 'center' }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          No se encontraron planes de precios de suscripción.
+import { useTranslations, useMessages } from 'next-intl';
+export default function Pricing() {
+  const t = useTranslations('Pricing');
+  const messages = useMessages();
+  const plansFromMessages = (messages?.Pricing?.plans ?? null) as unknown as Plan[] | null;
+  const plans = plansFromMessages && plansFromMessages.length ? plansFromMessages : defaultPlans;
+  return (
+    <Box id="pricing" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'background.paper' }}>
+      <Box sx={{ maxWidth: 'lg', mx: 'auto', px: 3, textAlign: 'center' }}>
+        <Typography variant="h2" component="h2" fontWeight="bold" gutterBottom>
+          {t('title')}
         </Typography>
-        <Typography variant="body1">
-          Cree planes en su{' '}
-          <Link
-            href="https://dashboard.stripe.com/products"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="primary"
-          >
-            Panel de Stripe
-          </Link>
-          .
+        <Typography variant="h5" color="text.secondary" sx={{ mb: 8 }}>
+          {t('subtitle')}
         </Typography>
-      </Box>
-    );
-  } else {
-    return (
-      <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', mb: 6 }}>
-            <Typography variant="h3" component="h1" gutterBottom>
-              Planes de Precios Flexibles
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
-              Elige el plan que mejor se adapte a tu práctica médica. Sin compromisos a largo plazo.
-            </Typography>
-            {/* El ToggleButton para mensual/anual puede quedar comentado si solo ofrecemos mensual por ahora */}
-          </Box>
-          <Grid container spacing={4} justifyContent="center" alignItems="stretch">
-            {products.map((product) => {
-              const price = product?.prices?.find(
-                (p) => p.interval === billingInterval
-              );
-              if (!price) return null;
-
-              const isContactForPrice = price.unit_amount === null;
-              const priceString = isContactForPrice
-                ? 'Contactar'
-                : new Intl.NumberFormat('es-ES', {
-                    style: 'currency',
-                    currency: price.currency!,
-                    minimumFractionDigits: 0
-                  }).format((price.unit_amount || 0) / 100);
-
-              return (
-                <Grid item key={product.id} xs={12} md={4}>
-                  <Card
+        <Grid container spacing={4} justifyContent="center">
+          {plans.map((plan) => (
+            <Grid item key={plan.name} xs={12} sm={6} md={3}>
+              <Card 
+                elevation={3} // Sombra base para todas las tarjetas
+                sx={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  borderColor: plan.isPopular ? 'primary.main' : 'transparent', // Borde solo si es popular
+                  borderWidth: 2,
+                  borderStyle: 'solid',
+                  position: 'relative',
+                  overflow: 'visible',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: (theme) => theme.shadows[8], // Sombra más intensa al hacer hover
+                  },
+                }}
+              >
+                {plan.isPopular && (
+                  <Chip 
+                    label={t('mostPopular')}
+                    color="primary"
                     sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      border: product.mostPopular ? 2 : 0,
-                      borderColor: 'primary.main',
-                      position: 'relative',
+                      position: 'absolute',
+                      top: 0,
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 1,
                     }}
-                  >
-                    {product.mostPopular && (
-                      <Chip 
-                        label="Más Popular" 
-                        color="primary" 
-                        sx={{ 
-                          position: 'absolute', 
-                          top: -12, 
-                          left: '50%', 
-                          transform: 'translateX(-50%)',
-                          fontWeight: 'bold',
-                        }} 
-                      />
-                    )}
-                    <CardContent sx={{ flexGrow: 1, pt: product.mostPopular ? 4 : 2 }}>
-                      <Typography variant="h5" component="h2" gutterBottom>
-                        {product.name}
-                      </Typography>
-                      <Typography variant="body1" color="text.secondary" sx={{ minHeight: 60 }}>
-                        {product.description}
-                      </Typography>
-                      <Typography variant="h4" component="p" sx={{ mt: 2 }}>
-                        {priceString}
-                        {!isContactForPrice && (
-                          <Typography component="span" variant="subtitle1" color="text.secondary">
-                            /mes
-                          </Typography>
-                        )}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={() => !isContactForPrice && handleStripeCheckout(price)}
-                        href={isContactForPrice ? '/contact' : undefined}
-                        component={isContactForPrice ? Link : 'button'}
-                        disabled={priceIdLoading === price.id}
-                      >
-                        {isContactForPrice ? 'Contactar Ventas' : (subscription && product.id === subscription?.id ? 'Gestionar' : 'Suscribirse')}
-                      </Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Container>
+                  />
+                )}
+                <CardContent sx={{ flexGrow: 1, p: 3, textAlign: 'left' }}>
+                  <Typography variant="h4" component="h3" gutterBottom>{plan.name}</Typography>
+                  <Typography color="text.secondary" sx={{ minHeight: '3em', mb: 2 }}>{plan.description}</Typography>
+                  
+                  {typeof plan.price === 'number' ? (
+                    <Typography variant="h3" component="p" sx={{ my: 2 }}>
+                      {plan.price} US$
+                      <Typography variant="h6" component="span" color="text.secondary">{t('perMonth')}</Typography>
+                    </Typography>
+                  ) : (
+                    <Typography variant="h3" component="p" sx={{ my: 2, fontWeight: 'medium' }}>
+                      {plan.price}
+                    </Typography>
+                  )}
+                </CardContent>
+                <Box sx={{ p: 3, pt: 0 }}>
+                  <Button fullWidth variant="contained" color="primary">
+                    {plan.action === 'contact' ? t('contactSales') : t('subscribe')}
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
-    );
-  }
+    </Box>
+  );
 }

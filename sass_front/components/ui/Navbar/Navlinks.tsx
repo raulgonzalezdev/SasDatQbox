@@ -1,6 +1,8 @@
 'use client';
 
+import {useTranslations} from 'next-intl';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button, Box, IconButton, Select, MenuItem, FormControl } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import Logo from '@/components/icons/Logo';
@@ -17,6 +19,19 @@ interface NavlinksProps {
 }
 
 export default function Navlinks({ user, isAuthenticated, logout }: NavlinksProps) {
+  const t = useTranslations('Navbar');
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const handleChangeLocale = (event: any) => {
+    const newLocale = event.target.value;
+    // Extrae la ruta base sin el locale actual
+    const newPathname = pathname.startsWith('/en') ? pathname.substring(3) : pathname.substring(3);
+    router.push(`/${newLocale}${newPathname || '/'}`);
+  };
+
+  const currentLocale = pathname.startsWith('/en') ? 'en' : 'es';
+
   const buttonStyles = {
     textTransform: 'none',
     fontSize: '1rem',
@@ -34,39 +49,40 @@ export default function Navlinks({ user, isAuthenticated, logout }: NavlinksProp
           <Logo />
         </Link>
         <Button color="inherit" component={Link} href="/#features" sx={buttonStyles}>
-          Funcionalidades
+          {t('features')}
         </Button>
         <Button color="inherit" component={Link} href="/#pricing" sx={buttonStyles}>
-          Precios
+          {t('pricing')}
         </Button>
-        <Button color="inherit" component={Link} href="/#blog" sx={buttonStyles}>
-          Blog
+        <Button color="inherit" component={Link} href="/blog" sx={buttonStyles}>
+          {t('blog')}
         </Button>
         <Button color="inherit" component={Link} href="/#help" sx={buttonStyles}>
-          Ayuda
+          {t('help')}
         </Button>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {isAuthenticated ? (
           <>
             <Button color="inherit" component={Link} href="/account" sx={buttonStyles}>
-              Dashboard
+              {t('dashboard')}
             </Button>
             <Button color="inherit" onClick={logout} sx={buttonStyles}>
-              Cerrar Sesión
+              {t('logout')}
             </Button>
           </>
         ) : (
           <Button color="inherit" component={Link} href="/signin" sx={buttonStyles}>
-            Iniciar Sesión
+            {t('login')}
           </Button>
         )}
         <Button variant="contained" color="primary" sx={{ ...buttonStyles, borderRadius: '20px' }}>
-          Descargar App
+          {t('downloadApp')}
         </Button>
         <FormControl size="small" variant="outlined" sx={{ minWidth: 60 }}>
           <Select
-            value="es"
+            value={currentLocale}
+            onChange={handleChangeLocale}
             IconComponent={LanguageIcon}
             sx={{
               '& .MuiOutlinedInput-notchedOutline': {
