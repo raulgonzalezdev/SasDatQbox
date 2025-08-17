@@ -13,6 +13,8 @@ class UserRole(str, enum.Enum):
 # Shared properties
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
+    is_active: bool = True
+    is_superuser: bool = False
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     phone: Optional[str] = None
@@ -20,6 +22,9 @@ class UserBase(BaseModel):
     billing_address: Optional[dict] = None  # Assuming JSON field maps to dict
     payment_method: Optional[dict] = None  # Assuming JSON field maps to dict
     role: Optional[UserRole] = None # Added role
+
+    class Config:
+        from_attributes = True
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
@@ -34,13 +39,13 @@ class UserUpdate(UserBase):
 
 # Properties shared by models stored in DB
 class UserInDBBase(UserBase):
-    id: UUID
+    id: Optional[UUID] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     hashed_password: str
 
     class Config:
-        from_attributes = True # Use from_attributes instead of orm_mode for Pydantic v2
+        from_attributes = True
 
 # Additional properties to return via API
 class User(UserInDBBase):
@@ -48,7 +53,7 @@ class User(UserInDBBase):
 
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
-    pass
+    hashed_password: str
 
 # Token schema for authentication
 class Token(BaseModel):

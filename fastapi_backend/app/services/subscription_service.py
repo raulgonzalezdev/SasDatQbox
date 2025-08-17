@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from app.models.subscription import SubscriptionProduct, Price, Subscription
-from app.schemas.subscription import SubscriptionProductCreate, SubscriptionProductUpdate, PriceCreate, PriceUpdate, SubscriptionCreate, SubscriptionUpdate
+from app.schemas.subscription import SubscriptionProductCreate, PriceCreate, SubscriptionCreate, SubscriptionUpdate
 from uuid import UUID
+from typing import List, Optional
 
 class SubscriptionService:
     def __init__(self, db: Session):
@@ -39,8 +40,22 @@ class SubscriptionService:
     def get_subscription(self, subscription_id: str) -> Subscription | None:
         return self.db.query(Subscription).filter(Subscription.id == subscription_id).first()
 
-    def get_subscriptions_by_user(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[Subscription]:
+    def get_subscriptions_by_user(self, user_id: UUID, skip: int = 0, limit: int = 100) -> List[Subscription]:
         return self.db.query(Subscription).filter(Subscription.user_id == user_id).offset(skip).limit(limit).all()
+
+    def update_subscription(self, subscription_id: UUID, subscription_in: SubscriptionUpdate, user_id: UUID) -> Optional[Subscription]:
+        subscription = self.db.query(Subscription).filter(Subscription.id == subscription_id, Subscription.user_id == user_id).first()
+        if not subscription:
+            return None
+        
+        update_data = subscription_in.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(subscription, key, value)
+            
+        self.db.add(subscription)
+        self.db.commit()
+        self.db.refresh(subscription)
+        return subscription
 
     def create_subscription(self, subscription_in: SubscriptionCreate) -> Subscription:
         db_subscription = Subscription(**subscription_in.model_dump())

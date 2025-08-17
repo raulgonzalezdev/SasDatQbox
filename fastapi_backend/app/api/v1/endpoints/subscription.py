@@ -5,8 +5,8 @@ from typing import List
 
 from app.dependencies import get_db
 from app.schemas.subscription import (
-    SubscriptionProduct, SubscriptionProductCreate, SubscriptionProductUpdate,
-    Price, PriceCreate, PriceUpdate,
+    SubscriptionProduct, SubscriptionProductCreate,
+    Price, PriceCreate,
     Subscription, SubscriptionCreate, SubscriptionUpdate
 )
 from app.services.subscription_service import SubscriptionService
@@ -75,3 +75,23 @@ def read_subscriptions(
 ):
     service = SubscriptionService(db)
     return service.get_subscriptions_by_user(user_id=user_id, skip=skip, limit=limit)
+
+@router.put("/subscriptions/{subscription_id}", response_model=Subscription)
+def update_subscription(
+    subscription_id: UUID,
+    subscription_in: SubscriptionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    service = SubscriptionService(db)
+    subscription = service.update_subscription(
+        subscription_id=subscription_id, 
+        subscription_in=subscription_in,
+        user_id=current_user.id
+    )
+    if not subscription:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found or you don't have permission to update it."
+        )
+    return subscription

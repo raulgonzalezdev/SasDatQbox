@@ -1,107 +1,66 @@
-from typing import Optional, Any, Dict
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field
-import enum
+from pydantic import BaseModel
 
-# --- Enums ---
-class PricingType(str, enum.Enum):
-    one_time = "one_time"
-    recurring = "recurring"
+# Pydantic models for Subscription Status
+class SubscriptionStatus:
+    ACTIVE = "active"
+    TRIALING = "trialing"
+    PAST_DUE = "past_due"
+    CANCELED = "canceled"
+    UNPAID = "unpaid"
+    INCOMPLETE = "incomplete"
+    INCOMPLETE_EXPIRED = "incomplete_expired"
+    ALL = "all"
 
-class PricingPlanInterval(str, enum.Enum):
-    day = "day"
-    week = "week"
-    month = "month"
-    year = "year"
+# Pydantic models for Pricing Plan Interval
+class PricingPlanInterval:
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+    YEAR = "year"
 
-class SubscriptionStatus(str, enum.Enum):
-    trialing = "trialing"
-    active = "active"
-    canceled = "canceled"
-    incomplete = "incomplete"
-    incomplete_expired = "incomplete_expired"
-    past_due = "past_due"
-    unpaid = "unpaid"
-    paused = "paused"
+# Pydantic models for Pricing Type
+class PricingType:
+    ONE_TIME = "one_time"
+    RECURRING = "recurring"
 
-# --- SubscriptionProduct Schemas ---
+# Base Pydantic models
 class SubscriptionProductBase(BaseModel):
     id: str
-    active: Optional[bool] = None
-    name: Optional[str] = None
+    active: bool
+    name: str
     description: Optional[str] = None
     image: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
 
-class SubscriptionProductCreate(SubscriptionProductBase):
-    pass
-
-class SubscriptionProductUpdate(BaseModel):
-    active: Optional[bool] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    image: Optional[str] = None
-    metadata: Optional[dict] = None
-
-class SubscriptionProductInDB(SubscriptionProductBase):
     class Config:
         from_attributes = True
 
-class SubscriptionProduct(SubscriptionProductBase):
-    
-    class Config:
-        orm_mode = True
-
-# --- Price Schemas ---
 class PriceBase(BaseModel):
     id: str
     product_id: str
-    active: Optional[bool] = None
-    description: Optional[str] = None
+    active: bool
     unit_amount: Optional[int] = None
-    currency: Optional[str] = None
-    type: Optional[PricingType] = None
-    interval: Optional[PricingPlanInterval] = None
+    currency: str
+    type: str
+    interval: Optional[str] = None
     interval_count: Optional[int] = None
     trial_period_days: Optional[int] = None
-    metadata: Optional[dict] = None
+    metadata: Optional[Dict[str, Any]] = None
 
-class PriceCreate(PriceBase):
-    pass
-
-class PriceUpdate(BaseModel):
-    active: Optional[bool] = None
-    description: Optional[str] = None
-    metadata: Optional[dict] = None
-
-class PriceInDB(PriceBase):
     class Config:
         from_attributes = True
 
-class Price(PriceInDB):
-    pass
-
-# --- Subscription Schemas ---
 class SubscriptionBase(BaseModel):
-    id: str
+    id: UUID
     user_id: UUID
-    status: Optional[SubscriptionStatus] = None
-    metadata: Optional[dict] = None
+    status: str
+    metadata: Optional[Dict[str, Any]] = None
     price_id: Optional[str] = None
     quantity: Optional[int] = None
-    cancel_at_period_end: Optional[bool] = None
-
-class SubscriptionCreate(SubscriptionBase):
-    pass
-
-class SubscriptionUpdate(BaseModel):
-    status: Optional[SubscriptionStatus] = None
-    metadata: Optional[dict] = None
-    quantity: Optional[int] = None
-    cancel_at_period_end: Optional[bool] = None
-
-class SubscriptionInDB(SubscriptionBase):
+    cancel_at_period_end: bool
     created: datetime
     current_period_start: datetime
     current_period_end: datetime
@@ -114,5 +73,35 @@ class SubscriptionInDB(SubscriptionBase):
     class Config:
         from_attributes = True
 
-class Subscription(SubscriptionInDB):
+# Models with relationships
+class SubscriptionProduct(SubscriptionProductBase):
+    prices: List['Price'] = []
+
+class Price(PriceBase):
+    product: 'SubscriptionProduct'
+
+class Subscription(SubscriptionBase):
+    price: Optional['Price'] = None
+
+# Create/Update models
+class SubscriptionProductCreate(SubscriptionProductBase):
     pass
+
+class PriceCreate(PriceBase):
+    pass
+
+class SubscriptionCreate(SubscriptionBase):
+
+    pass
+
+class SubscriptionUpdate(BaseModel):
+    status: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    price_id: Optional[str] = None
+    quantity: Optional[int] = None
+    cancel_at_period_end: Optional[bool] = None
+
+# To support circular references for relationships
+SubscriptionProduct.model_rebuild()
+Price.model_rebuild()
+Subscription.model_rebuild()
