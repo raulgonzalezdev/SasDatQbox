@@ -18,6 +18,8 @@ class SubscriptionProduct(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    prices = relationship("Price", back_populates="product")
+
 class PricingType(enum.Enum):
     one_time = "one_time"
     recurring = "recurring"
@@ -44,6 +46,8 @@ class Price(Base):
     metadata_ = Column("metadata", JSON)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    product = relationship("SubscriptionProduct", back_populates="prices")
 
 class SubscriptionStatus(enum.Enum):
     trialing = "trialing"

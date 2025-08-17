@@ -4,13 +4,15 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_active_user, get_current_active_admin
+from app.dependencies import get_db, get_current_active_user
 from app.schemas.business import (
     Business, BusinessCreate, BusinessUpdate,
     BusinessLocation, BusinessLocationCreate, BusinessLocationUpdate
 )
 from app.services.business_service import BusinessService
 from app.models.user import User as DBUser # Import DBUser for type hinting
+from app.api import deps
+from app.api.deps import get_current_active_admin
 
 router = APIRouter(
     tags=["Businesses"],
@@ -34,10 +36,17 @@ def read_businesses(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_active_admin) # Only admins can view all businesses
+    current_user: DBUser = Depends(get_current_active_user)
 ):
     business_service = BusinessService(db)
-    businesses = business_service.get_businesses(skip=skip, limit=limit)
+    owner_id_to_filter = None
+    # If the user is not an admin, they can only see their own businesses.
+    if current_user.role != "admin":
+        owner_id_to_filter = current_user.id
+    
+    businesses = business_service.get_businesses(
+        owner_id=owner_id_to_filter, skip=skip, limit=limit
+    )
     return businesses
 
 @router.get("/{business_id}", response_model=Business)
@@ -78,8 +87,9 @@ def update_business(
 
 @router.delete("/{business_id}", response_model=Business)
 def delete_business(
-    business_id: UUID,
-    db: Session = Depends(get_db),
+    *,
+    db: Session = Depends(deps.get_db),
+    business_id: str,
     current_user: DBUser = Depends(get_current_active_admin) # Only admins can delete businesses
 ):
     business_service = BusinessService(db)

@@ -19,4 +19,4 @@ class Product(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     business = relationship("Business", back_populates="products")
-    prices = relationship("Price", back_populates="product")
+    

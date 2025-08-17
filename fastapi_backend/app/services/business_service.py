@@ -11,8 +11,11 @@ class BusinessService:
     def get_business(self, business_id: UUID) -> Business | None:
         return self.db.query(Business).filter(Business.id == business_id).first()
 
-    def get_businesses(self, skip: int = 0, limit: int = 100) -> list[Business]:
-        return self.db.query(Business).offset(skip).limit(limit).all()
+    def get_businesses(self, owner_id: UUID | None = None, skip: int = 0, limit: int = 100) -> list[Business]:
+        query = self.db.query(Business)
+        if owner_id:
+            query = query.filter(Business.owner_id == owner_id)
+        return query.offset(skip).limit(limit).all()
 
     def create_business(self, business_in: BusinessCreate) -> Business:
         db_business = Business(

@@ -8,13 +8,13 @@ USER_EMAIL = "user@example.com"
 USER_PASSWORD = "user12345678"
 
 # --- Data ---
-BUSINESS_NAME = "Ferretería de Raúl"
-LOC1_NAME = "Almacén Central"
-LOC2_NAME = "Tienda Principal"
-PROD1_SKU = "HMR-001"
+BUSINESS_NAME = "Clínica Salud Integral"
+LOC1_NAME = "Sede Principal"
+LOC2_NAME = "Consultorio Anexo"
+PROD1_SKU = "CONSULTA-MEDICA-GENERAL"
 PROD2_SKU = "SCR-PH-002"
-SUB_PROD_ID = "prod_test_001"
-PRICE_ID = "price_test_001"
+SUB_PROD_ID = "plan_salud_premium"
+PRICE_ID = "precio_plan_salud_premium_mensual"
 
 # --- Global variables ---
 access_token = ""
@@ -165,6 +165,106 @@ def run_tests():
         print(f"FAILURE: Destination inventory is incorrect. Expected 20, got {final_inv2.get('quantity') if final_inv2 else 'not found'}.")
 
     print("\n--- Test script finished. ---")
+
+    # --- New Tests for Appointments, Patients, and Chat ---
+    print("\n--- Running new tests for Appointments, Patients, and Chat ---")
+
+    # 1. Create a doctor user
+    doctor_data = {
+        "email": "doctor@example.com",
+        "password": "doctor12345678",
+        "first_name": "Doctor",
+        "last_name": "Who",
+        "role": "doctor"
+    }
+    # We use a direct post here, assuming the doctor might not exist.
+    # A more robust test would check first or handle the creation failure.
+    print("\n--- Creating Doctor ---")
+    doctor_user_response = requests.post(f"{BASE_URL}/auth/register", json=doctor_data)
+    if doctor_user_response.status_code not in [200, 201, 400]: # 400 if user already exists
+        print(f"FAILED: Could not create or verify doctor. Status: {doctor_user_response.status_code}")
+        return
+    
+    # Log in as the doctor to get their token and ID
+    doctor_login_data = {"username": "doctor@example.com", "password": "doctor12345678"}
+    print("--- Logging in as Doctor... ---")
+    try:
+        doc_response = requests.post(f"{BASE_URL}/auth/login", data=doctor_login_data)
+        doc_response.raise_for_status()
+        doctor_access_token = doc_response.json()["access_token"]
+        doctor_headers = {"Authorization": f"Bearer {doctor_access_token}"}
+        doctor_user = requests.get(f"{BASE_URL}/auth/me", headers=doctor_headers).json()
+        print("Doctor login successful.")
+    except requests.exceptions.RequestException as e:
+        print(f"Doctor login failed: {e}")
+        return
+
+    # 2. Create a patient profile for the original user
+    patient_profile = get_or_create("/patients/", "/patients/", {"user_id": current_user['id']}, "user_id", current_user['id'])
+    if not patient_profile: return
+
+    # 3. Create an appointment
+    appointment_data = {
+        "doctor_id": doctor_user['id'],
+        "patient_id": patient_profile['id'],
+        "appointment_datetime": "2025-09-15T14:30:00Z",
+        "reason": "Consulta de rutina"
+    }
+    appointment = api_post("/appointments/", appointment_data)
+    if not appointment: return
+
+    # 4. Add a document to the appointment (as the doctor)
+    doc_data = {
+        "appointment_id": appointment['id'],
+        "document_type": "medical_report",
+        "content": "El paciente presenta un excelente estado de salud."
+    }
+    # Temporarily use doctor's headers for this action
+    original_headers = headers.copy()
+    headers.update(doctor_headers)
+    appointment_doc = api_post("/appointment-documents/", doc_data)
+    if not appointment_doc: return
+    headers.clear()
+    headers.update(original_headers) # Revert to original user's headers
+
+    # 5. Create a chat conversation for the appointment
+    chat_data = {
+        "type": "medical_consultation",
+        "appointment_id": appointment['id'],
+        "participant_ids": [current_user['id'], doctor_user['id']]
+    }
+    conversation = api_post("/chat/conversations/", chat_data)
+    if not conversation: return
+
+    # 6. Send a message as the patient
+    message_data = {
+        "conversation_id": conversation['id'],
+        "sender_id": current_user['id'],
+        "content": "Hola Doctor, gracias por la consulta."
+    }
+    message1 = api_post("/chat/messages/", message_data)
+    if not message1: return
+
+    # 7. Send a reply as the doctor
+    doctor_message_data = {
+        "conversation_id": conversation['id'],
+        "sender_id": doctor_user['id'],
+        "content": "De nada, ¡cuídese mucho!"
+    }
+    headers.update(doctor_headers) # Switch to doctor
+    message2 = api_post("/chat/messages/", doctor_message_data)
+    if not message2: return
+    headers.clear()
+    headers.update(original_headers) # Revert to original user
+
+    # 8. Verify messages in the conversation
+    messages = api_get(f"/chat/conversations/{conversation['id']}/messages/")
+    if messages and len(messages) == 2:
+        print("SUCCESS: Correct number of messages found in conversation.")
+    else:
+        print(f"FAILURE: Incorrect number of messages. Expected 2, got {len(messages) if messages is not None else 0}.")
+
+    print("\n--- New tests finished. ---")
 
 if __name__ == "__main__":
     run_tests()

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -19,15 +19,22 @@ router = APIRouter(
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(
-    user: UserCreate,
-    db: Session = Depends(get_db)
-):
+    *,
+    db: Session = Depends(get_db),
+    user_in: UserCreate,
+) -> Any:
+    """
+    Create new user.
+    """
     user_service = UserService(db)
-    db_user = user_service.get_user_by_email(email=user.email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+    user = user_service.get_by_email(db, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered",
+        )
     
-    new_user = user_service.create_user(user_in=user)
+    new_user = user_service.create_user(user_in=user_in)
     return new_user
 
 @router.post("/login", response_model=Token)
@@ -36,7 +43,7 @@ async def login_for_access_token( # Made async
     db: Session = Depends(get_db)
 ):
     user_service = UserService(db)
-    user = user_service.get_user_by_email(email=form_data.username)
+    user = user_service.get_by_email(db, email=form_data.username)
     
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
