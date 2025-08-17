@@ -10,16 +10,16 @@ export default function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { status } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (status === 'unauthenticated') {
       router.replace('/signin');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [status, router]);
 
-  if (isLoading || !isAuthenticated) {
+  if (status === 'loading' || status === 'unauthenticated') {
     return (
       <Box
         sx={{

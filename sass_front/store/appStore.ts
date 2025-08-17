@@ -10,20 +10,25 @@ interface User {
   role: 'admin' | 'doctor' | 'patient';
 }
 
-// Tipos para el estado y las acciones del store
+type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+
 interface AppState {
   user: User | null;
-  isAuthenticated: boolean;
-  setUser: (user: User | null) => void;
+  status: AuthStatus;
+  setUserAndAuth: (user: User | null) => void;
+  setStatus: (status: AuthStatus) => void;
   logout: () => void;
 }
 
-// Creación del store (sin persistencia del token)
 export const useAppStore = create<AppState>()(
   (set) => ({
     user: null,
-    isAuthenticated: false,
-    setUser: (user: User | null) => set({ user, isAuthenticated: !!user }),
-    logout: () => set({ user: null, isAuthenticated: false }),
+    status: 'loading', // Empezamos en estado de carga
+    setUserAndAuth: (user: User | null) => set({ 
+      user, 
+      status: user ? 'authenticated' : 'unauthenticated' 
+    }),
+    setStatus: (status: AuthStatus) => set({ status }),
+    logout: () => set({ user: null, status: 'unauthenticated' }),
   })
 );

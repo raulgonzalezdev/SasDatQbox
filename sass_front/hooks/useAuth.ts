@@ -32,18 +32,20 @@ const fetchUser = async (): Promise<User> => {
 
 const loginUser = async ({ payload }: AuthPayload) => {
   const body = new URLSearchParams(payload).toString();
-  return await customFetch('/auth/login', {
+  const res = await customFetch('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
+  return res; // customFetch ya devuelve el JSON
 };
 
 const registerUser = async ({ payload }: AuthPayload) => {
-  return await customFetch('/auth/register', {
+  const res = await customFetch('/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+  return res; // customFetch ya devuelve el JSON
 };
 
 const logoutUser = async () => {
@@ -54,36 +56,31 @@ const logoutUser = async () => {
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, setUser, logout: localLogout } = useAppStore();
+  const { user, status, setUserAndAuth, logout: localLogout } = useAppStore();
 
-  // Query to fetch the current user
-  const { data: currentUser, isLoading, isError } = useQuery({
+  useQuery({
     queryKey: ['user'],
     queryFn: fetchUser,
-    retry: false, // Don't retry on error, as it's likely a 401
+    onSuccess: (data) => setUserAndAuth(data),
+    onError: () => setUserAndAuth(null),
+    retry: false,
     refetchOnWindowFocus: false,
+    staleTime: Infinity, // Confiamos en el store, no necesitamos re-validar
   });
 
-  // Effect to sync Zustand store with React Query state
-  useEffect(() => {
-    if (currentUser) {
-      setUser(currentUser);
-    }
-    if (isError) {
-      setUser(null);
-    }
-  }, [currentUser, isError, setUser]);
-
-  // Mutation for logging in
   const { mutate: login, isPending: isLoggingIn } = useMutation({
     mutationFn: loginUser,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('¡Bienvenido de nuevo!');
-      // Invalidate the user query to refetch it
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      const user = data;
+      setUserAndAuth(user); // Única fuente de verdad
+      queryClient.setQueryData(['user'], user); // Actualizamos cache para coherencia
       router.push('/account');
     },
-    onError: handleApiError,
+    onError: (error) => {
+      localLogout();
+      handleApiError(error);
+    },
   });
 
   // Mutation for registering
@@ -114,11 +111,12 @@ export function useAuth() {
   };
 
   return {
-    user: user,
-    isLoading,
+    user,
+    status,
+    isLoading: status === 'loading',
+    isAuthenticated: status === 'authenticated',
     isLoggingIn,
     isRegistering,
-    isAuthenticated: !!user,
     login,
     register,
     logout,
