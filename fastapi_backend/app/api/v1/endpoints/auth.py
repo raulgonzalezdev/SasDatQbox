@@ -8,8 +8,7 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user # Corrected import for get_current_user
 from app.schemas.user import UserCreate, User as UserResponse, Token
 from app.services.user_service import UserService # Import the class
-from app.core.security import verify_password # Removed get_password_hash as it's used in service
-from app.core.config import settings
+from app.core.security import verify_password, ACCESS_TOKEN_EXPIRE_MINUTES # Removed get_password_hash as it's used in service
 from app.core.auth import create_access_token # This needs to be implemented
 
 router = APIRouter(
@@ -60,7 +59,7 @@ async def login_for_access_token( # Made async
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id)}, # Use user.id as sub
         expires_delta=access_token_expires

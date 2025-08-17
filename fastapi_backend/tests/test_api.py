@@ -3,6 +3,11 @@ import requests
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
+from alembic.config import Config
+from alembic import command
+from app.db.base import Base  # Import the Base for metadata
+from app.models import user, business, product, customer, inventory, subscription, patient, appointment, conversation
+import uuid
 
 # --- Configuration ---
 BASE_URL = "http://localhost:8001/api/v1"
@@ -13,21 +18,28 @@ USER_PASSWORD = "testpassword"
 @pytest.fixture(scope="session")
 def db_engine():
     engine = create_engine(settings.DATABASE_URL)
+    # The first time tests run, create all tables
+    Base.metadata.create_all(bind=engine)
     yield engine
     engine.dispose()
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_database(db_engine):
+    """
+    This fixture cleans all data from tables before each test by truncating them.
+    """
+    tables = Base.metadata.sorted_tables
+    
     with db_engine.connect() as connection:
-        connection.execute(text("DROP SCHEMA IF EXISTS pos CASCADE;"))
-        connection.execute(text("CREATE SCHEMA pos;"))
-        # Here you should apply migrations
-        # For now, we'll rely on the app to create tables or assume they exist
+        with connection.begin():
+            for table in reversed(tables):
+                # We use the 'pos' schema explicitly.
+                connection.execute(text(f'TRUNCATE TABLE pos."{table.name}" RESTART IDENTITY CASCADE;'))
     yield
 
 # --- Auth Fixtures ---
-@pytest.fixture(scope="module")
-def registered_user():
+@pytest.fixture(scope="function")
+def registered_user(setup_database):
     """Register a new user and return their data."""
     url = f"{BASE_URL}/auth/register"
     user_data = {
@@ -40,7 +52,7 @@ def registered_user():
     assert response.status_code == 201
             return response.json()
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def auth_token(registered_user):
     """Log in the registered user and return the auth token."""
     url = f"{BASE_URL}/auth/login"
@@ -49,7 +61,35 @@ def auth_token(registered_user):
     assert response.status_code == 200
     return response.json()["access_token"]
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
+def admin_user_token():
+    """
+    Register an admin user and return their auth token.
+    This creates a separate user from the default patient user.
+    """
+    # Register Admin User
+    url = f"{BASE_URL}/auth/register"
+    admin_email = f"admin_{uuid.uuid4()}@example.com"
+    user_data = {
+        "email": admin_email,
+        "password": USER_PASSWORD,
+        "first_name": "Admin",
+        "last_name": "User",
+        "role": "ADMIN"
+    }
+    response = requests.post(url, json=user_data)
+    assert response.status_code == 201
+    admin_user = response.json()
+
+    # Login Admin User
+    login_url = f"{BASE_URL}/auth/login"
+    login_data = {"username": admin_email, "password": USER_PASSWORD}
+    response = requests.post(login_url, data=login_data)
+    assert response.status_code == 200
+    return response.json()["access_token"]
+
+
+@pytest.fixture(scope="function")
 def test_business(auth_token, registered_user):
     """Create a business for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -59,7 +99,7 @@ def test_business(auth_token, registered_user):
     }
     response = requests.post(f"{BASE_URL}/businesses/", headers=headers, json=business_data)
     assert response.status_code == 201
-        return response.json()
+    return response.json()
 
 # --- API Tests ---
 def test_get_current_user(auth_token):
@@ -116,7 +156,7 @@ def test_delete_business(auth_token, test_business):
     assert response.status_code == 404
 
 # --- Business Location Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_business_location(auth_token, test_business):
     """Create a business location for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -179,7 +219,7 @@ def test_delete_business_location(auth_token, test_business_location):
     assert response.status_code == 404
 
 # --- Product Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_product(auth_token, test_business):
     """Create a product for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -232,9 +272,9 @@ def test_update_product(auth_token, test_product):
     assert response.status_code == 200
     assert response.json()["price"] == 12.50
 
-def test_delete_product(auth_token, test_product):
-    """Test deleting a product."""
-    headers = {"Authorization": f"Bearer {auth_token}"}
+def test_delete_product(admin_user_token, test_product):
+    """Test deleting a product (requires admin)."""
+    headers = {"Authorization": f"Bearer {admin_user_token}"}
     product_id = test_product["id"]
     response = requests.delete(f"{BASE_URL}/products/{product_id}", headers=headers)
     assert response.status_code == 200
@@ -243,7 +283,7 @@ def test_delete_product(auth_token, test_product):
     assert response.status_code == 404
 
 # --- Customer Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_customer(auth_token, test_business):
     """Create a customer for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -258,9 +298,9 @@ def test_customer(auth_token, test_business):
     assert response.status_code == 201
     return response.json()
 
-def test_create_customer(auth_token, test_business):
-    """Test creating a new customer."""
-    headers = {"Authorization": f"Bearer {auth_token}"}
+def test_create_customer(admin_user_token, test_business):
+    """Test creating a new customer (requires admin)."""
+    headers = {"Authorization": f"Bearer {admin_user_token}"}
     customer_data = {
         "first_name": "Jane",
         "last_name": "Doe",
@@ -295,9 +335,9 @@ def test_update_customer(auth_token, test_customer):
     assert response.status_code == 200
     assert response.json()["phone"] == "0987654321"
 
-def test_delete_customer(auth_token, test_customer):
-    """Test deleting a customer."""
-    headers = {"Authorization": f"Bearer {auth_token}"}
+def test_delete_customer(admin_user_token, test_customer):
+    """Test deleting a customer (requires admin)."""
+    headers = {"Authorization": f"Bearer {admin_user_token}"}
     customer_id = test_customer["id"]
     response = requests.delete(f"{BASE_URL}/customers/{customer_id}", headers=headers)
     assert response.status_code == 200
@@ -306,7 +346,7 @@ def test_delete_customer(auth_token, test_customer):
     assert response.status_code == 404
 
 # --- Inventory Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_inventory_item(auth_token, test_business, test_product, test_business_location):
     """Create an inventory item for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -372,7 +412,7 @@ def test_delete_inventory_item(auth_token, test_inventory_item):
     assert response.status_code == 404
 
 # --- Subscription Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_subscription_product(auth_token):
     """Create a subscription product for testing."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -385,7 +425,7 @@ def test_subscription_product(auth_token):
     assert response.status_code == 201
     return response.json()
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_price(auth_token, test_subscription_product):
     """Create a price for the subscription product."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -421,7 +461,7 @@ def test_get_prices(auth_token):
 # For now, we test the product and price endpoints.
 
 # --- Patient Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_patient(auth_token):
     """Create a patient for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -488,7 +528,7 @@ def test_delete_patient(auth_token, test_patient):
     assert response.status_code == 404
 
 # --- Appointment Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_appointment(auth_token, registered_user, test_patient):
     """Create an appointment for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
@@ -532,7 +572,7 @@ def test_update_appointment(auth_token, test_appointment):
     assert response.json()["status"] == "COMPLETED"
 
 # --- Chat Fixtures and Tests ---
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_conversation(auth_token, test_appointment):
     """Create a conversation for testing purposes."""
     headers = {"Authorization": f"Bearer {auth_token}"}
