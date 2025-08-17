@@ -4,6 +4,7 @@ from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
 from app.models.appointment import AppointmentStatus, DocumentType # Import enums
+from .patient import Patient # Import Patient schema
 
 # Document Schemas
 class AppointmentDocumentBase(BaseModel):
@@ -26,27 +27,41 @@ class AppointmentDocument(AppointmentDocumentBase):
         from_attributes = True
 
 # Appointment Schemas
+# Shared properties
 class AppointmentBase(BaseModel):
-    doctor_id: UUID
     patient_id: UUID
-    status: Optional[AppointmentStatus] = AppointmentStatus.PENDING_PAYMENT
     appointment_datetime: datetime
+    status: AppointmentStatus = AppointmentStatus.SCHEDULED
     reason: Optional[str] = None
-    stripe_payment_intent_id: Optional[str] = None
+    notes: Optional[str] = None
 
+# Properties to receive on appointment creation
 class AppointmentCreate(AppointmentBase):
+    # doctor_id will be inferred from the token
     pass
 
-class AppointmentUpdate(BaseModel):
-    status: Optional[AppointmentStatus] = None
-    appointment_datetime: Optional[datetime] = None
-    reason: Optional[str] = None
+# Internal schema for service layer
+class AppointmentCreateInternal(AppointmentBase):
+    doctor_id: UUID
 
-class Appointment(AppointmentBase):
+# Properties to receive on appointment update
+class AppointmentUpdate(BaseModel):
+    appointment_datetime: Optional[datetime] = None
+    status: Optional[AppointmentStatus] = None
+    reason: Optional[str] = None
+    notes: Optional[str] = None
+
+# Properties shared by models in DB
+class AppointmentInDBBase(AppointmentBase):
     id: UUID
+    doctor_id: UUID
     created_at: datetime
     updated_at: Optional[datetime] = None
-    documents: List[AppointmentDocument] = []
+    patient: Patient # Nest patient details
 
     class Config:
         from_attributes = True
+
+# Properties to return to client
+class Appointment(AppointmentInDBBase):
+    pass

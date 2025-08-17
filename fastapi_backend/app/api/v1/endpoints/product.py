@@ -39,19 +39,8 @@ def read_products(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: DBUser = Depends(get_current_active_user)
 ):
     product_service = ProductService(db)
-    business_service = BusinessService(db)
-
-    # Check if the user owns the associated business
-    business = business_service.get_business(business_id)
-    if business is None:
-        raise HTTPException(status_code=404, detail="Business not found")
-    
-    if str(business.owner_id) != str(current_user.id) and current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view products for this business")
-
     products = product_service.get_products_by_business(business_id=business_id, skip=skip, limit=limit)
     return products
 
@@ -59,23 +48,11 @@ def read_products(
 def read_product(
     product_id: UUID,
     db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_active_user)
 ):
     product_service = ProductService(db)
-    business_service = BusinessService(db)
-
     db_product = product_service.get_product(product_id=product_id)
     if db_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    
-    # Check if the user owns the associated business
-    business = business_service.get_business(db_product.business_id)
-    if business is None:
-        raise HTTPException(status_code=404, detail="Associated business not found")
-
-    if str(business.owner_id) != str(current_user.id) and current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this product")
-
     return db_product
 
 @router.put("/{product_id}", response_model=Product)

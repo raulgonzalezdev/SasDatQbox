@@ -5,7 +5,7 @@ from uuid import UUID
 from typing import List
 
 from app.dependencies import get_db, get_current_active_user
-from app.schemas.patient import Patient, PatientCreate, PatientUpdate
+from app.schemas.patient import Patient, PatientCreate, PatientUpdate, PatientCreateInternal
 from app.services.patient_service import PatientService
 from app.models.user import User as DBUser, UserRole
 
@@ -20,11 +20,17 @@ def create_patient(
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
-    # Only ADMIN or the user themselves can create a patient profile
-    if str(current_user.id) != str(patient_in.user_id) and current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Forbidden")
-    service = PatientService(db)
-    return service.create_patient(patient_in=patient_in)
+    """
+    Create a new patient for the current user.
+    """
+    patient_service = PatientService(db)
+    
+    patient_internal_in = PatientCreateInternal(
+        **patient_in.model_dump(),
+        user_id=current_user.id
+    )
+    
+    return patient_service.create_patient(patient_in=patient_internal_in)
 
 @router.get("/", response_model=List[Patient])
 def read_patients(

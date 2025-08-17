@@ -1,37 +1,32 @@
 'use client';
 
-import { useState }s from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { TextField, Button, Typography, Box } from '@mui/material';
-import { useLogin } from '@/lib/hooks/useAuth';
+import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
+import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 
 const formSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(1, 'La contraseña es requerida'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function PasswordSignIn() {
-  const router = useRouter();
+  const { login, isLoggingIn } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
-  const loginMutation = useLogin();
-
-  const onSubmit = async (data: FormData) => {
-    try {
-      await loginMutation.mutateAsync(data);
-      router.push('/account'); // Redirect to account page on successful login
-    } catch (error) {
-      console.error('Login failed:', error);
-      // Error message is handled by the mutation's error state and displayed below
-    }
+  const onSubmit = (data: FormData) => {
+    const payload = {
+      username: data.email,
+      password: data.password,
+    };
+    login({ payload });
   };
 
   return (
@@ -41,48 +36,45 @@ export default function PasswordSignIn() {
         required
         fullWidth
         id="email"
-        label="Email Address"
+        label="Correo Electrónico"
         autoComplete="email"
         autoFocus
         {...register('email')}
         error={!!errors.email}
         helperText={errors.email?.message}
+        disabled={isLoggingIn}
       />
       <TextField
         margin="normal"
         required
         fullWidth
         name="password"
-        label="Password"
+        label="Contraseña"
         type="password"
         id="password"
         autoComplete="current-password"
         {...register('password')}
         error={!!errors.password}
         helperText={errors.password?.message}
+        disabled={isLoggingIn}
       />
-      {loginMutation.error && (
-        <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-          Error: {loginMutation.error.message}
-        </Typography>
-      )}
       <Button
         type="submit"
         fullWidth
         variant="contained"
         sx={{ mt: 3, mb: 2 }}
-        disabled={loginMutation.isPending}
+        disabled={isLoggingIn}
       >
-        {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+        {isLoggingIn ? <CircularProgress size={24} /> : 'Iniciar Sesión'}
       </Button>
       <Typography variant="body2" sx={{ mt: 2 }}>
         <Link href="/signin/forgot_password" passHref>
-          Forgot your password?
+          ¿Olvidaste tu contraseña?
         </Link>
       </Typography>
       <Typography variant="body2" sx={{ mt: 1 }}>
         <Link href="/signin/signup" passHref>
-          Don't have an account? Sign up
+          ¿No tienes una cuenta? Regístrate
         </Link>
       </Typography>
     </Box>

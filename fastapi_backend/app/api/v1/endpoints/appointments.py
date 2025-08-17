@@ -2,12 +2,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
-from typing import List
+from typing import List, Any
 
 from app.dependencies import get_db, get_current_active_user
 from app.schemas.appointment import (
     Appointment, AppointmentCreate, AppointmentUpdate,
-    AppointmentDocument, AppointmentDocumentCreate, AppointmentDocumentUpdate
+    AppointmentDocument, AppointmentDocumentCreate, AppointmentDocumentUpdate,
+    AppointmentCreateInternal
 )
 from app.services.appointment_service import AppointmentService
 from app.models.user import User as DBUser, UserRole
@@ -23,26 +24,27 @@ def create_appointment(
     appointment_in: AppointmentCreate,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
-):
-    # Any authenticated user can create an appointment for themselves
-    if str(current_user.id) != str(appointment_in.patient_id) and current_user.role != UserRole.ADMIN:
-         raise HTTPException(status_code=403, detail="Forbidden")
+) -> Any:
+    """
+    Create a new appointment for the current user (doctor).
+    """
     service = AppointmentService(db)
-    return service.create_appointment(appointment_in=appointment_in)
+    appointment_internal = AppointmentCreateInternal(
+        **appointment_in.model_dump(),
+        doctor_id=current_user.id
+    )
+    return service.create_appointment(appointment_in=appointment_internal)
 
 @router.get("/", response_model=List[Appointment])
 def read_appointments(
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
     current_user: DBUser = Depends(get_current_active_user)
-):
+) -> Any:
+    """
+    Retrieve appointments for the current user.
+    """
     service = AppointmentService(db)
-    if current_user.role == UserRole.ADMIN:
-        return service.get_appointments(skip=skip, limit=limit)
-    # Non-admins can only see their own appointments
-    # This requires filtering logic in the service, which we'll add
-    raise HTTPException(status_code=501, detail="Not implemented for non-admins yet")
+    return service.get_appointments_by_user(user_id=current_user.id)
 
 @router.get("/{appointment_id}", response_model=Appointment)
 def read_appointment(

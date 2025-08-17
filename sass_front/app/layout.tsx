@@ -1,40 +1,67 @@
-import React from 'react';
-import { Metadata } from 'next';
+'use client';
+
+import { useState, useRef } from 'react';
+import { Toaster } from 'react-hot-toast';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { Box, Zoom } from '@mui/material';
 import Footer from '@/components/ui/Footer';
 import Navbar from '@/components/ui/Navbar';
-import { PropsWithChildren, Suspense } from 'react';
-import { getURL } from '@/utils/helpers';
+import { PropsWithChildren, Suspense } from 'react'; // Importar Suspense
 import MuiRegistry from '@/lib/MuiRegistry';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Box } from '@mui/material';
-import { Toaster } from 'react-hot-toast'; // Importar de react-hot-toast
+import FloatingChatButton from '@/components/ui/FloatingChatButton';
+import SupportChatPopover from '@/components/ui/Landing/SupportChatPopover';
 
 const queryClient = new QueryClient();
 
-const title = 'Next.js Subscription Starter';
-const description = 'A subscription starter kit built with Next.js, and Stripe.';
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [isChatOpen, setChatOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const chatButtonRef = useRef<HTMLButtonElement>(null);
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getURL()),
-  title: title,
-  description: description,
-  openGraph: {
-    title: title,
-    description: description
-  }
-};
+  const handleChatOpen = () => {
+    setAnchorEl(chatButtonRef.current);
+    setChatOpen(true);
+  };
 
-export default async function RootLayout({ children }: PropsWithChildren) {
+  const handleChatClose = () => {
+    setAnchorEl(null);
+    setChatOpen(false);
+  };
+
   return (
-    <html lang="en">
-      <body>
+    <html lang="es">
+      <body
+        style={{
+          margin: 0,
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh'
+        }}
+      >
         <QueryClientProvider client={queryClient}>
           <MuiRegistry>
-            <Navbar />
-            <Box component="main" id="skip" sx={{ minHeight: 'calc(100vh - 4rem)' }}>
-              {children}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh'
+              }}
+            >
+              <Navbar />
+              <Box component="main" sx={{ flexGrow: 1 }}>
+                {children}
+              </Box>
+              <Footer />
             </Box>
-            <Footer />
+            <Zoom in={!isChatOpen} unmountOnExit>
+                <FloatingChatButton ref={chatButtonRef} onClick={handleChatOpen} />
+            </Zoom>
+            <SupportChatPopover
+              open={isChatOpen}
+              onClose={handleChatClose}
+              anchorEl={anchorEl}
+            />
             <Suspense>
               <Toaster />
             </Suspense>

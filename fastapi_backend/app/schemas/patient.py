@@ -6,7 +6,6 @@ from datetime import date, datetime
 
 # Shared properties
 class PatientBase(BaseModel):
-    user_id: UUID
     first_name: str
     last_name: str
     date_of_birth: date
@@ -15,7 +14,12 @@ class PatientBase(BaseModel):
 
 # Properties to receive via API on creation
 class PatientCreate(PatientBase):
+    # user_id ya no es requerido aquí, se obtendrá del token
     pass
+
+# Nuevo schema para uso interno del servicio
+class PatientCreateInternal(PatientBase):
+    user_id: UUID
 
 # Properties to receive via API on update
 class PatientUpdate(BaseModel):

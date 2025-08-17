@@ -4,80 +4,91 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { TextField, Button, Typography, Box } from '@mui/material';
-import { useRegister } from '@/lib/hooks/useAuth';
+import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
+import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 
+// Esquema de validación con Zod
 const formSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  first_name: z.string().min(1, 'El nombre es requerido'),
+  last_name: z.string().min(1, 'El apellido es requerido'),
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function SignUp() {
-  const router = useRouter();
+  const { register: signup, isRegistering } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
-  const registerMutation = useRegister();
-
-  const onSubmit = async (data: FormData) => {
-    try {
-      await registerMutation.mutateAsync(data);
-      console.log('Registration successful!');
-      router.push('/signin'); // Redirect to signin page on successful registration
-    } catch (error) {
-      console.error('Registration failed:', error);
-      // Error message is handled by the mutation's error state and displayed below
-    }
+  const onSubmit = (data: FormData) => {
+    signup({ payload: data }); // Llamamos a la mutación con el formato correcto
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
-        margin="normal"
+        required
+        fullWidth
+        id="first_name"
+        label="Nombre"
+        autoComplete="given-name"
+        autoFocus
+        {...register('first_name')}
+        error={!!errors.first_name}
+        helperText={errors.first_name?.message}
+        disabled={isRegistering}
+      />
+      <TextField
+        required
+        fullWidth
+        id="last_name"
+        label="Apellido"
+        autoComplete="family-name"
+        {...register('last_name')}
+        error={!!errors.last_name}
+        helperText={errors.last_name?.message}
+        disabled={isRegistering}
+      />
+      <TextField
         required
         fullWidth
         id="email"
-        label="Email Address"
+        label="Correo Electrónico"
         autoComplete="email"
-        autoFocus
         {...register('email')}
         error={!!errors.email}
         helperText={errors.email?.message}
+        disabled={isRegistering}
       />
       <TextField
-        margin="normal"
         required
         fullWidth
         name="password"
-        label="Password"
+        label="Contraseña"
         type="password"
         id="password"
         autoComplete="new-password"
         {...register('password')}
         error={!!errors.password}
         helperText={errors.password?.message}
+        disabled={isRegistering}
       />
-      {registerMutation.error && (
-        <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-          Error: {registerMutation.error.message}
-        </Typography>
-      )}
       <Button
         type="submit"
         fullWidth
         variant="contained"
         sx={{ mt: 3, mb: 2 }}
-        disabled={registerMutation.isPending}
+        disabled={isRegistering}
       >
-        {registerMutation.isPending ? 'Signing Up...' : 'Sign Up'}
+        {isRegistering ? <CircularProgress size={24} /> : 'Crear Cuenta'}
       </Button>
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        <Link href="/signin/password_signin" passHref>
-          Already have an account? Sign in
+      <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+        <Link href="/signin">
+          ¿Ya tienes una cuenta? Inicia sesión
         </Link>
       </Typography>
     </Box>

@@ -8,6 +8,7 @@ import enum
 
 class AppointmentStatus(str, enum.Enum):
     PENDING_PAYMENT = "pending_payment"
+    SCHEDULED = "scheduled"
     ACTIVE = "active"
     COMPLETED = "completed"
     CANCELLED = "cancelled"

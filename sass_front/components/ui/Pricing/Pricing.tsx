@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Typography, Box, Card, CardContent, CardActions, Grid, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Button, Typography, Box, Card, CardContent, CardActions, Grid, ToggleButtonGroup, ToggleButton, Container, Chip } from '@mui/material';
+import Link from 'next/link';
 
 interface Product {
   id: string;
@@ -19,6 +20,7 @@ interface Price {
 
 interface ProductWithPrices extends Product {
   prices: Price[];
+  mostPopular?: boolean;
 }
 
 interface Subscription {
@@ -85,87 +87,92 @@ export default function Pricing({ user, products, subscription }: Props) {
     );
   } else {
     return (
-      <Box sx={{ py: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            Planes de Precios
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Empiece a construir gratis, luego añada un plan de sitio para salir en vivo.
-            Los planes de cuenta desbloquean características adicionales.
-          </Typography>
-          <ToggleButtonGroup
-            value={billingInterval}
-            exclusive
-            onChange={(event, newInterval) => {
-              if (newInterval !== null) {
-                setBillingInterval(newInterval);
-              }
-            }}
-            sx={{ mt: 4 }}
-          >
-            {intervals.includes('month') && (
-              <ToggleButton value="month">
-                Facturación Mensual
-              </ToggleButton>
-            )}
-            {intervals.includes('year') && (
-              <ToggleButton value="year">
-                Facturación Anual
-              </ToggleButton>
-            )}
-          </ToggleButtonGroup>
-        </Box>
-        <Grid container spacing={4} justifyContent="center">
-          {products.map((product) => {
-            const price = product?.prices?.find(
-              (price) => price.interval === billingInterval
-            );
-            if (!price) return null;
-            const priceString = new Intl.NumberFormat('es-ES', {
-              style: 'currency',
-              currency: price.currency!,
-              minimumFractionDigits: 0
-            }).format((price?.unit_amount || 0) / 100);
-            return (
-              <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    border: subscription && product.id === subscription?.id ? '2px solid primary.main' : 'none',
-                  }}
-                >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h5" component="h2" gutterBottom>
-                      {product.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {product.description}
-                    </Typography>
-                    <Typography variant="h4" component="p" sx={{ mt: 2 }}>
-                      {priceString}
-                      <Typography component="span" variant="subtitle1" color="text.secondary">
-                        /{billingInterval === 'month' ? 'mes' : 'año'}
+      <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography variant="h3" component="h1" gutterBottom>
+              Planes de Precios Flexibles
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Elige el plan que mejor se adapte a tu práctica médica. Sin compromisos a largo plazo.
+            </Typography>
+            {/* El ToggleButton para mensual/anual puede quedar comentado si solo ofrecemos mensual por ahora */}
+          </Box>
+          <Grid container spacing={4} justifyContent="center" alignItems="stretch">
+            {products.map((product) => {
+              const price = product?.prices?.find(
+                (p) => p.interval === billingInterval
+              );
+              if (!price) return null;
+
+              const isContactForPrice = price.unit_amount === null;
+              const priceString = isContactForPrice
+                ? 'Contactar'
+                : new Intl.NumberFormat('es-ES', {
+                    style: 'currency',
+                    currency: price.currency!,
+                    minimumFractionDigits: 0
+                  }).format((price.unit_amount || 0) / 100);
+
+              return (
+                <Grid item key={product.id} xs={12} md={4}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      border: product.mostPopular ? 2 : 0,
+                      borderColor: 'primary.main',
+                      position: 'relative',
+                    }}
+                  >
+                    {product.mostPopular && (
+                      <Chip 
+                        label="Más Popular" 
+                        color="primary" 
+                        sx={{ 
+                          position: 'absolute', 
+                          top: -12, 
+                          left: '50%', 
+                          transform: 'translateX(-50%)',
+                          fontWeight: 'bold',
+                        }} 
+                      />
+                    )}
+                    <CardContent sx={{ flexGrow: 1, pt: product.mostPopular ? 4 : 2 }}>
+                      <Typography variant="h5" component="h2" gutterBottom>
+                        {product.name}
                       </Typography>
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={() => handleStripeCheckout(price)}
-                      disabled={priceIdLoading === price.id}
-                    >
-                      {subscription && product.id === subscription?.id ? 'Gestionar' : 'Suscribirse'}
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
+                      <Typography variant="body1" color="text.secondary" sx={{ minHeight: 60 }}>
+                        {product.description}
+                      </Typography>
+                      <Typography variant="h4" component="p" sx={{ mt: 2 }}>
+                        {priceString}
+                        {!isContactForPrice && (
+                          <Typography component="span" variant="subtitle1" color="text.secondary">
+                            /mes
+                          </Typography>
+                        )}
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={() => !isContactForPrice && handleStripeCheckout(price)}
+                        href={isContactForPrice ? '/contact' : undefined}
+                        component={isContactForPrice ? Link : 'button'}
+                        disabled={priceIdLoading === price.id}
+                      >
+                        {isContactForPrice ? 'Contactar Ventas' : (subscription && product.id === subscription?.id ? 'Gestionar' : 'Suscribirse')}
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Container>
       </Box>
     );
   }

@@ -1,5 +1,5 @@
-from typing import Generator
-from fastapi import Depends, HTTPException, status
+from typing import Generator, Optional
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -9,7 +9,10 @@ from app.models.user import User as DBUser # Alias to avoid conflict with pydant
 from app.core.config import settings
 from app.schemas.user import UserRole # Import UserRole
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login") # Adjust tokenUrl as needed
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/auth/login",
+    auto_error=False  # No lanzar error automáticamente para poder manejarlo
+)
 
 def get_db() -> Generator:
     db = SessionLocal()
@@ -18,14 +21,28 @@ def get_db() -> Generator:
     finally:
         db.close()
 
+def get_token(request: Request, token: Optional[str] = Depends(reusable_oauth2)) -> Optional[str]:
+    """
+    Intenta obtener el token de la cookie 'access_token'.
+    Si no está, usa el flujo de OAuth2 (cabecera Authorization).
+    """
+    cookie_token = request.cookies.get("access_token")
+    if cookie_token:
+        # FastAPI espera que el token no tenga el prefijo 'Bearer '
+        return cookie_token.replace("Bearer ", "")
+    return token
+
 async def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    db: Session = Depends(get_db), token: str = Depends(get_token)
 ) -> DBUser:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if token is None:
+        raise credentials_exception
+        
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str = payload.get("sub")

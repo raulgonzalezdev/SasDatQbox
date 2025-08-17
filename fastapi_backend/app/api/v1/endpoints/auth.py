@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -45,8 +45,9 @@ def register_user(
             detail="An error occurred during user creation.",
         )
 
-@router.post("/login", response_model=Token)
-async def login_for_access_token( # Made async
+@router.post("/login")
+async def login_for_access_token( 
+    response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db)
 ):
@@ -61,13 +62,29 @@ async def login_for_access_token( # Made async
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": str(user.id)}, # Use user.id as sub
+        data={"sub": str(user.id)}, 
         expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        secure=True, # En producción, asegúrate de que sea True
+        samesite='lax', # o 'strict'
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/"
+    )
+    
+    return {"message": "Login successful"}
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="access_token", path="/")
+    return {"message": "Logout successful"}
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me( # Made async
-    current_user: Annotated[UserResponse, Depends(get_current_user)] # Use UserResponse
+async def read_users_me( 
+    current_user: Annotated[UserResponse, Depends(get_current_user)] 
 ):
     return current_user

@@ -70,10 +70,28 @@ def read_inventory_item(
     current_user: DBUser = Depends(get_current_active_user)
 ):
     inventory_service = InventoryService(db)
+    business_service = BusinessService(db)
+
     item = inventory_service.get_inventory_item(item_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Inventory item not found")
-    # Add authorization check if needed
+    
+    # --- INICIO DE LA AUTORIZACIÓN ---
+    location = business_service.get_business_location(item.location_id)
+    if not location:
+        raise HTTPException(status_code=404, detail="Associated location not found")
+        
+    business = business_service.get_business(location.business_id)
+    if not business:
+        raise HTTPException(status_code=404, detail="Associated business not found")
+
+    if str(business.owner_id) != str(current_user.id) and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Not authorized to view this inventory item"
+        )
+    # --- FIN DE LA AUTORIZACIÓN ---
+
     return item
 
 @router.get("/by_location_product/", response_model=Inventory)
