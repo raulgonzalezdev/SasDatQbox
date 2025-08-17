@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 # Appointments
-@router.post("/appointments/", response_model=Appointment, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Appointment, status_code=status.HTTP_201_CREATED)
 def create_appointment(
     appointment_in: AppointmentCreate,
     db: Session = Depends(get_db),
@@ -30,7 +30,7 @@ def create_appointment(
     service = AppointmentService(db)
     return service.create_appointment(appointment_in=appointment_in)
 
-@router.get("/appointments/", response_model=List[Appointment])
+@router.get("/", response_model=List[Appointment])
 def read_appointments(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -44,7 +44,7 @@ def read_appointments(
     # This requires filtering logic in the service, which we'll add
     raise HTTPException(status_code=501, detail="Not implemented for non-admins yet")
 
-@router.get("/appointments/{appointment_id}", response_model=Appointment)
+@router.get("/{appointment_id}", response_model=Appointment)
 def read_appointment(
     appointment_id: UUID,
     db: Session = Depends(get_db),
@@ -58,7 +58,7 @@ def read_appointment(
         raise HTTPException(status_code=403, detail="Forbidden")
     return appointment
 
-@router.put("/appointments/{appointment_id}", response_model=Appointment)
+@router.put("/{appointment_id}", response_model=Appointment)
 def update_appointment(
     appointment_id: UUID,
     appointment_in: AppointmentUpdate,
@@ -74,7 +74,7 @@ def update_appointment(
     return service.update_appointment(appointment_id=appointment_id, appointment_in=appointment_in)
 
 # Appointment Documents
-@router.post("/appointment-documents/", response_model=AppointmentDocument, status_code=status.HTTP_201_CREATED)
+@router.post("/documents/", response_model=AppointmentDocument, status_code=status.HTTP_201_CREATED)
 def create_appointment_document(
     doc_in: AppointmentDocumentCreate,
     db: Session = Depends(get_db),
@@ -87,7 +87,7 @@ def create_appointment_document(
         raise HTTPException(status_code=403, detail="Forbidden")
     return service.create_appointment_document(doc_in=doc_in)
 
-@router.get("/appointments/{appointment_id}/documents/", response_model=List[AppointmentDocument])
+@router.get("/{appointment_id}/documents/", response_model=List[AppointmentDocument])
 def read_appointment_documents(
     appointment_id: UUID,
     db: Session = Depends(get_db),

@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from app.models.chat import Conversation, Message, ConversationParticipant
 from app.models.user import User
-from app.schemas.chat import ConversationCreate, MessageCreate
+from app.schemas.chat import ConversationCreate, MessageCreateInternal
 
 class ChatService:
     def __init__(self, db: Session):
@@ -39,7 +39,7 @@ class ChatService:
     def get_user_conversations(self, user_id: UUID) -> List[Conversation]:
         return self.db.query(Conversation).join(Conversation.participants).filter(User.id == user_id).all()
 
-    def create_message(self, message_in: MessageCreate) -> Message:
+    def create_message(self, message_in: MessageCreateInternal) -> Message:
         db_message = Message(**message_in.model_dump())
         self.db.add(db_message)
         self.db.commit()

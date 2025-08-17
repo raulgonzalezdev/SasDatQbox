@@ -21,9 +21,7 @@ def create_customer(
     current_user: DBUser = Depends(get_current_active_admin) # Only admins can create customers
 ):
     customer_service = CustomerService(db)
-    db_customer = customer_service.get_customer(customer.id)
-    if db_customer:
-        raise HTTPException(status_code=400, detail="Customer with this ID already exists")
+    # The service/db layer will handle creation logic and potential IntegrityErrors
     return customer_service.create_customer(customer)
 
 @router.get("/", response_model=List[Customer])

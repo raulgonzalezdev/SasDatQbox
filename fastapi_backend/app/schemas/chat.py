@@ -12,7 +12,10 @@ class MessageBase(BaseModel):
 
 class MessageCreate(MessageBase):
     conversation_id: UUID
-    sender_id: UUID # In a real app, this would likely come from the authenticated user
+    # sender_id is now handled by the service/endpoint from the current_user
+
+class MessageCreateInternal(MessageCreate):
+    sender_id: UUID
 
 class Message(MessageBase):
     id: UUID

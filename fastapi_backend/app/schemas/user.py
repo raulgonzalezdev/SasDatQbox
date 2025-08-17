@@ -12,8 +12,8 @@ class UserRole(str, enum.Enum):
 
 # Shared properties
 class UserBase(BaseModel):
-    email: Optional[EmailStr] = None
-    is_active: bool = True
+    email: EmailStr
+    is_active: Optional[bool] = True
     is_superuser: bool = False
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -39,7 +39,7 @@ class UserUpdate(UserBase):
 
 # Properties shared by models stored in DB
 class UserInDBBase(UserBase):
-    id: Optional[UUID] = None
+    id: UUID
     created_at: datetime
     updated_at: Optional[datetime] = None
     hashed_password: str

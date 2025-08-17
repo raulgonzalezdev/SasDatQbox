@@ -22,6 +22,7 @@ class Business(Base):
     owner = relationship("User")
     locations = relationship("BusinessLocation", back_populates="business")
     products = relationship("Product", back_populates="business")
+    customers = relationship("Customer", back_populates="business")
 
 class BusinessLocation(Base):
     __tablename__ = "business_locations"

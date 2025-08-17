@@ -14,7 +14,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.post("/patients/", response_model=Patient, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Patient, status_code=status.HTTP_201_CREATED)
 def create_patient(
     patient_in: PatientCreate,
     db: Session = Depends(get_db),
@@ -26,7 +26,7 @@ def create_patient(
     service = PatientService(db)
     return service.create_patient(patient_in=patient_in)
 
-@router.get("/patients/", response_model=List[Patient])
+@router.get("/", response_model=List[Patient])
 def read_patients(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -39,7 +39,7 @@ def read_patients(
     service = PatientService(db)
     return service.get_patients(skip=skip, limit=limit)
 
-@router.get("/patients/{patient_id}", response_model=Patient)
+@router.get("/{patient_id}", response_model=Patient)
 def read_patient(
     patient_id: UUID,
     db: Session = Depends(get_db),
@@ -54,7 +54,7 @@ def read_patient(
         raise HTTPException(status_code=403, detail="Forbidden")
     return patient
 
-@router.put("/patients/{patient_id}", response_model=Patient)
+@router.put("/{patient_id}", response_model=Patient)
 def update_patient(
     patient_id: UUID,
     patient_in: PatientUpdate,
@@ -70,7 +70,7 @@ def update_patient(
         raise HTTPException(status_code=403, detail="Forbidden")
     return service.update_patient(patient_id=patient_id, patient_in=patient_in)
 
-@router.delete("/patients/{patient_id}", response_model=Patient)
+@router.delete("/{patient_id}", response_model=Patient)
 def delete_patient(
     patient_id: UUID,
     db: Session = Depends(get_db),

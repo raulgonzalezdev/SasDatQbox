@@ -11,14 +11,15 @@ class SubscriptionProduct(Base):
     __table_args__ = {'schema': 'pos'}
     id = Column(String, primary_key=True) # Product ID from Stripe
     active = Column(Boolean)
-    name = Column(String)
-    description = Column(String)
-    image = Column(String)
-    metadata_ = Column("metadata", JSON)
+    name = Column(String, nullable=True)
+    description = Column(String, nullable=True)
+    image = Column(String, nullable=True)
+    metadata_ = Column("metadata", JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    prices = relationship("Price", back_populates="product")
+    # Relationships
+    prices = relationship("Price", back_populates="product", lazy="selectin")
 
 class PricingType(enum.Enum):
     one_time = "one_time"
@@ -32,10 +33,12 @@ class PricingPlanInterval(enum.Enum):
 
 class Price(Base):
     __tablename__ = "prices"
-    __table_args__ = {'schema': 'pos'}
-    id = Column(String, primary_key=True) # Price ID from Stripe
-    product_id = Column(String, ForeignKey('pos.subscription_products.id'))
-    active = Column(Boolean)
+    __table_args__ = {"schema": "pos"}
+
+    id = Column(String, primary_key=True)
+    product_id = Column(String, ForeignKey("pos.subscription_products.id"))
+    product = relationship("SubscriptionProduct", back_populates="prices", lazy="selectin")
+    active = Column(Boolean, nullable=True)
     description = Column(String)
     unit_amount = Column(BigInteger)
     currency = Column(String(3))
@@ -46,8 +49,6 @@ class Price(Base):
     metadata_ = Column("metadata", JSON)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-    product = relationship("SubscriptionProduct", back_populates="prices")
 
 class SubscriptionStatus(enum.Enum):
     trialing = "trialing"

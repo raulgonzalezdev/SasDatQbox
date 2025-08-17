@@ -1,7 +1,8 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from enum import Enum
 
 # Pydantic models for Subscription Status
 class SubscriptionStatus:
@@ -33,31 +34,33 @@ class SubscriptionProductBase(BaseModel):
     name: str
     description: Optional[str] = None
     image: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="metadata_")
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 class PriceBase(BaseModel):
     id: str
     product_id: str
     active: bool
-    unit_amount: Optional[int] = None
+    unit_amount: int
     currency: str
     type: str
     interval: Optional[str] = None
     interval_count: Optional[int] = None
     trial_period_days: Optional[int] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="metadata_")
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 class SubscriptionBase(BaseModel):
     id: UUID
     user_id: UUID
     status: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="metadata_")
     price_id: Optional[str] = None
     quantity: Optional[int] = None
     cancel_at_period_end: bool
@@ -75,10 +78,15 @@ class SubscriptionBase(BaseModel):
 
 # Models with relationships
 class SubscriptionProduct(SubscriptionProductBase):
-    prices: List['Price'] = []
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    prices: List["Price"] = []
 
 class Price(PriceBase):
-    product: 'SubscriptionProduct'
+    id: str
+    product: "SubscriptionProduct"
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
 class Subscription(SubscriptionBase):
     price: Optional['Price'] = None
@@ -90,13 +98,13 @@ class SubscriptionProductCreate(SubscriptionProductBase):
 class PriceCreate(PriceBase):
     pass
 
-class SubscriptionCreate(SubscriptionBase):
+class SubscriptionCreate(BaseModel):
 
     pass
 
 class SubscriptionUpdate(BaseModel):
     status: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="metadata_")
     price_id: Optional[str] = None
     quantity: Optional[int] = None
     cancel_at_period_end: Optional[bool] = None
@@ -105,3 +113,22 @@ class SubscriptionUpdate(BaseModel):
 SubscriptionProduct.model_rebuild()
 Price.model_rebuild()
 Subscription.model_rebuild()
+
+# Schemas to break recursion
+class PriceResponse(PriceBase):
+    id: str
+    product_id: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class SubscriptionProductResponse(SubscriptionProductBase):
+    id: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    prices: List[PriceResponse] = []
+
+    class Config:
+        from_attributes = True

@@ -1,19 +1,28 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 # Shared properties
 class CustomerBase(BaseModel):
+    first_name: str
+    last_name: str
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    business_id: UUID
+    user_id: UUID # The user who is creating/managing this customer
     stripe_customer_id: Optional[str] = None
 
 # Properties to receive via API on creation
 class CustomerCreate(CustomerBase):
-    id: UUID # Customer ID is linked to User ID
+    pass
 
 # Properties to receive via API on update
-class CustomerUpdate(CustomerBase):
-    pass # No specific update fields beyond base for now
+class CustomerUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
 
 # Properties shared by models stored in DB
 class CustomerInDBBase(CustomerBase):

@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models.user import User as DBUser, UserRole
 from app.schemas.user import User
-from app.services.user_service import user_service
+from app.services.user_service import user_service # Import the already instantiated service
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
@@ -35,7 +35,9 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = user_service.get(db, id=token_data.sub)
+
+    user = user_service.get(db, id=token_data["sub"])
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user

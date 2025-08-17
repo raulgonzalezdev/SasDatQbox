@@ -5,12 +5,11 @@ from uuid import UUID
 from typing import List
 
 from app.dependencies import get_db, get_current_active_user
-from app.schemas.chat import Conversation, ConversationCreate, Message, MessageCreate
+from app.schemas.chat import Conversation, ConversationCreate, Message, MessageCreate, MessageCreateInternal
 from app.services.chat_service import ChatService
 from app.models.user import User as DBUser
 
 router = APIRouter(
-    prefix="/chat",
     tags=["Chat"],
     responses={404: {"description": "Not found"}},
 )
@@ -66,13 +65,17 @@ def send_message(
     """
     Send a message in a conversation.
     """
-    if current_user.id != message_in.sender_id:
-        raise HTTPException(status_code=403, detail="Sender ID must match current user")
-
     service = ChatService(db)
-    # Check if user is a participant
-    conversation = service.get_conversation(message_in.conversation_id)
-    if not conversation or current_user not in conversation.participants:
-        raise HTTPException(status_code=403, detail="Not authorized to send messages in this conversation")
     
-    return service.create_message(message_in=message_in)
+    # Check if user is a participant before creating the message
+    conversation = service.get_conversation(message_in.conversation_id)
+    if not conversation or not any(p.id == current_user.id for p in conversation.participants):
+        raise HTTPException(status_code=403, detail="Not authorized to send messages in this conversation")
+
+    # Create the internal message schema with the sender_id from the authenticated user
+    message_internal = MessageCreateInternal(
+        **message_in.model_dump(),
+        sender_id=current_user.id
+    )
+    
+    return service.create_message(message_in=message_internal)

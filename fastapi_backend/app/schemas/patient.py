@@ -1,12 +1,16 @@
 
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any, Dict
 from uuid import UUID
-from datetime import datetime
+from datetime import date, datetime
 
 # Shared properties
 class PatientBase(BaseModel):
     user_id: UUID
+    first_name: str
+    last_name: str
+    date_of_birth: date
+    contact_info: Optional[Dict[str, Any]] = None
     medical_history: Optional[str] = None
 
 # Properties to receive via API on creation
@@ -15,6 +19,10 @@ class PatientCreate(PatientBase):
 
 # Properties to receive via API on update
 class PatientUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    contact_info: Optional[Dict[str, Any]] = None
     medical_history: Optional[str] = None
 
 # Properties shared by models stored in DB
