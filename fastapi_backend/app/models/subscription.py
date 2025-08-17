@@ -6,12 +6,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
-class Customer(Base):
-    __tablename__ = "customers"
-    __table_args__ = {'schema': 'pos'}
-    id = Column(UUID(as_uuid=True), ForeignKey('pos.users.id'), primary_key=True)
-    stripe_customer_id = Column(String)
-
 class SubscriptionProduct(Base):
     __tablename__ = "subscription_products"
     __table_args__ = {'schema': 'pos'}
@@ -21,6 +15,8 @@ class SubscriptionProduct(Base):
     description = Column(String)
     image = Column(String)
     metadata_ = Column("metadata", JSON)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 class PricingType(enum.Enum):
     one_time = "one_time"
@@ -46,6 +42,8 @@ class Price(Base):
     interval_count = Column(Integer)
     trial_period_days = Column(Integer)
     metadata_ = Column("metadata", JSON)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 class SubscriptionStatus(enum.Enum):
     trialing = "trialing"
@@ -67,7 +65,8 @@ class Subscription(Base):
     price_id = Column(String, ForeignKey('pos.prices.id'))
     quantity = Column(Integer)
     cancel_at_period_end = Column(Boolean)
-    created = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     current_period_start = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     current_period_end = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     ended_at = Column(DateTime(timezone=True))

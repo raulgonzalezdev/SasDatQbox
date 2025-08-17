@@ -1,20 +1,22 @@
 from fastapi import FastAPI
-from app.api.v1.endpoints import auth
-from app.api.endpoints import users # Import the new users router
-from app.api.endpoints import businesses # Import the new businesses router
-from app.api.endpoints import customers # Import the new customers router
+from app.api.v1.endpoints import auth, users, businesses, customers, product, inventory, stock_transfer, subscription
 
 app = FastAPI(
     title="SasDatQbox API",
     description="API para el sistema SasDatQbox, incluyendo autenticación, gestión de negocios y suscripciones.",
-    version="0.1.0"
+    version="1.0.0"
 )
 
+# API v1 Routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
-app.include_router(users.router, prefix="/api/v1", tags=["Users"])
-app.include_router(businesses.router, prefix="/api/v1", tags=["Businesses"])
-app.include_router(customers.router, prefix="/api/v1", tags=["Customers"]) # Include the customers router
+app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+app.include_router(businesses.router, prefix="/api/v1/businesses", tags=["Businesses"])
+app.include_router(customers.router, prefix="/api/v1/customers", tags=["Customers"])
+app.include_router(product.router, prefix="/api/v1/products", tags=["Products"])
+app.include_router(inventory.router, prefix="/api/v1/inventory", tags=["Inventory"])
+app.include_router(stock_transfer.router, prefix="/api/v1", tags=["Stock Transfers"])
+app.include_router(subscription.router, prefix="/api/v1/subscriptions", tags=["Subscriptions"])
 
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"message": "Bienvenido a la API de SasDatQbox"}
+    return {"message": "Bienvenido a la API de SasDatQbox v1"}

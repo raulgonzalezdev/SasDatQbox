@@ -9,8 +9,7 @@ from app.schemas.customer import Customer, CustomerCreate, CustomerUpdate
 from app.services.customer_service import CustomerService
 
 router = APIRouter(
-    prefix="/customers",
-    tags=["customers"],
+    tags=["Customers"],
     responses={404: {"description": "Not found"}},
 )
 

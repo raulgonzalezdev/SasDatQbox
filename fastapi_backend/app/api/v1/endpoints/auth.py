@@ -14,7 +14,10 @@ from app.api.deps import get_current_user # Assuming this is correct
 from app.models.user import User
 from app.core.auth import create_access_token # Assuming this will be created/used for token creation
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Auth"],
+    responses={401: {"description": "Unauthorized"}}
+)
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(

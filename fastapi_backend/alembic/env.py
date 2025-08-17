@@ -1,3 +1,7 @@
+import sys
+from os.path import abspath, dirname
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -10,9 +14,12 @@ from app.db.base import Base
 # Import your models to ensure they are registered with SQLAlchemy
 from app.models.user import User
 from app.models.business import Business, BusinessLocation
-from app.models.subscription import Customer, SubscriptionProduct, Price, Subscription
+from app.models.customer import Customer
+from app.models.subscription import SubscriptionProduct, Price, Subscription
 from app.models.product import Product
 from app.models.inventory import Inventory, StockTransfer, StockTransferItem
+from app.models.patient import Patient
+from app.models.appointment import Appointment, AppointmentDocument
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -50,11 +57,16 @@ def run_migrations_offline() -> None:
 
     """
     url = config.get_main_option("sqlalchemy.url")
+    # Configure offline migration context with safer autogeneration options
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
+        compare_type=True,
+        compare_server_default=True,
+        version_table_schema="pos",
     )
 
     with context.begin_transaction():
@@ -75,8 +87,16 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Configure online migration context with explicit comparators so
+        # autogenerate produces incremental ALTER statements instead of
+        # destructive DROP/CREATE when possible.
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_schemas=True,
+            compare_type=True,
+            compare_server_default=True,
+            version_table_schema="pos",
         )
 
         with context.begin_transaction():

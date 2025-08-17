@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
 from app.models.inventory import Inventory, StockTransfer, StockTransferItem
 from app.schemas.inventory import (
     InventoryCreate, InventoryUpdate,
@@ -14,6 +15,12 @@ class InventoryService:
     # --- Inventory CRUD ---
     def get_inventory_item(self, item_id: UUID) -> Inventory | None:
         return self.db.query(Inventory).filter(Inventory.id == item_id).first()
+
+    def get_inventory_item_by_product_and_location(self, product_id: UUID, location_id: UUID) -> Inventory | None:
+        return self.db.query(Inventory).filter(
+            Inventory.product_id == product_id, 
+            Inventory.location_id == location_id
+        ).first()
 
     def get_inventory_items(self, skip: int = 0, limit: int = 100) -> list[Inventory]:
         return self.db.query(Inventory).offset(skip).limit(limit).all()
@@ -75,8 +82,39 @@ class InventoryService:
         db_transfer = self.get_stock_transfer(transfer_id)
         if not db_transfer:
             return None
-        
+
         update_data = transfer_in.model_dump(exclude_unset=True)
+        
+        if update_data.get("status") == "completed" and db_transfer.status != "completed":
+            print(f"--- PROCESSING TRANSFER {transfer_id} ---")
+            transfer_items = self.get_stock_transfer_items(transfer_id=transfer_id)
+            if not transfer_items:
+                raise HTTPException(status_code=404, detail="No items found for this transfer.")
+
+            for item in transfer_items:
+                print(f"  - Processing item {item.product_id}, quantity {item.quantity}")
+                from_inventory = self.get_inventory_item_by_product_and_location(item.product_id, db_transfer.from_location_id)
+                
+                if not from_inventory or from_inventory.quantity < item.quantity:
+                    self.db.rollback()
+                    raise HTTPException(status_code=400, detail=f"Insufficient stock for product {item.product_id}")
+                
+                print(f"    - Source inventory (before): {from_inventory.quantity}")
+                from_inventory.quantity -= item.quantity
+                print(f"    - Source inventory (after): {from_inventory.quantity}")
+                self.db.add(from_inventory)
+
+                to_inventory = self.get_inventory_item_by_product_and_location(item.product_id, db_transfer.to_location_id)
+                if to_inventory:
+                    print(f"    - Destination inventory (before): {to_inventory.quantity}")
+                    to_inventory.quantity += item.quantity
+                    print(f"    - Destination inventory (after): {to_inventory.quantity}")
+                    self.db.add(to_inventory)
+                else:
+                    print(f"    - Destination inventory not found. Creating with quantity {item.quantity}")
+                    new_inventory_item = Inventory(product_id=item.product_id, location_id=db_transfer.to_location_id, quantity=item.quantity)
+                    self.db.add(new_inventory_item)
+
         for key, value in update_data.items():
             setattr(db_transfer, key, value)
         
@@ -97,8 +135,8 @@ class InventoryService:
     def get_stock_transfer_item(self, item_id: UUID) -> StockTransferItem | None:
         return self.db.query(StockTransferItem).filter(StockTransferItem.id == item_id).first()
 
-    def get_stock_transfer_items(self, skip: int = 0, limit: int = 100) -> list[StockTransferItem]:
-        return self.db.query(StockTransferItem).offset(skip).limit(limit).all()
+    def get_stock_transfer_items(self, transfer_id: UUID, skip: int = 0, limit: int = 100) -> list[StockTransferItem]:
+        return self.db.query(StockTransferItem).filter(StockTransferItem.transfer_id == transfer_id).offset(skip).limit(limit).all()
 
     def create_stock_transfer_item(self, item_in: StockTransferItemCreate) -> StockTransferItem:
         db_item = StockTransferItem(

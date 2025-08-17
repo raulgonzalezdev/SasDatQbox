@@ -12,8 +12,7 @@ from app.schemas.business import (
 from app.services.business_service import BusinessService
 
 router = APIRouter(
-    prefix="/businesses",
-    tags=["businesses"],
+    tags=["Businesses"],
     responses={404: {"description": "Not found"}},
 )
 

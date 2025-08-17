@@ -4,6 +4,8 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.core.security import get_password_hash
 from uuid import UUID
+from app.services.customer_service import CustomerService
+from app.schemas.customer import CustomerCreate
 
 class UserService:
     def __init__(self, db: Session):
@@ -31,6 +33,12 @@ class UserService:
             self.db.add(db_user)
             self.db.commit()
             self.db.refresh(db_user)
+
+            # Create a corresponding customer record
+            customer_service = CustomerService(self.db)
+            customer_in = CustomerCreate(id=db_user.id)
+            customer_service.create_customer(customer_in)
+
             return db_user
         except IntegrityError:
             self.db.rollback()
