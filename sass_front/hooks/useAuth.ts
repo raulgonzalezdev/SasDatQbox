@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAppStore } from '@/store/appStore';
 import { customFetch } from '@/utils/api';
@@ -56,25 +56,30 @@ const logoutUser = async () => {
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, status, setUserAndAuth, logout: localLogout } = useAppStore();
+  const { user, status, setUserAndAuth, setStatus, logout: localLogout } = useAppStore();
 
-  useQuery({
-    queryKey: ['user'],
-    queryFn: fetchUser,
-    onSuccess: (data) => setUserAndAuth(data),
-    onError: () => setUserAndAuth(null),
-    retry: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity, // Confiamos en el store, no necesitamos re-validar
-  });
+  // Efecto para verificar la sesión del usuario al cargar la app
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const userData = await customFetch('/auth/me');
+        setUserAndAuth(userData);
+      } catch (error) {
+        setUserAndAuth(null);
+      }
+    };
+
+    if (status === 'loading') {
+      checkUserStatus();
+    }
+  }, [status, setUserAndAuth]);
 
   const { mutate: login, isPending: isLoggingIn } = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
       toast.success('¡Bienvenido de nuevo!');
-      const user = data;
-      setUserAndAuth(user); // Única fuente de verdad
-      queryClient.setQueryData(['user'], user); // Actualizamos cache para coherencia
+      setUserAndAuth(data);
+      queryClient.setQueryData(['user'], data);
       router.push('/account');
     },
     onError: (error) => {

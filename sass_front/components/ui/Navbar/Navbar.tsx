@@ -3,9 +3,16 @@
 import Navlinks from './Navlinks';
 import { useAuth } from '@/hooks/useAuth';
 import { AppBar, Toolbar, Box, CircularProgress, Typography } from '@mui/material';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const pathname = usePathname();
+
+  // No renderizar el Navbar principal en las páginas del dashboard
+  if (pathname.startsWith('/account')) {
+    return null;
+  }
 
   return (
     <AppBar position="sticky" sx={{
