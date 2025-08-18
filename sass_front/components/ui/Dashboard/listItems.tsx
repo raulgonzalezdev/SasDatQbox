@@ -15,8 +15,26 @@ import BookIcon from '@mui/icons-material/Book';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import StethoscopeIcon from '@mui/icons-material/MedicalServices';
 
-export const mainListItems = () => {
+// Custom hook to properly detect route changes
+function useCurrentPath() {
   const pathname = usePathname();
+  const [currentPath, setCurrentPath] = React.useState(pathname);
+  
+  React.useEffect(() => {
+    setCurrentPath(pathname);
+  }, [pathname]);
+  
+  // Remove locale from pathname for matching
+  const pathWithoutLocale = currentPath?.replace(/^\/[a-z]{2}/, '') || '';
+  
+  return pathWithoutLocale;
+}
+
+export const mainListItems = () => {
+  const currentPath = useCurrentPath();
+  
+  // Clean the pathname to remove trailing slashes and ensure consistent matching
+  const cleanPathname = currentPath?.replace(/\/$/, '') || '';
 
   return (
     <React.Fragment>
@@ -24,10 +42,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account"
-        selected={pathname === '/account'}
+        selected={cleanPathname === '/account'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account' ? 600 : 400,
+          fontWeight: cleanPathname === '/account' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -49,10 +67,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/patients"
-        selected={pathname === '/account/patients'}
+        selected={cleanPathname === '/account/patients'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/patients' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/patients' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -74,10 +92,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/appointments"
-        selected={pathname === '/account/appointments'}
+        selected={cleanPathname === '/account/appointments'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/appointments' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/appointments' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -99,10 +117,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/consultation"
-        selected={pathname === '/account/consultation'}
+        selected={cleanPathname === '/account/consultation'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/consultation' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/consultation' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -124,10 +142,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/prescriptions"
-        selected={pathname === '/account/prescriptions'}
+        selected={cleanPathname === '/account/prescriptions'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/prescriptions' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/prescriptions' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -149,10 +167,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/chat"
-        selected={pathname === '/account/chat'}
+        selected={cleanPathname === '/account/chat'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/chat' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/chat' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -174,10 +192,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/payments"
-        selected={pathname === '/account/payments'}
+        selected={cleanPathname === '/account/payments'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/payments' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/payments' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -199,10 +217,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/account/reports"
-        selected={pathname === '/account/reports'}
+        selected={cleanPathname === '/account/reports'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/reports' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/reports' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -228,10 +246,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/"
-        selected={pathname === '/'}
+        selected={cleanPathname === '/'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/' ? 600 : 400,
+          fontWeight: cleanPathname === '/' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -253,10 +271,10 @@ export const mainListItems = () => {
       <ListItemButton 
         component={Link} 
         href="/blog"
-        selected={pathname === '/blog'}
+        selected={cleanPathname === '/blog'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/blog' ? 600 : 400,
+          fontWeight: cleanPathname === '/blog' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
@@ -281,15 +299,18 @@ export const mainListItems = () => {
 
 // Items secundarios, podrían ser específicos para admins o configuraciones
 export const secondaryListItems = () => {
-  const pathname = usePathname();
+  const currentPath = useCurrentPath();
+  
+  // Clean the pathname to remove trailing slashes and ensure consistent matching
+  const cleanPathname = currentPath?.replace(/\/$/, '') || '';
   
   return (
     <React.Fragment>
       <ListItemButton
-        selected={pathname === '/account/settings'}
+        selected={cleanPathname === '/account/settings'}
         sx={{ 
           color: 'white',
-          fontWeight: pathname === '/account/settings' ? 600 : 400,
+          fontWeight: cleanPathname === '/account/settings' ? 600 : 400,
           '&:hover': { 
             backgroundColor: 'rgba(255,255,255,0.15)',
             color: 'white',
