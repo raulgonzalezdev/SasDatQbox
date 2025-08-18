@@ -62,7 +62,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><DashboardIcon /></ListItemIcon>
-        <ListItemText primary="Dashboard" />
+        <ListItemText primary="Dashboard" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -87,7 +87,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><PeopleIcon /></ListItemIcon>
-        <ListItemText primary="Pacientes" />
+        <ListItemText primary="Pacientes" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -112,7 +112,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><EventIcon /></ListItemIcon>
-        <ListItemText primary="Agenda" />
+        <ListItemText primary="Agenda" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -137,7 +137,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><StethoscopeIcon /></ListItemIcon>
-        <ListItemText primary="Consultas" />
+        <ListItemText primary="Consultas" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -162,7 +162,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><DescriptionIcon /></ListItemIcon>
-        <ListItemText primary="Recetas" />
+        <ListItemText primary="Recetas" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -187,7 +187,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><ChatIcon /></ListItemIcon>
-        <ListItemText primary="Chat" />
+        <ListItemText primary="Chat" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -212,7 +212,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><PaymentIcon /></ListItemIcon>
-        <ListItemText primary="Pagos" />
+        <ListItemText primary="Pagos" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -237,7 +237,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><BarChartIcon /></ListItemIcon>
-        <ListItemText primary="Estadísticas" />
+        <ListItemText primary="Estadísticas" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       
       <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
@@ -266,7 +266,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><HomeIcon /></ListItemIcon>
-        <ListItemText primary="Sitio Principal" />
+        <ListItemText primary="Sitio Principal" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -291,7 +291,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><BookIcon /></ListItemIcon>
-        <ListItemText primary="Blog" />
+        <ListItemText primary="Blog" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
     </React.Fragment>
   );
@@ -329,7 +329,7 @@ export const secondaryListItems = () => {
         <ListItemIcon sx={{ color: 'white' }}>
           <AssignmentIcon />
         </ListItemIcon>
-        <ListItemText primary="Configuración" />
+        <ListItemText primary="Configuración" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
     </React.Fragment>
   );

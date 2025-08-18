@@ -1,5 +1,5 @@
 'use client';
-import { AppBar as MuiAppBar, Toolbar, Typography, IconButton, Button, Box, Avatar, Menu, MenuItem, styled } from '@mui/material';
+import { AppBar as MuiAppBar, Toolbar, Typography, IconButton, Button, Box, Avatar, Menu, MenuItem, styled, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,11 +30,19 @@ const AppBar = styled(MuiAppBar, {
       duration: theme.transitions.duration.enteringScreen,
     }),
   }),
+  // On small screens, always use full width
+  [theme.breakpoints.down('lg')]: {
+    marginLeft: 0,
+    width: '100%',
+  },
 }));
 
 export default function DashboardNavbar({ toggleDrawer, title, open }: DashboardNavbarProps) {
   const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  
+  // Detect if screen is small (mobile/tablet)
+  const isSmallScreen = useMediaQuery('(max-width:1024px)');
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -71,18 +79,20 @@ export default function DashboardNavbar({ toggleDrawer, title, open }: Dashboard
   return (
     <AppBar position="absolute" open={open}>
       <Toolbar>
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="open drawer"
-          onClick={toggleDrawer}
-          sx={{
-            marginRight: '36px',
-            ...(open && { display: 'none' }),
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
+        {!isSmallScreen && (
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleDrawer}
+            sx={{
+              marginRight: '36px',
+              ...(open && { display: 'none' }),
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
         
         {/* Page Title */}
         <Typography 

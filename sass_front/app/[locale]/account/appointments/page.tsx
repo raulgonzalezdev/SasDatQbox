@@ -1,275 +1,256 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Grid,
-  Paper,
-  Avatar,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Person as PersonIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Schedule as ScheduleIcon,
-  Event as EventIcon,
-  Today as TodayIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-} from '@mui/icons-material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import React, { useMemo } from 'react';
+import { Box, Container, Typography, Paper, Grid, Button, IconButton } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import dayjs, { Dayjs } from 'dayjs';
+import 'dayjs/locale/es';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
-
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 dayjs.extend(weekOfYear);
+dayjs.locale('es');
 
-import { useAppointmentStore, Appointment } from '@/stores/appointmentStore';
-import { usePatients } from '@/hooks/usePatients';
-import { useAuth } from '@/hooks/useAuth';
-
-type ViewMode = 'week' | 'month';
+import { useAppointmentStore } from '@/stores/appointmentStore';
 
 export default function AppointmentsPage() {
-  const { user } = useAuth();
-  const { patients } = usePatients();
-
-  const {
-    selectedDate,
-    appointments,
-    setSelectedDate,
-    addAppointment,
-    getAppointmentsForDate,
-  } = useAppointmentStore();
+  const { selectedDate, setSelectedDate, getAppointmentsForDate } = useAppointmentStore();
+  const router = useRouter();
 
   const sd = useMemo(() => dayjs(selectedDate), [selectedDate]);
 
-  const [viewMode, setViewMode] = useState<ViewMode>('week');
-  const [newAppointmentForm, setNewAppointmentForm] = useState({
-    patient_id: '',
-    appointment_datetime: dayjs(),
-    reason: '',
-    notes: '',
-  });
-
-  // Slots horarios
+  // slots horarios
   const timeSlots = useMemo(() => {
     const slots: Dayjs[] = [];
-    for (let hour = 8; hour <= 20; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        slots.push(dayjs().hour(hour).minute(minute));
+    for (let h = 8; h <= 20; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        slots.push(dayjs(sd).hour(h).minute(m));
       }
     }
     return slots;
-  }, []);
+  }, [sd]);
 
-  // Días de la semana
+  // días de la semana actual
   const weekDays = useMemo(() => {
     const days: Dayjs[] = [];
-    const startOfWeek = sd.startOf('week');
-    for (let i = 0; i < 7; i++) {
-      days.push(startOfWeek.add(i, 'day'));
-    }
+    const start = sd.startOf('week');
+    for (let i = 0; i < 7; i++) days.push(start.add(i, 'day'));
     return days;
   }, [sd]);
 
-  // Mini calendario mensual
+  // días del mes para el calendario lateral
   const calendarDays = useMemo(() => {
-    const startOfMonth = sd.startOf('month');
-    const endOfMonth = sd.endOf('month');
-    const startOfCalendar = startOfMonth.startOf('week');
-    const endOfCalendar = endOfMonth.endOf('week');
-
+    const start = sd.startOf('month').startOf('week');
+    const end = sd.endOf('month').endOf('week');
     const days: Dayjs[] = [];
-    let current = startOfCalendar;
-
-    while (current.isBefore(endOfCalendar) || current.isSame(endOfCalendar, 'day')) {
-      days.push(current);
-      current = current.add(1, 'day');
+    let day = start;
+    while (day.isBefore(end) || day.isSame(end, 'day')) {
+      days.push(day);
+      day = day.add(1, 'day');
     }
     return days;
   }, [sd]);
 
-  const getMonthName = (date: Dayjs) => {
-    const months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    return months[date.month()];
-  };
-
-  // Crear cita rápida
-  const handleCreateAppointment = () => {
-    if (!user || !newAppointmentForm.patient_id) return;
-    const newAppointment: Appointment = {
-      id: Date.now().toString(),
-      patient_id: newAppointmentForm.patient_id,
-      doctor_id: user.id,
-      appointment_datetime: newAppointmentForm.appointment_datetime.toISOString(),
-      reason: newAppointmentForm.reason,
-      notes: newAppointmentForm.notes,
-      status: 'scheduled',
-      patient: patients.find(p => p.id === newAppointmentForm.patient_id),
-      doctor: { id: user.id, first_name: user.first_name, last_name: user.last_name },
-    };
-    addAppointment(newAppointment);
-    setNewAppointmentForm({ patient_id: '', appointment_datetime: dayjs(), reason: '', notes: '' });
+  // cita en hora específica
+  const getAppointmentAt = (date: Dayjs, time: Dayjs) => {
+    return getAppointmentsForDate(date).find((apt) => {
+      const aptDate = dayjs(apt.appointment_datetime);
+      return aptDate.hour() === time.hour() && aptDate.minute() === time.minute();
+    });
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container maxWidth="xl" sx={{ py: 3 }}>
-        {/* Encabezado */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            Agenda de citas
-          </Typography>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
+        Agenda de citas
+      </Typography>
+
+      <Grid container spacing={2}>
+        {/* Panel izquierdo */}
+        <Grid item xs={12} md={3}>
+          <Paper sx={{ p: 2, mb: 2 }}>
+            {/* Navegador de mes */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+              <IconButton onClick={() => setSelectedDate(sd.subtract(1, 'month'))}>
+                <ChevronLeftIcon />
+              </IconButton>
+              <Typography variant="h6">{sd.format('MMMM YYYY')}</Typography>
+              <IconButton onClick={() => setSelectedDate(sd.add(1, 'month'))}>
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+
+            {/* Calendario mensual */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+              {calendarDays.map((date, index) => {
+                const isToday = date.isSame(dayjs(), 'day');
+                const isSelected = date.isSame(sd, 'day');
+                const hasAppointments = getAppointmentsForDate(date).length > 0;
+
+                return (
+                  <Box
+                    key={index}
+                    onClick={() => setSelectedDate(date)}
+                    sx={{
+                      textAlign: 'center',
+                      py: 1,
+                      cursor: 'pointer',
+                      borderRadius: '50%',
+                      bgcolor: isSelected ? 'primary.main' : isToday ? 'secondary.light' : 'transparent',
+                      color: isSelected ? 'white' : 'text.primary',
+                      fontWeight: hasAppointments ? 'bold' : 'normal',
+                      '&:hover': { bgcolor: 'grey.200' },
+                    }}
+                  >
+                    {date.date()}
+                  </Box>
+                );
+              })}
+            </Box>
+          </Paper>
+
+          {/* citas del día */}
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              {/* 👇 ahora muestra el día seleccionado */}
+              {sd.format('dddd DD [de] MMMM')}
+            </Typography>
+            {getAppointmentsForDate(sd).length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                No hay citas este día
+              </Typography>
+            ) : (
+              getAppointmentsForDate(sd).map((apt) => (
+                <Box
+                  key={apt.id}
+                  onDoubleClick={() => router.push(`/account/appointments/${apt.id}`)}
+                  sx={{
+                    p: 1,
+                    mb: 1,
+                    borderRadius: 1,
+                    bgcolor: 'primary.light',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                    {apt.patient?.first_name} {apt.patient?.last_name}
+                  </Typography>
+                  <Typography variant="caption">
+                    {dayjs(apt.appointment_datetime).format('HH:mm')}
+                  </Typography>
+                </Box>
+              ))
+            )}
+          </Paper>
+
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ backgroundColor: 'orange.main', '&:hover': { backgroundColor: 'orange.dark' } }}
+            fullWidth
+            color="secondary"
+            onClick={() => router.push('/account/appointments/new')}
           >
             Agendar nueva cita
           </Button>
-        </Box>
+        </Grid>
 
-        <Grid container spacing={2}>
-          {/* Panel izquierdo */}
-          <Grid item xs={12} md={3}>
-            <Paper sx={{ p: 2, mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <IconButton onClick={() => setSelectedDate(sd.subtract(1, 'month'))}>
-                  <ChevronLeftIcon />
-                </IconButton>
-                <Typography variant="h6">{getMonthName(sd)} {sd.year()}</Typography>
-                <IconButton onClick={() => setSelectedDate(sd.add(1, 'month'))}>
-                  <ChevronRightIcon />
-                </IconButton>
-              </Box>
+        {/* Panel derecho */}
+        <Grid item xs={12} md={9}>
+          {/* Cabecera de semana con navegación */}
+          <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
+            <IconButton onClick={() => setSelectedDate(sd.subtract(1, 'week'))}>
+              <ChevronLeftIcon />
+            </IconButton>
+            <Typography variant="h6" sx={{ mx: 2 }}>
+              Semana {sd.week()} ({sd.format('MMMM YYYY')})
+            </Typography>
+            <IconButton onClick={() => setSelectedDate(sd.add(1, 'week'))}>
+              <ChevronRightIcon />
+            </IconButton>
+            <Button sx={{ ml: 2 }} onClick={() => setSelectedDate(dayjs())}>
+              Hoy
+            </Button>
+          </Box>
 
-              {/* Mini calendario */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
-                {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
-                  <Typography key={i} align="center" sx={{ fontWeight: 'bold' }}>{d}</Typography>
-                ))}
-                {calendarDays.map((date, idx) => {
-                  const isToday = date.isSame(dayjs(), 'day');
-                  const isSelected = date.isSame(sd, 'day');
-                  const hasAppointments = getAppointmentsForDate(date).length > 0;
-                  return (
-                    <Box
-                      key={idx}
-                      onClick={() => setSelectedDate(date)}
-                      sx={{
-                        textAlign: 'center',
-                        py: 1,
-                        borderRadius: '50%',
-                        cursor: 'pointer',
-                        backgroundColor: isSelected ? 'primary.main' : isToday ? 'primary.light' : 'transparent',
-                        color: isSelected ? 'white' : isToday ? 'primary.main' : 'text.primary',
-                        fontWeight: hasAppointments ? 'bold' : 'normal',
-                        '&:hover': { backgroundColor: 'grey.200' },
-                      }}
-                    >
-                      {date.date()}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Paper>
+          <Paper sx={{ overflow: 'auto' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '80px repeat(7, 1fr)',
+                border: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              {/* Encabezado */}
+              <Box />
+              {weekDays.map((d) => (
+                <Box
+                  key={d.toString()}
+                  sx={{
+                    textAlign: 'center',
+                    p: 1,
+                    fontWeight: 'bold',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: d.isSame(dayjs(), 'day') ? 'secondary.light' : 'grey.50',
+                  }}
+                >
+                  {d.format('dddd DD')}
+                </Box>
+              ))}
 
-            {/* Citas de hoy */}
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>Hoy</Typography>
-              <List>
-                {getAppointmentsForDate(dayjs()).map((apt) => (
-                  <ListItem key={apt.id}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'primary.main' }}><PersonIcon /></Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`${apt.patient?.first_name} ${apt.patient?.last_name}`}
-                      secondary={`${dayjs(apt.appointment_datetime).format('HH:mm')} - ${apt.reason}`}
-                    />
-                  </ListItem>
-                ))}
-                {getAppointmentsForDate(dayjs()).length === 0 && (
-                  <Typography variant="body2" color="text.secondary" align="center">No hay citas hoy</Typography>
-                )}
-              </List>
-            </Paper>
-          </Grid>
+              {/* Celdas */}
+              {timeSlots.map((time) => (
+                <React.Fragment key={time.toString()}>
+                  <Box
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      textAlign: 'right',
+                      p: 0.5,
+                      fontSize: 12,
+                      color: 'text.secondary',
+                      bgcolor: 'grey.50',
+                    }}
+                  >
+                    {time.format('HH:mm')}
+                  </Box>
 
-          {/* Panel derecho - Vista semanal */}
-          <Grid item xs={12} md={9}>
-            <Paper sx={{ p: 2 }}>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', mb: 1 }}>
-                <Box></Box>
-                {weekDays.map((d, i) => (
-                  <Typography key={i} align="center" sx={{ fontWeight: 'bold' }}>
-                    {d.format('ddd DD')}
-                  </Typography>
-                ))}
-              </Box>
-
-              <Box sx={{ maxHeight: 600, overflow: 'auto', position: 'relative' }}>
-                {timeSlots.map((t) => (
-                  <Box key={t.format('HH:mm')} sx={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', gap: 1 }}>
-                    <Typography align="right" sx={{ pr: 1, color: 'text.secondary' }}>{t.format('HH:mm')}</Typography>
-                    {weekDays.map((d, i) => {
-                      const hasApt = getAppointmentsForDate(d).some((apt) =>
-                        dayjs(apt.appointment_datetime).hour() === t.hour() &&
-                        dayjs(apt.appointment_datetime).minute() === t.minute()
-                      );
-                      return (
-                        <Box key={i} sx={{
-                          minHeight: 40,
+                  {weekDays.map((d) => {
+                    const apt = getAppointmentAt(d, time);
+                    return (
+                      <Box
+                        key={d.toString() + time.toString()}
+                        sx={{
                           border: '1px solid',
                           borderColor: 'divider',
-                          backgroundColor: hasApt ? 'primary.light' : 'transparent',
-                          cursor: hasApt ? 'pointer' : 'default',
-                        }} />
-                      );
-                    })}
-                  </Box>
-                ))}
-                {/* Línea de hora actual */}
-                <Box sx={{
-                  position: 'absolute',
-                  left: 80,
-                  right: 0,
-                  top: `${(dayjs().hour() - 8) * 80 + (dayjs().minute() / 60) * 80}px`,
-                  height: '2px',
-                  backgroundColor: 'red'
-                }} />
-              </Box>
-            </Paper>
-          </Grid>
+                          height: 40,
+                          bgcolor: apt ? 'primary.light' : 'transparent',
+                          cursor: 'pointer',
+                        }}
+                        onDoubleClick={() => {
+                          if (apt) {
+                            router.push(`/account/appointments/${apt.id}`);
+                          } else {
+                            router.push(
+                              `/account/appointments/new?date=${d.hour(time.hour()).minute(time.minute()).toISOString()}`
+                            );
+                          }
+                        }}
+                      >
+                        {apt && (
+                          <Typography variant="caption" sx={{ p: 0.5, display: 'block' }}>
+                            {apt.patient?.first_name} {apt.patient?.last_name}
+                          </Typography>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </Box>
+          </Paper>
         </Grid>
-      </Container>
-    </LocalizationProvider>
+      </Grid>
+    </Container>
   );
 }

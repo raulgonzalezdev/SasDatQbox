@@ -1,12 +1,15 @@
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
+import { TextField, Button, Typography, Box, CircularProgress, InputAdornment, IconButton } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 // Esquema de validación con Zod
 const formSchema = z.object({
@@ -20,9 +23,16 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function SignUp() {
   const { register: signup, isRegistering } = useAuth();
+  const [showPassword, setShowPassword] = React.useState(false);
+  
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
 
   const onSubmit = (data: FormData) => {
     signup({ payload: data }); // Llamamos a la mutación con el formato correcto
@@ -67,15 +77,28 @@ export default function SignUp() {
       <TextField
         required
         fullWidth
-        name="password"
         label="Contraseña"
-        type="password"
+        type={showPassword ? 'text' : 'password'}
         id="password"
         autoComplete="new-password"
         {...register('password')}
         error={!!errors.password}
         helperText={errors.password?.message}
         disabled={isRegistering}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowPassword}
+                onMouseDown={handleMouseDownPassword}
+                edge="end"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <Button
         type="submit"
@@ -86,11 +109,6 @@ export default function SignUp() {
       >
         {isRegistering ? <CircularProgress size={24} /> : 'Crear Cuenta'}
       </Button>
-      <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
-        <Link href="/signin">
-          ¿Ya tienes una cuenta? Inicia sesión
-        </Link>
-      </Typography>
     </Box>
   );
 }

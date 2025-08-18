@@ -3,6 +3,7 @@
 import EmailSignIn from '@/components/ui/AuthForms/EmailSignIn';
 import { Box, Typography, Container, Paper } from '@mui/material';
 import Link from 'next/link';
+import Logo from '@/components/ui/Logo';
 
 export default function SignInPage() {
   return (
@@ -37,6 +38,9 @@ export default function SignInPage() {
               alignItems: 'center',
             }}
           >
+            <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <Logo width={120} height={120} disabledLink={true} />
+            </Box>
             <Typography component="h1" variant="h5">
               Iniciar Sesión
             </Typography>

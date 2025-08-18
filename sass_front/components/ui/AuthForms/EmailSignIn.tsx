@@ -1,11 +1,19 @@
 'use client';
 
-import { Box, TextField, Button, CircularProgress } from '@mui/material';
+import { Box, TextField, Button, CircularProgress, InputAdornment, IconButton } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import React from 'react';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function EmailSignIn() {
   const { login, isLoggingIn } = useAuth();
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,10 +53,24 @@ export default function EmailSignIn() {
         fullWidth
         name="password"
         label="Contraseña"
-        type="password"
+        type={showPassword ? 'text' : 'password'}
         id="password"
         autoComplete="current-password"
         disabled={isLoggingIn}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowPassword}
+                onMouseDown={handleMouseDownPassword}
+                edge="end"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <Button
         type="submit"

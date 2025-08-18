@@ -1,7 +1,7 @@
 'use client';
 import { Box, Typography, Container, Grid, Link as MuiLink } from '@mui/material';
 import Link from 'next/link';
-import Logo from '@/components/icons/Logo';
+import Logo from '@/components/ui/Logo';
 import { useTranslations } from 'next-intl';
 
 interface FooterLinkProps {

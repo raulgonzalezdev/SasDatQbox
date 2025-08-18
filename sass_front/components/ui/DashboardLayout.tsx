@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { styled, Theme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 import {
   CssBaseline, Box, Toolbar, List, Divider, IconButton, Drawer as MuiDrawer, Typography, Avatar
 } from '@mui/material';
@@ -9,6 +10,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DashboardNavbar from './Dashboard/DashboardNavbar';
 import DashboardFooter from './Dashboard/DashboardFooter';
 import { mainListItems, secondaryListItems } from './Dashboard/listItems';
+import Logo from './Logo';
 
 const drawerWidth = 240;
 
@@ -33,6 +35,11 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
         }),
         width: theme.spacing(7),
       }),
+      // Force collapsed state on small screens
+      [theme.breakpoints.down('lg')]: {
+        width: theme.spacing(7),
+        overflowX: 'hidden',
+      },
     },
   }),
 );
@@ -72,22 +79,38 @@ function useCurrentPath() {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = React.useState(true);
   const currentPath = useCurrentPath();
+  
+  // Detect if screen is small (mobile/tablet)
+  const isSmallScreen = useMediaQuery('(max-width:1024px)');
+  
+  // Initialize sidebar state based on screen size
+  const [open, setOpen] = React.useState(!isSmallScreen);
+  
+  // Update sidebar state when screen size changes
+  React.useEffect(() => {
+    setOpen(!isSmallScreen);
+  }, [isSmallScreen]);
   
   // Clean the pathname to remove trailing slashes and ensure consistent matching
   const cleanPathname = currentPath?.replace(/\/$/, '') || '';
   const title = pageTitles[cleanPathname] || pageTitles[currentPath] || 'Dashboard';
-  const toggleDrawer = () => setOpen(!open);
+  
+  // Toggle drawer only on larger screens
+  const toggleDrawer = () => {
+    if (!isSmallScreen) {
+      setOpen(!open);
+    }
+  };
 
   // Debug - remove this later
-  console.log('DashboardLayout - currentPath:', currentPath, 'cleanPathname:', cleanPathname, 'title:', title);
+  console.log('DashboardLayout - currentPath:', currentPath, 'cleanPathname:', cleanPathname, 'title:', title, 'isSmallScreen:', isSmallScreen);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <CssBaseline />
       <DashboardNavbar toggleDrawer={toggleDrawer} title={title} open={open} />
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={isSmallScreen ? false : open}>
         <Toolbar sx={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -100,20 +123,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {open ? (
             // When sidebar is extended - show BoxDoctor brand
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-              <Avatar 
-                sx={{ 
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  width: 40,
-                  height: 40,
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold'
-                }}
-              >
-                BD
-              </Avatar>
+              <Logo width={100} height={100} disabledLink={true} />
               <Typography 
-                variant="h6" 
+                variant="h7" 
                 sx={{ 
                   fontWeight: 'bold',
                   color: 'white',
@@ -124,25 +136,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Typography>
             </Box>
           ) : (
-            // When sidebar is collapsed - show compact avatar
+            // When sidebar is collapsed - show compact logo
             <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Avatar 
-                sx={{ 
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  width: 40,
-                  height: 40,
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold'
-                }}
-              >
-                BD
-              </Avatar>
+              <Logo width={48} height={48} disabledLink={true} />
             </Box>
           )}
-          <IconButton onClick={toggleDrawer} sx={{ color: 'white' }}>
-            <ChevronLeftIcon />
-          </IconButton>
+          {!isSmallScreen && (
+            <IconButton onClick={toggleDrawer} sx={{ color: 'white' }}>
+              <ChevronLeftIcon />
+            </IconButton>
+          )}
         </Toolbar>
         <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
         <List component="nav">{mainListItems()}</List>
