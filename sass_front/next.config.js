@@ -6,6 +6,9 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  experimental: {
+    optimizeFonts: true,
+  },
   images: {
     remotePatterns: [
       {

@@ -43,29 +43,32 @@ export default function Testimonials() {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 2,
+    slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 6000,
     arrows: false,
+    centerMode: false,
     responsive: [
       {
         breakpoint: 900,
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          dots: true,
         },
       },
     ],
   };
 
   return (
-    <Box sx={{ py: { xs: 8, md: 12 }, overflow: 'hidden' }}>
+    <Box sx={{ py: { xs: 6, md: 12 }, overflow: 'hidden' }}>
       <Grid container spacing={4} alignItems="center">
-        <Grid item xs={12} md={6}>
+        {/* Desktop: Left side with bubbles */}
+        <Grid item xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Box sx={{ 
                 position: 'relative', 
-                height: { xs: '400px', md: '600px' }, 
+                height: '600px', 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -96,6 +99,7 @@ export default function Testimonials() {
             </Box>
         </Grid>
 
+        {/* Content - Full width on mobile, half on desktop */}
         <Grid item xs={12} md={6}>
           <Box sx={{ textAlign: { xs: 'center', md: 'left' }, pr: { md: 4 } }}>
             <Typography 
@@ -104,7 +108,7 @@ export default function Testimonials() {
               fontWeight="bold" 
               sx={{ 
                 mb: 2,
-                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
+                fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' }
               }}
             >
               {t('title')}
@@ -113,26 +117,101 @@ export default function Testimonials() {
               variant="h6" 
               color="text.secondary" 
               sx={{ 
-                mb: 6,
-                fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+                mb: 4,
+                fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.5rem' },
+                lineHeight: { xs: 1.4, md: 1.5 }
               }}
             >
               {t('subtitle')}
             </Typography>
-            <Box sx={{ maxWidth: { xs: 320, sm: 400, md: '100%' }, mx: 'auto' }}>
+            
+            {/* Mobile: Simple stacked cards */}
+            <Box sx={{ 
+              display: { xs: 'block', md: 'none' },
+              maxWidth: { xs: '90%', sm: '85%' },
+              mx: 'auto',
+              px: { xs: 2, sm: 0 }
+            }}>
+              {testimonials.map((testimonial, index) => (
+                <Paper
+                  key={testimonial.name}
+                  elevation={2}
+                  sx={{ 
+                    p: { xs: 2.5, sm: 3 }, 
+                    mb: 3, 
+                    borderRadius: 2,
+                    border: '1px solid #f0f0f0',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar sx={{ 
+                      bgcolor: 'primary.main', 
+                      mr: 2, 
+                      width: { xs: 36, sm: 40 }, 
+                      height: { xs: 36, sm: 40 } 
+                    }}>
+                      {testimonial.initial || testimonial.name?.[0]}
+                    </Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="bold" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                        {testimonial.name}
+                      </Typography>
+                      <Rating 
+                        value={testimonial.rating} 
+                        precision={0.5} 
+                        readOnly 
+                        size="small"
+                      />
+                    </Box>
+                  </Box>
+                  <Typography variant="body1" sx={{ 
+                    fontSize: { xs: '0.9rem', sm: '0.95rem' }, 
+                    lineHeight: 1.5 
+                  }}>
+                    "{testimonial.quote}"
+                  </Typography>
+                </Paper>
+              ))}
+            </Box>
+
+            {/* Desktop: Carousel */}
+            <Box sx={{ 
+              display: { xs: 'none', md: 'block' },
+              maxWidth: '100%', 
+              mx: 'auto'
+            }}>
               <Slider {...sliderSettings}>
                 {testimonials.map((testimonial) => (
-                  <Box key={testimonial.name} sx={{ px: 1.5 }}>
+                  <Box key={testimonial.name} sx={{ px: 1 }}>
                     <Paper
                       elevation={3}
-                      sx={{ p: 3, mb: 3, height: '100%' }}
+                      sx={{ 
+                        p: 3, 
+                        mb: 3, 
+                        height: '100%',
+                        borderRadius: 2
+                      }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>{testimonial.initial || testimonial.name?.[0]}</Avatar>
-                        <Typography variant="subtitle1" fontWeight="bold">{testimonial.name}</Typography>
-                        <Rating value={testimonial.rating} precision={0.5} readOnly sx={{ ml: 'auto' }} />
+                        <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
+                          {testimonial.initial || testimonial.name?.[0]}
+                        </Avatar>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          {testimonial.name}
+                        </Typography>
+                        <Rating 
+                          value={testimonial.rating} 
+                          precision={0.5} 
+                          readOnly 
+                          size="small"
+                          sx={{ ml: 'auto' }} 
+                        />
                       </Box>
-                      <Typography variant="body1">"{testimonial.quote}"</Typography>
+                      <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                        "{testimonial.quote}"
+                      </Typography>
                     </Paper>
                   </Box>
                 ))}

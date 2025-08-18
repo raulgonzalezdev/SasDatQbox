@@ -53,15 +53,32 @@ export default function Pricing() {
   const plansFromMessages = (messages?.Pricing?.plans ?? null) as unknown as Plan[] | null;
   const plans = plansFromMessages && plansFromMessages.length ? plansFromMessages : defaultPlans;
   return (
-    <Box id="pricing" sx={{ py: { xs: 8, md: 12 }, bgcolor: 'background.paper' }}>
+    <Box id="pricing" sx={{ py: { xs: 6, md: 12 }, bgcolor: 'background.paper' }}>
       <Box sx={{ maxWidth: 'lg', mx: 'auto', px: 3, textAlign: 'center' }}>
-        <Typography variant="h2" component="h2" fontWeight="bold" gutterBottom>
+        <Typography 
+          variant="h3" 
+          component="h2" 
+          fontWeight="bold" 
+          gutterBottom
+          sx={{ 
+            fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' },
+            mb: { xs: 2, md: 3 }
+          }}
+        >
           {t('title')}
         </Typography>
-        <Typography variant="h5" color="text.secondary" sx={{ mb: 8 }}>
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          sx={{ 
+            mb: { xs: 4, md: 8 },
+            fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.5rem' },
+            lineHeight: { xs: 1.4, md: 1.5 }
+          }}
+        >
           {t('subtitle')}
         </Typography>
-        <Grid container spacing={4} justifyContent="center">
+        <Grid container spacing={{ xs: 2, md: 4 }} justifyContent="center">
           {plans.map((plan) => (
             <Grid item key={plan.name} xs={12} sm={6} md={3}>
               <Card 
@@ -86,32 +103,85 @@ export default function Pricing() {
                   <Chip 
                     label={t('mostPopular')}
                     color="primary"
+                    size="small"
                     sx={{
                       position: 'absolute',
                       top: 0,
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
                       zIndex: 1,
+                      fontSize: { xs: '0.7rem', md: '0.8rem' }
                     }}
                   />
                 )}
-                <CardContent sx={{ flexGrow: 1, p: 3, textAlign: 'left' }}>
-                  <Typography variant="h4" component="h3" gutterBottom>{plan.name}</Typography>
-                  <Typography color="text.secondary" sx={{ minHeight: '3em', mb: 2 }}>{plan.description}</Typography>
+                <CardContent sx={{ flexGrow: 1, p: { xs: 2, md: 3 }, textAlign: 'left' }}>
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom
+                    sx={{ 
+                      fontSize: { xs: '1.25rem', md: '2rem' },
+                      mb: { xs: 1, md: 2 }
+                    }}
+                  >
+                    {plan.name}
+                  </Typography>
+                  <Typography 
+                    color="text.secondary" 
+                    sx={{ 
+                      minHeight: { xs: '2.5em', md: '3em' }, 
+                      mb: { xs: 1.5, md: 2 },
+                      fontSize: { xs: '0.8rem', md: '1rem' },
+                      lineHeight: { xs: 1.3, md: 1.5 }
+                    }}
+                  >
+                    {plan.description}
+                  </Typography>
                   
                   {typeof plan.price === 'number' ? (
-                    <Typography variant="h3" component="p" sx={{ my: 2 }}>
+                    <Typography 
+                      variant="h4" 
+                      component="p" 
+                      sx={{ 
+                        my: { xs: 1.5, md: 2 },
+                        fontSize: { xs: '1.5rem', md: '2.5rem' }
+                      }}
+                    >
                       {plan.price} US$
-                      <Typography variant="h6" component="span" color="text.secondary">{t('perMonth')}</Typography>
+                      <Typography 
+                        variant="body2" 
+                        component="span" 
+                        color="text.secondary"
+                        sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}
+                      >
+                        {t('perMonth')}
+                      </Typography>
                     </Typography>
                   ) : (
-                    <Typography variant="h3" component="p" sx={{ my: 2, fontWeight: 'medium' }}>
+                    <Typography 
+                      variant="h4" 
+                      component="p" 
+                      sx={{ 
+                        my: { xs: 1.5, md: 2 }, 
+                        fontWeight: 'medium',
+                        fontSize: { xs: '1.5rem', md: '2.5rem' }
+                      }}
+                    >
                       {plan.price}
                     </Typography>
                   )}
                 </CardContent>
-                <Box sx={{ p: 3, pt: 0 }}>
-                  <Button fullWidth variant="contained" color="primary">
+                <Box sx={{ p: { xs: 2, md: 3 }, pt: 0 }}>
+                  <Button 
+                    fullWidth 
+                    variant="contained" 
+                    color="primary"
+                    size="medium"
+                    sx={{ 
+                      fontSize: { xs: '0.8rem', md: '1rem' },
+                      py: { xs: 1, md: 1.5 }
+                    }}
+                  >
                     {plan.action === 'contact' ? t('contactSales') : t('subscribe')}
                   </Button>
                 </Box>

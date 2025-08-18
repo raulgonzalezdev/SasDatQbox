@@ -1,121 +1,85 @@
-"use client";
-import {
-  Box, Typography, Drawer, IconButton, TextField, Button, CircularProgress
-} from '@mui/material';
+'use client';
+import { Drawer, Box, Typography, TextField, Button, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { toast } from 'react-hot-toast';
-import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
-const contactSchema = (t: any) => z.object({
-  name: z.string().min(1, t('errors.nameRequired')),
-  email: z.string().email(t('errors.invalidEmail')),
-  message: z.string().min(10, t('errors.messageMin')),
-});
+export default function ContactDrawer() {
+  const [open, setOpen] = useState(false);
 
-type ContactFormData = z.infer<typeof contactSchema>;
-
-interface ContactDrawerProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-export default function ContactDrawer({ open, onClose }: ContactDrawerProps) {
-  const t = useTranslations('ContactDrawer');
-  const schema = contactSchema(t);
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<ContactFormData>({
-    resolver: zodResolver(schema),
-  });
-
-  const onSubmit = async (data: ContactFormData) => {
-    // Simular envío a API
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log(data);
-    toast.success(t('successMessage'));
-    onClose();
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
-    <Drawer anchor="left" open={open} onClose={onClose}>
-      <Box sx={{ width: { xs: '90vw', sm: 400 }, p: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h5" component="h2" fontWeight="bold">
-            {t('title')}
-          </Typography>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Typography color="text.secondary" sx={{ mt: 1 }}>
-          {t('subtitle')}
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 4, flexGrow: 1 }}>
-          <Controller
-            name="name"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-                <TextField
-                {...field}
-                label={t('form.name')}
-                fullWidth
-                margin="normal"
-                required
-                error={!!errors.name}
-                helperText={errors.name?.message}
-              />
-            )}
-          />
-          <Controller
-            name="email"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-                <TextField
-                {...field}
-                label={t('form.email')}
-                type="email"
-                fullWidth
-                margin="normal"
-                required
-                error={!!errors.email}
-                helperText={errors.email?.message}
-              />
-            )}
-          />
-          <Controller
-            name="message"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-                <TextField
-                {...field}
-                label={t('form.message')}
-                multiline
-                rows={4}
-                fullWidth
-                margin="normal"
-                required
-                error={!!errors.message}
-                helperText={errors.message?.message}
-              />
-            )}
-          />
-          <Box sx={{ mt: 3 }}>
+    <>
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={handleOpen}
+        sx={{ position: 'fixed', left: 16, bottom: 16, zIndex: 1000 }}
+      >
+        Contacto
+      </Button>
+      
+      <Drawer
+        anchor="left"
+        open={open}
+        onClose={handleClose}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: 400,
+            maxWidth: '90vw',
+          },
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h5" color="primary.main">
+              Contacto
+            </Typography>
+            <IconButton onClick={handleClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Nombre"
+              variant="outlined"
+              fullWidth
+              required
+            />
+            <TextField
+              label="Email"
+              type="email"
+              variant="outlined"
+              fullWidth
+              required
+            />
+            <TextField
+              label="Asunto"
+              variant="outlined"
+              fullWidth
+              required
+            />
+            <TextField
+              label="Mensaje"
+              variant="outlined"
+              multiline
+              rows={4}
+              fullWidth
+              required
+            />
             <Button
               type="submit"
-              fullWidth
               variant="contained"
-              disabled={isSubmitting}
+              color="primary"
+              sx={{ mt: 2 }}
             >
-              {isSubmitting ? <CircularProgress size={24} /> : t('form.submit')}
+              Enviar Mensaje
             </Button>
           </Box>
         </Box>
-      </Box>
-    </Drawer>
+      </Drawer>
+    </>
   );
 }

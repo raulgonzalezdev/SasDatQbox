@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DashboardNavbar from './Dashboard/DashboardNavbar';
-import { mainListItems } from './Dashboard/listItems';
+import { mainListItems, secondaryListItems } from './Dashboard/listItems';
 
 const drawerWidth = 240;
 
@@ -17,6 +17,8 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
       position: 'relative',
       whiteSpace: 'nowrap',
       width: drawerWidth,
+      backgroundColor: theme.palette.primary.main,
+      color: 'white',
       transition: theme.transitions.create('width', {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.enteringScreen,
@@ -39,6 +41,7 @@ const pageTitles: { [key: string]: string } = {
   '/account/patients': 'Pacientes',
   '/account/appointments': 'Consultas',
   '/account/chat': 'Chat',
+  '/account/consultation': 'Consulta',
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -52,20 +55,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <CssBaseline />
       <DashboardNavbar toggleDrawer={toggleDrawer} title={title} open={open} />
       <Drawer variant="permanent" open={open}>
-        <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: [1] }}>
-          <IconButton onClick={toggleDrawer}>
+        <Toolbar sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'flex-end', 
+          px: [1],
+          backgroundColor: 'primary.main',
+          color: 'white'
+        }}>
+          <IconButton onClick={toggleDrawer} sx={{ color: 'white' }}>
             <ChevronLeftIcon />
           </IconButton>
         </Toolbar>
-        <Divider />
-        <List component="nav">{mainListItems}</List>
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+        <List component="nav">{mainListItems()}</List>
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+        <List component="nav">{secondaryListItems()}</List>
       </Drawer>
       <Box
         component="main"
         sx={{
           backgroundColor: (theme) =>
             theme.palette.mode === 'light'
-              ? theme.palette.grey[100]
+              ? theme.palette.background.default
               : theme.palette.grey[900],
           flexGrow: 1,
           height: '100vh',
