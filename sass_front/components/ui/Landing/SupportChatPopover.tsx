@@ -8,6 +8,7 @@ import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import AppsIcon from '@mui/icons-material/Apps';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface Message {
   sender: 'user' | 'support';
@@ -21,8 +22,9 @@ interface SupportChatPopoverProps {
 }
 
 export default function SupportChatPopover({ open, onClose, anchorEl }: SupportChatPopoverProps) {
+  const t = useTranslations('SupportChat');
   const [messages, setMessages] = useState<Message[]>([
-    { sender: 'support', text: '¡Hola! Bienvenido al soporte. ¿En qué podemos ayudarte?' }
+    { sender: 'support', text: t('welcomeMessage') }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -41,7 +43,7 @@ export default function SupportChatPopover({ open, onClose, anchorEl }: SupportC
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setTimeout(() => {
-      const supportResponse: Message = { sender: 'support', text: 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto.' };
+      const supportResponse: Message = { sender: 'support', text: t('responseMessage') };
       setMessages(prev => [...prev, supportResponse]);
     }, 1500);
   };
@@ -81,8 +83,8 @@ export default function SupportChatPopover({ open, onClose, anchorEl }: SupportC
         </IconButton>
       </Box>
       <Box sx={{ pt: '40px', pb: 1, px: 2, textAlign: 'center' }}>
-        <Typography variant="h6">¡Hola, soy SIA!</Typography>
-        <Typography variant="body2" color="text.secondary">Tu asistente virtual.</Typography>
+        <Typography variant="h6">{t('assistantName')}</Typography>
+        <Typography variant="body2" color="text.secondary">{t('assistantSubtitle')}</Typography>
       </Box>
       <Divider sx={{ mb: 1 }} />
       <Box ref={chatContentRef} sx={{ 
@@ -112,8 +114,8 @@ export default function SupportChatPopover({ open, onClose, anchorEl }: SupportC
         <Box sx={{ p: 1, display: 'flex', alignItems: 'center', borderTop: '1px solid #ddd' }}>
           <IconButton onClick={handleMenuClick}><AppsIcon /></IconButton>
           <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose}>
-            <MenuItem onClick={handleMenuClose} component={Link} href="/signin/signup">Registrarse</MenuItem>
-            <MenuItem onClick={handleMenuClose} component={Link} href="/signin">Iniciar Sesión</MenuItem>
+            <MenuItem onClick={handleMenuClose} component={Link} href="/signin/signup">{t('menu.register')}</MenuItem>
+            <MenuItem onClick={handleMenuClose} component={Link} href="/signin">{t('menu.login')}</MenuItem>
           </Menu>
           <Box sx={{
             flexGrow: 1,
@@ -127,7 +129,7 @@ export default function SupportChatPopover({ open, onClose, anchorEl }: SupportC
           }}>
             <InputBase
               sx={{ flex: 1 }}
-              placeholder="Escribe aquí..."
+              placeholder={t('placeholder')}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}

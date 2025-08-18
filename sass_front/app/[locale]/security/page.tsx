@@ -1,7 +1,8 @@
 import { Box, Typography, Container, Paper } from '@mui/material';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function SecurityPage() {
+  const locale = useLocale();
   const t = useTranslations('Security');
 
   return (

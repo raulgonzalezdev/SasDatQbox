@@ -13,7 +13,16 @@ export default function FAQ() {
   return (
     <Box id="faq" sx={{ py: { xs: 8, md: 12 } }}>
       <Container maxWidth="md">
-        <Typography variant="h2" component="h2" textAlign="center" fontWeight="bold" sx={{ mb: 6 }}>
+        <Typography 
+          variant="h3" 
+          component="h2" 
+          textAlign="center" 
+          fontWeight="bold" 
+          sx={{ 
+            mb: 6,
+            fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
+          }}
+        >
           {t('title')}
         </Typography>
         <Box>

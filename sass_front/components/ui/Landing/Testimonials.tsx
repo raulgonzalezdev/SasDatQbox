@@ -75,8 +75,8 @@ export default function Testimonials() {
                         position: 'absolute',
                         borderRadius: '50%',
                         border: '1px solid #e0e0e0',
-                        width: `${150 + i * 120}px`,
-                        height: `${150 + i * 120}px`,
+                        width: `${300 + i * 150}px`,
+                        height: `${300 + i * 150}px`,
                     }} />
                 ))}
                 {imageBubbles.map((bubble, index) => (
@@ -98,10 +98,25 @@ export default function Testimonials() {
 
         <Grid item xs={12} md={6}>
           <Box sx={{ textAlign: { xs: 'center', md: 'left' }, pr: { md: 4 } }}>
-            <Typography variant="h2" component="h2" fontWeight="bold" sx={{ mb: 2 }}>
+            <Typography 
+              variant="h3" 
+              component="h2" 
+              fontWeight="bold" 
+              sx={{ 
+                mb: 2,
+                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
+              }}
+            >
               {t('title')}
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 6 }}>
+            <Typography 
+              variant="h6" 
+              color="text.secondary" 
+              sx={{ 
+                mb: 6,
+                fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+              }}
+            >
               {t('subtitle')}
             </Typography>
             <Box sx={{ maxWidth: { xs: 320, sm: 400, md: '100%' }, mx: 'auto' }}>

@@ -79,10 +79,25 @@ export default function LandingPage() {
         <Grid container spacing={4} alignItems="center">
           <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
-              <Typography variant="h2" component="h1" fontWeight="bold" sx={{ mb: 3 }}>
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                fontWeight="bold" 
+                sx={{ 
+                  mb: 3,
+                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3.75rem' }
+                }}
+              >
                 {t('title')}
               </Typography>
-              <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
+              <Typography 
+                variant="h6" 
+                color="text.secondary" 
+                sx={{ 
+                  mb: 4,
+                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+                }}
+              >
                 {t('subtitle')}
               </Typography>
               <Button variant="contained" color="primary" size="large" component={Link} href="/#contact">

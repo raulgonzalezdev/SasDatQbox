@@ -37,10 +37,28 @@ export default function FeaturesSection() {
   return (
     <Box id="features" sx={{ bgcolor: 'background.paper', py: { xs: 10, md: 16 } }}>
       <Box sx={{ maxWidth: 'lg', mx: 'auto', px: 3 }}>
-        <Typography variant="h2" component="h2" textAlign="center" fontWeight="bold" sx={{ mb: 2, color: 'primary.main' }}>
+        <Typography 
+          variant="h3" 
+          component="h2" 
+          textAlign="center" 
+          fontWeight="bold" 
+          sx={{ 
+            mb: 2, 
+            color: 'primary.main',
+            fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
+          }}
+        >
           {t('title')}
         </Typography>
-        <Typography variant="h5" color="text.secondary" textAlign="center" sx={{ mb: 8 }}>
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          textAlign="center" 
+          sx={{ 
+            mb: 8,
+            fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+          }}
+        >
           {t('subtitle')}
         </Typography>
         <Grid container spacing={4}>

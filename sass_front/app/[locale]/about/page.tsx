@@ -1,7 +1,8 @@
 import { Box, Typography, Container, Paper, Avatar, Grid } from '@mui/material';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function AboutUsPage() {
+  const locale = useLocale();
   const t = useTranslations('About');
 
   return (

@@ -159,5 +159,24 @@
 			"invalidEmail": "Please enter a valid email.",
 			"messageMin": "Message must be at least 10 characters."
 		}
+	},
+	"SupportChat": {
+		"welcomeMessage": "Hello! Welcome to support. How can we help you?",
+		"responseMessage": "Thank you for your message. An agent will contact you soon.",
+		"assistantName": "Hello, I'm SIA!",
+		"assistantSubtitle": "Your virtual assistant.",
+		"placeholder": "Type here...",
+		"menu": {
+			"register": "Register",
+			"login": "Login"
+		}
+	},
+	"About": {
+		"missionTitle": "Our Mission",
+		"missionSubtitle": "Transform healthcare through innovative technology",
+		"aboutBoxDoctorTitle": "About BoxDoctor",
+		"aboutBoxDoctorP1": "BoxDoctor is a comprehensive telemedicine platform designed to connect healthcare professionals with patients securely and efficiently. Our cutting-edge technology enables high-quality virtual consultations, prescription management, appointment scheduling, and real-time communication, all while maintaining the highest standards of security and HIPAA compliance.",
+		"ourTeamTitle": "Our Team",
+		"ourTeamP1": "We are a passionate team of developers, healthcare professionals, and technology experts committed to revolutionizing how healthcare is delivered. Our combined experience in medicine, technology, and user experience allows us to create solutions that truly make a difference in the lives of doctors and patients."
 	}
 }

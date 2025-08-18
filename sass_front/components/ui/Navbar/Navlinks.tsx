@@ -3,8 +3,26 @@
 import {useTranslations} from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button, Box, IconButton, Select, MenuItem, FormControl } from '@mui/material';
+import { useState } from 'react';
+import { 
+  Button, 
+  Box, 
+  IconButton, 
+  Select, 
+  MenuItem, 
+  FormControl, 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import Logo from '@/components/icons/Logo';
 
 interface User {
@@ -22,6 +40,9 @@ export default function Navlinks({ user, isAuthenticated, logout }: NavlinksProp
   const t = useTranslations('Navbar');
   const router = useRouter();
   const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const handleChangeLocale = (event: any) => {
     const newLocale = event.target.value;
@@ -37,67 +58,193 @@ export default function Navlinks({ user, isAuthenticated, logout }: NavlinksProp
     fontSize: '1rem',
   };
 
-  return (
-    <Box sx={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: '100%'
-    }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Link href="/" passHref>
-          <Logo />
-        </Link>
-        <Button color="inherit" component={Link} href="/#features" sx={buttonStyles}>
-          {t('features')}
-        </Button>
-        <Button color="inherit" component={Link} href="/#pricing" sx={buttonStyles}>
-          {t('pricing')}
-        </Button>
-        <Button color="inherit" component={Link} href="/blog" sx={buttonStyles}>
-          {t('blog')}
-        </Button>
-        <Button color="inherit" component={Link} href="/#help" sx={buttonStyles}>
-          {t('help')}
-        </Button>
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const navigationItems = [
+    { text: t('features'), href: '/#features' },
+    { text: t('pricing'), href: '/#pricing' },
+    { text: t('blog'), href: '/blog' },
+    { text: t('help'), href: '/#help' },
+  ];
+
+  const mobileMenu = (
+    <Drawer
+      anchor="right"
+      open={mobileMenuOpen}
+      onClose={handleMobileMenuClose}
+      sx={{
+        '& .MuiDrawer-paper': {
+          width: 280,
+          pt: 2,
+        },
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 2 }}>
+        <Logo />
+        <IconButton onClick={handleMobileMenuClose}>
+          <CloseIcon />
+        </IconButton>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Divider />
+      <List>
+        {navigationItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton 
+              component={Link} 
+              href={item.href}
+              onClick={handleMobileMenuClose}
+            >
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+        <Divider />
         {isAuthenticated ? (
           <>
-            <Button color="inherit" component={Link} href="/account" sx={buttonStyles}>
-              {t('dashboard')}
-            </Button>
-            <Button color="inherit" onClick={logout} sx={buttonStyles}>
-              {t('logout')}
-            </Button>
+            <ListItem disablePadding>
+              <ListItemButton 
+                component={Link} 
+                href="/account"
+                onClick={handleMobileMenuClose}
+              >
+                <ListItemText primary={t('dashboard')} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => { logout(); handleMobileMenuClose(); }}>
+                <ListItemText primary={t('logout')} />
+              </ListItemButton>
+            </ListItem>
           </>
         ) : (
-          <Button color="inherit" component={Link} href="/signin" sx={buttonStyles}>
-            {t('login')}
-          </Button>
+          <ListItem disablePadding>
+            <ListItemButton 
+              component={Link} 
+              href="/signin"
+              onClick={handleMobileMenuClose}
+            >
+              <ListItemText primary={t('login')} />
+            </ListItemButton>
+          </ListItem>
         )}
-        <Button variant="contained" color="primary" sx={{ ...buttonStyles, borderRadius: '20px' }}>
-          {t('downloadApp')}
-        </Button>
-        <FormControl size="small" variant="outlined" sx={{ minWidth: 60 }}>
-          <Select
-            value={currentLocale}
-            onChange={handleChangeLocale}
-            IconComponent={LanguageIcon}
-            sx={{
-              '& .MuiOutlinedInput-notchedOutline': {
-                border: 'none'
-              },
-              '& .MuiSelect-select': {
-                padding: '8px',
-              },
-            }}
-          >
-            <MenuItem value="es">ES</MenuItem>
-            <MenuItem value="en">EN</MenuItem>
-          </Select>
-        </FormControl>
+        <Divider />
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemText primary={t('downloadApp')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
+          <FormControl fullWidth size="small" variant="outlined">
+            <Select
+              value={currentLocale}
+              onChange={handleChangeLocale}
+              IconComponent={LanguageIcon}
+            >
+              <MenuItem value="es">ES</MenuItem>
+              <MenuItem value="en">EN</MenuItem>
+            </Select>
+          </FormControl>
+        </ListItem>
+      </List>
+    </Drawer>
+  );
+
+  return (
+    <>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Link href="/" passHref>
+            <Logo />
+          </Link>
+          {!isMobile && (
+            <>
+              <Button color="inherit" component={Link} href="/#features" sx={buttonStyles}>
+                {t('features')}
+              </Button>
+              <Button color="inherit" component={Link} href="/#pricing" sx={buttonStyles}>
+                {t('pricing')}
+              </Button>
+              <Button color="inherit" component={Link} href="/blog" sx={buttonStyles}>
+                {t('blog')}
+              </Button>
+              <Button color="inherit" component={Link} href="/#help" sx={buttonStyles}>
+                {t('help')}
+              </Button>
+            </>
+          )}
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {!isMobile && (
+            <>
+              {isAuthenticated ? (
+                <>
+                  <Button color="inherit" component={Link} href="/account" sx={buttonStyles}>
+                    {t('dashboard')}
+                  </Button>
+                  <Button color="inherit" onClick={logout} sx={buttonStyles}>
+                    {t('logout')}
+                  </Button>
+                </>
+              ) : (
+                <Button color="inherit" component={Link} href="/signin" sx={buttonStyles}>
+                  {t('login')}
+                </Button>
+              )}
+              <Button variant="contained" color="primary" sx={{ ...buttonStyles, borderRadius: '20px' }}>
+                {t('downloadApp')}
+              </Button>
+            </>
+          )}
+          {isMobile && (
+            <>
+              {isAuthenticated ? (
+                <Button color="inherit" component={Link} href="/account" sx={buttonStyles}>
+                  {t('dashboard')}
+                </Button>
+              ) : (
+                <Button color="inherit" component={Link} href="/signin" sx={buttonStyles}>
+                  {t('login')}
+                </Button>
+              )}
+              <IconButton onClick={handleMobileMenuToggle} color="inherit">
+                <MenuIcon />
+              </IconButton>
+            </>
+          )}
+          {!isMobile && (
+            <FormControl size="small" variant="outlined" sx={{ minWidth: 60 }}>
+              <Select
+                value={currentLocale}
+                onChange={handleChangeLocale}
+                IconComponent={LanguageIcon}
+                sx={{
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
+                  },
+                  '& .MuiSelect-select': {
+                    padding: '8px',
+                  },
+                }}
+              >
+                <MenuItem value="es">ES</MenuItem>
+                <MenuItem value="en">EN</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        </Box>
       </Box>
-    </Box>
+      {mobileMenu}
+    </>
   );
 }
