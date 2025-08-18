@@ -10,9 +10,9 @@ import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 
 const contactSchema = (t: any) => z.object({
-  name: z.string().min(1, t('errors.nameRequired') ?? 'El nombre es requerido.'),
-  email: z.string().email(t('errors.invalidEmail') ?? 'Debe ser un email válido.'),
-  message: z.string().min(10, t('errors.messageMin') ?? 'El mensaje debe tener al menos 10 caracteres.'),
+  name: z.string().min(1, t('errors.nameRequired')),
+  email: z.string().email(t('errors.invalidEmail')),
+  message: z.string().min(10, t('errors.messageMin')),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
