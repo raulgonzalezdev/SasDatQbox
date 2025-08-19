@@ -9,17 +9,13 @@ import { z } from 'zod';
 import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 
-const createContactSchema = (t: any) => z.object({
+const contactSchema = (t: any) => z.object({
   name: z.string().min(1, t('errors.nameRequired')),
   email: z.string().email(t('errors.invalidEmail')),
   message: z.string().min(10, t('errors.messageMin')),
 });
 
-type ContactFormData = {
-  name: string;
-  email: string;
-  message: string;
-};
+type ContactFormData = z.infer<typeof contactSchema>;
 
 interface ContactDrawerProps {
   open: boolean;
@@ -28,7 +24,7 @@ interface ContactDrawerProps {
 
 export default function ContactDrawer({ open, onClose }: ContactDrawerProps) {
   const t = useTranslations('ContactDrawer');
-  const schema = createContactSchema(t);
+  const schema = contactSchema(t);
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<ContactFormData>({
     resolver: zodResolver(schema),
   });
