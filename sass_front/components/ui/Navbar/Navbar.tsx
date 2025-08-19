@@ -16,17 +16,24 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
 import LanguageSelector from './LanguageSelector';
 import Logo from '../Logo';
+import { useTranslations } from 'next-intl';
 
 export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const t = useTranslations('Navbar');
+
+  console.log('🔍 Navbar Debug:');
+  console.log('  - t("features"):', t('features'));
+  console.log('  - t("pricing"):', t('pricing'));
+  console.log('  - t("login"):', t('login'));
 
   const menuItems = [
-    { text: 'Características', href: '/#features' },
-    { text: 'Precios', href: '/#pricing' },
-    { text: 'Blog', href: '/blog' },
-    { text: 'Ayuda', href: '/#help' },
+    { text: t('features'), href: '/#features' },
+    { text: t('pricing'), href: '/#pricing' },
+    { text: t('blog'), href: '/blog' },
+    { text: t('help'), href: '/#help' },
   ];
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -79,23 +86,23 @@ export default function Navbar() {
           </Box>
         )}
         
-        {/* Login Button - siempre visible */}
-        <Button
-          component={Link}
-          href="/signin"
-          variant="contained"
-          color="primary"
-          sx={{ 
-            textTransform: 'none',
-            fontWeight: 500,
-            borderRadius: 8,
-            px: 3,
-            py: 1,
-            mr: isMobile ? 1 : 0,
-          }}
-        >
-          Iniciar Sesión
-        </Button>
+                 {/* Login Button - siempre visible */}
+         <Button
+           component={Link}
+           href="/signin"
+           variant="contained"
+           color="primary"
+           sx={{ 
+             textTransform: 'none',
+             fontWeight: 500,
+             borderRadius: 8,
+             px: 3,
+             py: 1,
+             mr: isMobile ? 1 : 0,
+           }}
+         >
+           {t('login')}
+         </Button>
         
         {/* Mobile Menu Button */}
         {isMobile && (

@@ -15,8 +15,10 @@ type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 interface AppState {
   user: User | null;
   status: AuthStatus;
+  locale: string;
   setUserAndAuth: (user: User | null) => void;
   setStatus: (status: AuthStatus) => void;
+  setLocale: (locale: string) => void;
   logout: () => void;
 }
 
@@ -24,11 +26,13 @@ export const useAppStore = create<AppState>()(
   (set) => ({
     user: null,
     status: 'loading', // Empezamos en estado de carga
+    locale: 'es', // Idioma por defecto
     setUserAndAuth: (user: User | null) => set({ 
       user, 
       status: user ? 'authenticated' : 'unauthenticated' 
     }),
     setStatus: (status: AuthStatus) => set({ status }),
+    setLocale: (locale: string) => set({ locale }),
     logout: () => set({ user: null, status: 'unauthenticated' }),
   })
 );

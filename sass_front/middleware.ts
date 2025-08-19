@@ -2,10 +2,13 @@ import createMiddleware from 'next-intl/middleware';
 
 export default createMiddleware({
   // A list of all locales that are supported
-  locales: ['en', 'es'], // Must match the locales in next.config.js
+  locales: ['es', 'en'], // Must match the locales in next.config.js
 
   // Used when no locale matches
-  defaultLocale: 'es' // Must match the defaultLocale in next.config.js
+  defaultLocale: 'es', // Must match the defaultLocale in next.config.js
+  
+  // Force default locale and disable automatic locale detection
+  localePrefix: 'always'
 });
 
 export const config = {

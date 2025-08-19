@@ -18,6 +18,8 @@ export default function HomePage() {
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
       
+
+      
       {/* Hero Section */}
       <Box
         sx={{
