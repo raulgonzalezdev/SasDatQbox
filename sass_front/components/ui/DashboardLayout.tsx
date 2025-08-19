@@ -21,7 +21,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
       position: 'relative',
       whiteSpace: 'nowrap',
       width: drawerWidth,
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
       color: 'white',
       transition: theme.transitions.create('width', {
         easing: theme.transitions.easing.sharp,
@@ -123,13 +123,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           alignItems: 'center', 
           justifyContent: 'space-between', 
           px: [1],
-          backgroundColor: 'primary.main',
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
           color: 'white',
           minHeight: '64px'
         }}>
           {open ? (
             // When sidebar is extended - show BoxDoctor brand
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, mr: 2 }}>
               <Logo width={100} height={100} disabledLink={true} />
               <Typography 
                 variant="h6" 
@@ -149,14 +149,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Box>
           )}
           {!isSmallScreen && (
-            <IconButton onClick={toggleDrawer} sx={{ color: 'white' }}>
+            <IconButton 
+              onClick={toggleDrawer} 
+              sx={{ 
+                color: 'white',
+                ml: 1,
+                '&:hover': {
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.1)',
+                }
+              }}
+            >
               <ChevronLeftIcon />
             </IconButton>
           )}
         </Toolbar>
-        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+        <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
         <List component="nav">{mainListItems()}</List>
-        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+        <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
         <List component="nav">{secondaryListItems()}</List>
       </Drawer>
       <Box
@@ -165,7 +174,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           backgroundColor: (theme: Theme) =>
             theme.palette.mode === 'light'
               ? theme.palette.background.default
-              : theme.palette.grey[900],
+              : '#1e1e1e',
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',

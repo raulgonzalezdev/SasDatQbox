@@ -13,10 +13,10 @@ export default function DashboardFooter() {
         py: 2,
         px: 2,
         mt: 'auto',
-        backgroundColor: 'primary.main',
+        backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : theme.palette.primary.main,
         color: 'white',
         borderTop: '1px solid',
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
         borderRadius: '8px 8px 0 0', // Subtle rounded top corners
       }}
     >
@@ -31,7 +31,7 @@ export default function DashboardFooter() {
           <Typography variant="body2" sx={{ 
             color: 'white', // Keep the white color for copyright
             fontWeight: 500, // Keep the bold weight
-            opacity: 0.9 // Keep the opacity
+            opacity: 0.95 // Increase opacity for better contrast
           }}>
             © {new Date().getFullYear()} BoxDoctor. {t('rights')}
           </Typography>
@@ -45,12 +45,13 @@ export default function DashboardFooter() {
               sx={{
                 color: 'white',
                 textDecoration: 'none',
-                opacity: 0.8,
+                opacity: 0.9,
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 '&:hover': {
                   opacity: 1,
                   textDecoration: 'underline',
+                  color: (theme) => theme.palette.mode === 'dark' ? '#4db6ac' : '#ffffff',
                 },
               }}
             >
@@ -64,12 +65,13 @@ export default function DashboardFooter() {
               sx={{
                 color: 'white',
                 textDecoration: 'none',
-                opacity: 0.8,
+                opacity: 0.9,
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 '&:hover': {
                   opacity: 1,
                   textDecoration: 'underline',
+                  color: (theme) => theme.palette.mode === 'dark' ? '#4db6ac' : '#ffffff',
                 },
               }}
             >
@@ -83,12 +85,13 @@ export default function DashboardFooter() {
               sx={{
                 color: 'white',
                 textDecoration: 'none',
-                opacity: 0.8,
+                opacity: 0.9,
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 '&:hover': {
                   opacity: 1,
                   textDecoration: 'underline',
+                  color: (theme) => theme.palette.mode === 'dark' ? '#4db6ac' : '#ffffff',
                 },
               }}
             >

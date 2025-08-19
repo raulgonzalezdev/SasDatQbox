@@ -20,7 +20,8 @@ const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })<DashboardNavbarProps>(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: theme.palette.mode === 'dark' ? '#1a1a1a' : theme.palette.primary.main,
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#ffffff',
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,

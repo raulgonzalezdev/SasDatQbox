@@ -49,13 +49,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -74,13 +74,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/patients' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -99,13 +99,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/appointments' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -124,13 +124,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/consultation' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -149,13 +149,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/prescriptions' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -174,13 +174,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/chat' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -199,13 +199,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/payments' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -224,13 +224,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/reports' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -242,7 +242,7 @@ export const mainListItems = () => {
         <ListItemText primary={t('statistics')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       
-      <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+      <Divider sx={{ my: 1, backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
       
       {/* Links al sitio público */}
       <ListItemButton 
@@ -253,13 +253,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -278,13 +278,13 @@ export const mainListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/blog' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
@@ -315,13 +315,13 @@ export const secondaryListItems = () => {
           color: 'white',
           fontWeight: cleanPathname === '/account/settings' ? 600 : 400,
           '&:hover': { 
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px'
           },
           '&.Mui-selected': { 
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)',
             color: 'white',
             borderRadius: '0 20px 20px 0',
             marginRight: '8px',
