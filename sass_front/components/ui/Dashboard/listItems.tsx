@@ -14,7 +14,9 @@ import HomeIcon from '@mui/icons-material/Home';
 import BookIcon from '@mui/icons-material/Book';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import StethoscopeIcon from '@mui/icons-material/MedicalServices';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/hooks/useAuth';
 
 // Custom hook to properly detect route changes
 function useCurrentPath() {
@@ -333,6 +335,38 @@ export const secondaryListItems = () => {
           <AssignmentIcon />
         </ListItemIcon>
         <ListItemText primary={t('settings')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+      </ListItemButton>
+    </React.Fragment>
+  );
+};
+
+// Botón de logout fijo en la parte inferior
+export const logoutListItems = () => {
+  const t = useTranslations('Dashboard.menu');
+  const { logout } = useAuth();
+  
+  const handleLogout = () => {
+    logout();
+  };
+  
+  return (
+    <React.Fragment>
+      <ListItemButton
+        onClick={handleLogout}
+        sx={{ 
+          color: 'white',
+          '&:hover': { 
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            borderRadius: '0 20px 20px 0',
+            marginRight: '8px'
+          }
+        }}
+      >
+        <ListItemIcon sx={{ color: 'white' }}>
+          <LogoutIcon />
+        </ListItemIcon>
+        <ListItemText primary={t('logout')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
     </React.Fragment>
   );

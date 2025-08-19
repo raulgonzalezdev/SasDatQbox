@@ -222,7 +222,8 @@
 			"statistics": "Estadísticas",
 			"mainSite": "Sitio Principal",
 			"blog": "Blog",
-			"settings": "Configuración"
+			"settings": "Configuración",
+			"logout": "Cerrar Sesión"
 		},
 		"navbar": {
 			"user": "Usuario",

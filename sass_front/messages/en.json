@@ -222,7 +222,8 @@
 			"statistics": "Statistics",
 			"mainSite": "Main Site",
 			"blog": "Blog",
-			"settings": "Settings"
+			"settings": "Settings",
+			"logout": "Logout"
 		},
 		"navbar": {
 			"user": "User",

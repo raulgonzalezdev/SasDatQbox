@@ -9,7 +9,7 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DashboardNavbar from './Dashboard/DashboardNavbar';
 import DashboardFooter from './Dashboard/DashboardFooter';
-import { mainListItems, secondaryListItems } from './Dashboard/listItems';
+import { mainListItems, secondaryListItems, logoutListItems } from './Dashboard/listItems';
 import Logo from './Logo';
 import { useTranslations } from 'next-intl';
 
@@ -119,72 +119,101 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
       <DashboardNavbar toggleDrawer={toggleDrawer} title={title} open={open} />
-      <Drawer variant="permanent" open={isSmallScreen ? false : open} theme={undefined as any}>
-                 <Toolbar sx={{ 
-           display: 'flex', 
-           alignItems: 'center', 
-           justifyContent: 'space-between', 
-           px: [1, 2], // Balanced padding
-           backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
-           color: 'white',
-           minHeight: '64px',
-           flexShrink: 0, // Prevent toolbar from shrinking
-           position: 'sticky',
-           top: 0,
-           zIndex: 1
-         }}>
-                     {open ? (
-             // When sidebar is extended - show BoxDoctor brand
-                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, minWidth: 0 }}>
-                <Logo width={80} height={80} disabledLink={true} />
-                                 <Typography 
-                   variant="body1" 
-                   sx={{ 
-                     fontWeight: 'bold',
-                     color: 'white',
-                     flexGrow: 1,
-                     overflow: 'hidden',
-                     textOverflow: 'ellipsis',
-                     whiteSpace: 'nowrap',
-                     fontSize: '0.95rem'
-                   }}
-                 >
-                  BoxDoctor
-                </Typography>
-              </Box>
-            ) : (
-             // When sidebar is collapsed - show compact logo
-             <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-               <Logo width={48} height={48} disabledLink={true} />
-             </Box>
-           )}
-           
-           {/* Toggle button - positioned next to BoxDoctor */}
-           {!isSmallScreen && (
-             <IconButton 
-               onClick={toggleDrawer} 
-               sx={{ 
-                 color: 'white',
-                 minWidth: '40px',
-                 minHeight: '40px',
-                 flexShrink: 0,
-                 '&:hover': {
-                   backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.1)',
-                 }
-               }}
-             >
-               <ChevronLeftIcon sx={{ 
-                 transform: open ? 'rotate(0deg)' : 'rotate(180deg)',
-                 transition: 'transform 0.3s ease',
-                 fontSize: '1.5rem'
-               }} />
-             </IconButton>
-           )}
+      <Drawer 
+        variant="permanent" 
+        open={isSmallScreen ? false : open} 
+        theme={undefined as any}
+        sx={{
+          '& .MuiDrawer-paper': {
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        {/* Header */}
+        <Toolbar sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          px: [1, 2], // Balanced padding
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
+          color: 'white',
+          minHeight: '64px',
+          flexShrink: 0, // Prevent toolbar from shrinking
+          position: 'sticky',
+          top: 0,
+          zIndex: 1
+        }}>
+          {open ? (
+            // When sidebar is extended - show BoxDoctor brand
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, minWidth: 0 }}>
+              <Logo width={80} height={80} disabledLink={true} />
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  color: 'white',
+                  flexGrow: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontSize: '0.95rem'
+                }}
+              >
+                BoxDoctor
+              </Typography>
+            </Box>
+          ) : (
+            // When sidebar is collapsed - show compact logo
+            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <Logo width={48} height={48} disabledLink={true} />
+            </Box>
+          )}
+          
+          {/* Toggle button - positioned next to BoxDoctor */}
+          {!isSmallScreen && (
+            <IconButton 
+              onClick={toggleDrawer} 
+              sx={{ 
+                color: 'white',
+                minWidth: '40px',
+                minHeight: '40px',
+                flexShrink: 0,
+                '&:hover': {
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.1)',
+                }
+              }}
+            >
+              <ChevronLeftIcon sx={{ 
+                transform: open ? 'rotate(0deg)' : 'rotate(180deg)',
+                transition: 'transform 0.3s ease',
+                fontSize: '1.5rem'
+              }} />
+            </IconButton>
+          )}
         </Toolbar>
-                           <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
-          <List component="nav">{mainListItems()}</List>
+        
+        <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
+        
+        {/* Scrollable content area */}
+        <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <List component="nav" sx={{ flex: 1 }}>
+            {mainListItems()}
+          </List>
           <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
-          <List component="nav">{secondaryListItems()}</List>
+          <List component="nav">
+            {secondaryListItems()}
+          </List>
+        </Box>
+        
+        {/* Fixed logout button at bottom */}
+        <Box sx={{ flexShrink: 0, borderTop: 1, borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }}>
+          <List component="nav">
+            {logoutListItems()}
+          </List>
+        </Box>
       </Drawer>
              <Box
          component="main"

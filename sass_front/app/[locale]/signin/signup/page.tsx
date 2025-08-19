@@ -14,7 +14,9 @@ export default function SignUpPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(to top right, #f0f4f8, #ffffff)',
+        background: (theme) => theme.palette.mode === 'dark' 
+          ? 'linear-gradient(to top right, #1a1a1a, #2d2d2d)' 
+          : 'linear-gradient(to top right, #f0f4f8, #ffffff)',
       }}
     >
       <Container component="main" maxWidth="xs">
@@ -24,7 +26,11 @@ export default function SignUpPage() {
             padding: 4, 
             width: '100%',
             borderRadius: 3,
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.04)',
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : '#ffffff',
+            color: (theme) => theme.palette.mode === 'dark' ? '#ffffff' : '#000000',
+            boxShadow: (theme) => theme.palette.mode === 'dark' 
+              ? '0 10px 25px rgba(0, 0, 0, 0.3), 0 5px 10px rgba(0, 0, 0, 0.2)' 
+              : '0 10px 25px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.04)',
             transition: 'transform 0.3s ease-in-out',
             '&:hover': {
               transform: 'translateY(-5px)',
@@ -41,11 +47,30 @@ export default function SignUpPage() {
             <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <Logo width={120} height={120} disabledLink={true} />
             </Box>
-            <Typography component="h1" variant="h5">
+            <Typography 
+              component="h1" 
+              variant="h5"
+              sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#ffffff' : '#000000',
+                fontWeight: 'bold'
+              }}
+            >
               Crear Cuenta
             </Typography>
             <SignUp />
-            <Typography variant="body2" sx={{ mt: 2 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mt: 2,
+                '& a': {
+                  color: (theme) => theme.palette.mode === 'dark' ? '#4db6ac' : '#1976d2',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }
+              }}
+            >
               <Link href="/signin" passHref>
                 ¿Ya tienes una cuenta? Inicia sesión
               </Link>

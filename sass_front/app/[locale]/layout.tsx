@@ -7,6 +7,7 @@ import Providers from '@/components/Providers';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AuthChecker from '@/components/ui/AuthChecker';
 import { rubik } from '../fonts';
+import '../globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://boxdoctor.com'),
@@ -78,6 +79,42 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={rubik.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const themeStore = localStorage.getItem('theme-store');
+                  if (themeStore) {
+                    const theme = JSON.parse(themeStore);
+                    if (theme.state && theme.state.mode === 'dark') {
+                      document.documentElement.style.backgroundColor = '#121212';
+                      document.body.style.backgroundColor = '#121212';
+                      document.documentElement.classList.add('dark-mode');
+                    } else {
+                      document.documentElement.style.backgroundColor = '#f8f9fa';
+                      document.body.style.backgroundColor = '#f8f9fa';
+                    }
+                  } else {
+                    // Verificar preferencia del sistema
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                      document.documentElement.style.backgroundColor = '#121212';
+                      document.body.style.backgroundColor = '#121212';
+                      document.documentElement.classList.add('dark-mode');
+                    } else {
+                      document.documentElement.style.backgroundColor = '#f8f9fa';
+                      document.body.style.backgroundColor = '#f8f9fa';
+                    }
+                  }
+                } catch (e) {
+                  console.error('Error applying theme:', e);
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <Providers>
           <NextIntlClientProvider locale={locale} messages={messages}>

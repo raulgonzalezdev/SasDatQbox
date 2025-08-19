@@ -131,8 +131,11 @@ export function useAuth() {
       queryClient.setQueryData(['user'], null); // Clear user data immediately
       queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidar la query
       toast.success('Has cerrado sesión.');
+      
       // Redirigir a la landing page después del logout
-      router.push(`/${locale}`);
+      // Asegurarse de que siempre redirija a la landing page, no al dashboard
+      const currentLocale = locale || 'es'; // Fallback a español si no hay locale
+      router.push(`/${currentLocale}`);
     }
   };
 
