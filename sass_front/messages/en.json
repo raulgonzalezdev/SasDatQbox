@@ -174,5 +174,212 @@
 	},
 	"DashboardNavbar": {
 		"logout": "Logout"
+	},
+	"Dashboard": {
+		"title": "Dashboard",
+		"welcome": "Welcome back",
+		"stats": {
+			"totalPatients": "Total Patients",
+			"totalAppointments": "Total Appointments",
+			"totalRevenue": "Total Revenue",
+			"pendingAppointments": "Pending Appointments"
+		},
+		"menu": {
+			"dashboard": "Dashboard",
+			"patients": "Patients",
+			"appointments": "Appointments",
+			"consultations": "Consultations",
+			"prescriptions": "Prescriptions",
+			"chat": "Chat",
+			"payments": "Payments",
+			"statistics": "Statistics",
+			"maintenance": "Maintenance",
+			"blog": "Blog",
+			"settings": "Settings",
+			"logout": "Logout"
+		},
+		"navbar": {
+			"logout": "Logout"
+		},
+		"footer": {
+			"rights": "All rights reserved.",
+			"about": "About",
+			"security": "Security",
+			"blog": "Blog"
+		},
+		"patients": {
+			"title": "Patients",
+			"addPatient": "Add Patient",
+			"totalPatients": "Total Patients",
+			"womenPercentage": "Women",
+			"menPercentage": "Men",
+			"searchPlaceholder": "Search patients...",
+			"tableHeaders": {
+				"patient": "Patient",
+				"age": "Age",
+				"gender": "Gender",
+				"phone": "Phone",
+				"lastVisit": "Last Visit"
+			},
+			"age": "years",
+			"newPatient": {
+				"createPatient": "Create Patient",
+				"saveChanges": "Save Changes",
+				"name": "Full Name",
+				"email": "Email",
+				"phone": "Phone",
+				"gender": "Gender",
+				"male": "Male",
+				"female": "Female",
+				"other": "Other",
+				"birthDate": "Birth Date",
+				"address": "Address",
+				"medicalHistory": "Medical History"
+			}
+		},
+		"appointments": {
+			"title": "Appointments",
+			"newAppointment": "New Appointment",
+			"totalAppointments": "Total Appointments",
+			"confirmed": "Confirmed",
+			"pending": "Pending",
+			"cancelled": "Cancelled",
+			"tableHeaders": {
+				"patient": "Patient",
+				"date": "Date",
+				"time": "Time",
+				"type": "Type",
+				"status": "Status",
+				"actions": "Actions"
+			},
+			"status": {
+				"confirmed": "Confirmed",
+				"pending": "Pending",
+				"cancelled": "Cancelled"
+			},
+			"actions": {
+				"view": "View",
+				"edit": "Edit",
+				"cancel": "Cancel",
+				"confirm": "Confirm"
+			}
+		},
+		"consultation": {
+			"title": "Consultation",
+			"patientInfo": "Patient Information",
+			"medicalHistory": "Medical History",
+			"currentSymptoms": "Current Symptoms",
+			"diagnosis": "Diagnosis",
+			"treatment": "Treatment",
+			"notes": "Notes",
+			"endConsultation": "End Consultation",
+			"editInfo": "Edit Information",
+			"videoCall": "Video Call",
+			"audioCall": "Audio Call",
+			"chat": "Chat",
+			"tabs": {
+				"overview": "Overview",
+				"history": "History",
+				"prescriptions": "Prescriptions",
+				"notes": "Notes"
+			}
+		},
+		"prescriptions": {
+			"title": "Prescriptions",
+			"newPrescription": "New Prescription",
+			"totalPrescriptions": "Total Prescriptions",
+			"active": "Active",
+			"expired": "Expired",
+			"tableHeaders": {
+				"patient": "Patient",
+				"medications": "Medications",
+				"date": "Date",
+				"status": "Status",
+				"actions": "Actions"
+			},
+			"status": {
+				"active": "Active",
+				"expired": "Expired",
+				"cancelled": "Cancelled"
+			},
+			"actions": {
+				"view": "View",
+				"print": "Print",
+				"edit": "Edit",
+				"close": "Close"
+			},
+			"form": {
+				"patient": "Select Patient",
+				"medication": "Medication",
+				"dosage": "Dosage",
+				"frequency": "Frequency",
+				"duration": "Duration",
+				"notes": "Notes",
+				"addMedication": "Add Medication",
+				"review": "Review Prescription"
+			},
+			"steps": {
+				"patient": "Patient Selection",
+				"medication": "Medication",
+				"review": "Review"
+			}
+		},
+		"chat": {
+			"title": "Chat",
+			"newConversation": "New Conversation",
+			"totalConversations": "Total Conversations",
+			"unreadMessages": "Unread Messages",
+			"online": "Online",
+			"conversations": "Conversations",
+			"searchPlaceholder": "Search conversations...",
+			"emptyState": "No conversations yet",
+			"types": {
+				"medical": "Medical Consultation",
+				"technical": "Technical Support",
+				"general": "General"
+			},
+			"messagePlaceholder": "Type your message..."
+		},
+		"payments": {
+			"title": "Payments",
+			"newPayment": "New Payment",
+			"addMethod": "Add Payment Method",
+			"totalRevenue": "Total Revenue",
+			"totalTransactions": "Total Transactions",
+			"pendingPayments": "Pending Payments",
+			"failedPayments": "Failed Payments",
+			"paymentMethods": "Payment Methods",
+			"recentPayments": "Recent Payments",
+			"tableHeaders": {
+				"date": "Date",
+				"amount": "Amount",
+				"method": "Method",
+				"status": "Status",
+				"actions": "Actions"
+			},
+			"status": {
+				"completed": "Completed",
+				"pending": "Pending",
+				"failed": "Failed"
+			},
+			"methods": {
+				"creditCard": "Credit Card",
+				"debitCard": "Debit Card",
+				"bankTransfer": "Bank Transfer",
+				"cash": "Cash"
+			},
+			"form": {
+				"amount": "Amount",
+				"description": "Description",
+				"method": "Payment Method",
+				"cardNumber": "Card Number",
+				"expiryDate": "Expiry Date",
+				"cvv": "CVV"
+			}
+		}
+	},
+	"ThemeToggle": {
+		"lightMode": "Light Mode",
+		"darkMode": "Dark Mode"
 	}
 }

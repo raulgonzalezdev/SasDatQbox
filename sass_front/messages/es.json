@@ -174,5 +174,212 @@
 	},
 	"DashboardNavbar": {
 		"logout": "Cerrar Sesión"
+	},
+	"Dashboard": {
+		"title": "Panel de Control",
+		"welcome": "Bienvenido de vuelta",
+		"stats": {
+			"totalPatients": "Total de Pacientes",
+			"totalAppointments": "Total de Citas",
+			"totalRevenue": "Ingresos Totales",
+			"pendingAppointments": "Citas Pendientes"
+		},
+		"menu": {
+			"dashboard": "Panel",
+			"patients": "Pacientes",
+			"appointments": "Citas",
+			"consultations": "Consultas",
+			"prescriptions": "Recetas",
+			"chat": "Chat",
+			"payments": "Pagos",
+			"statistics": "Estadísticas",
+			"maintenance": "Mantenimiento",
+			"blog": "Blog",
+			"settings": "Configuración",
+			"logout": "Cerrar Sesión"
+		},
+		"navbar": {
+			"logout": "Cerrar Sesión"
+		},
+		"footer": {
+			"rights": "Todos los derechos reservados.",
+			"about": "Acerca de",
+			"security": "Seguridad",
+			"blog": "Blog"
+		},
+		"patients": {
+			"title": "Pacientes",
+			"addPatient": "Agregar Paciente",
+			"totalPatients": "Total de Pacientes",
+			"womenPercentage": "Mujeres",
+			"menPercentage": "Hombres",
+			"searchPlaceholder": "Buscar pacientes...",
+			"tableHeaders": {
+				"patient": "Paciente",
+				"age": "Edad",
+				"gender": "Género",
+				"phone": "Teléfono",
+				"lastVisit": "Última Visita"
+			},
+			"age": "años",
+			"newPatient": {
+				"createPatient": "Crear Paciente",
+				"saveChanges": "Guardar Cambios",
+				"name": "Nombre Completo",
+				"email": "Email",
+				"phone": "Teléfono",
+				"gender": "Género",
+				"male": "Masculino",
+				"female": "Femenino",
+				"other": "Otro",
+				"birthDate": "Fecha de Nacimiento",
+				"address": "Dirección",
+				"medicalHistory": "Historial Médico"
+			}
+		},
+		"appointments": {
+			"title": "Citas",
+			"newAppointment": "Nueva Cita",
+			"totalAppointments": "Total de Citas",
+			"confirmed": "Confirmadas",
+			"pending": "Pendientes",
+			"cancelled": "Canceladas",
+			"tableHeaders": {
+				"patient": "Paciente",
+				"date": "Fecha",
+				"time": "Hora",
+				"type": "Tipo",
+				"status": "Estado",
+				"actions": "Acciones"
+			},
+			"status": {
+				"confirmed": "Confirmada",
+				"pending": "Pendiente",
+				"cancelled": "Cancelada"
+			},
+			"actions": {
+				"view": "Ver",
+				"edit": "Editar",
+				"cancel": "Cancelar",
+				"confirm": "Confirmar"
+			}
+		},
+		"consultation": {
+			"title": "Consulta",
+			"patientInfo": "Información del Paciente",
+			"medicalHistory": "Historial Médico",
+			"currentSymptoms": "Síntomas Actuales",
+			"diagnosis": "Diagnóstico",
+			"treatment": "Tratamiento",
+			"notes": "Notas",
+			"endConsultation": "Terminar Consulta",
+			"editInfo": "Editar Información",
+			"videoCall": "Videollamada",
+			"audioCall": "Llamada de Audio",
+			"chat": "Chat",
+			"tabs": {
+				"overview": "Resumen",
+				"history": "Historial",
+				"prescriptions": "Recetas",
+				"notes": "Notas"
+			}
+		},
+		"prescriptions": {
+			"title": "Recetas",
+			"newPrescription": "Nueva Receta",
+			"totalPrescriptions": "Total de Recetas",
+			"active": "Activas",
+			"expired": "Expiradas",
+			"tableHeaders": {
+				"patient": "Paciente",
+				"medications": "Medicamentos",
+				"date": "Fecha",
+				"status": "Estado",
+				"actions": "Acciones"
+			},
+			"status": {
+				"active": "Activa",
+				"expired": "Expirada",
+				"cancelled": "Cancelada"
+			},
+			"actions": {
+				"view": "Ver",
+				"print": "Imprimir",
+				"edit": "Editar",
+				"close": "Cerrar"
+			},
+			"form": {
+				"patient": "Seleccionar Paciente",
+				"medication": "Medicamento",
+				"dosage": "Dosis",
+				"frequency": "Frecuencia",
+				"duration": "Duración",
+				"notes": "Notas",
+				"addMedication": "Agregar Medicamento",
+				"review": "Revisar Receta"
+			},
+			"steps": {
+				"patient": "Selección de Paciente",
+				"medication": "Medicamento",
+				"review": "Revisión"
+			}
+		},
+		"chat": {
+			"title": "Chat",
+			"newConversation": "Nueva Conversación",
+			"totalConversations": "Total de Conversaciones",
+			"unreadMessages": "Mensajes No Leídos",
+			"online": "En Línea",
+			"conversations": "Conversaciones",
+			"searchPlaceholder": "Buscar conversaciones...",
+			"emptyState": "Aún no hay conversaciones",
+			"types": {
+				"medical": "Consulta Médica",
+				"technical": "Soporte Técnico",
+				"general": "General"
+			},
+			"messagePlaceholder": "Escribe tu mensaje..."
+		},
+		"payments": {
+			"title": "Pagos",
+			"newPayment": "Nuevo Pago",
+			"addMethod": "Agregar Método de Pago",
+			"totalRevenue": "Ingresos Totales",
+			"totalTransactions": "Total de Transacciones",
+			"pendingPayments": "Pagos Pendientes",
+			"failedPayments": "Pagos Fallidos",
+			"paymentMethods": "Métodos de Pago",
+			"recentPayments": "Pagos Recientes",
+			"tableHeaders": {
+				"date": "Fecha",
+				"amount": "Monto",
+				"method": "Método",
+				"status": "Estado",
+				"actions": "Acciones"
+			},
+			"status": {
+				"completed": "Completado",
+				"pending": "Pendiente",
+				"failed": "Fallido"
+			},
+			"methods": {
+				"creditCard": "Tarjeta de Crédito",
+				"debitCard": "Tarjeta de Débito",
+				"bankTransfer": "Transferencia Bancaria",
+				"cash": "Efectivo"
+			},
+			"form": {
+				"amount": "Monto",
+				"description": "Descripción",
+				"method": "Método de Pago",
+				"cardNumber": "Número de Tarjeta",
+				"expiryDate": "Fecha de Vencimiento",
+				"cvv": "CVV"
+			}
+		}
+	},
+	"ThemeToggle": {
+		"lightMode": "Modo Claro",
+		"darkMode": "Modo Oscuro"
 	}
 }

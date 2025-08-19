@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '../constants/api';
+import { AUTH_ENDPOINTS, buildApiUrl, getAuthHeaders, getDefaultHeaders } from '../constants/api';
 
 // Clave para almacenar el token en AsyncStorage
 const TOKEN_KEY = '@medical_app_token';
@@ -106,11 +106,9 @@ export const register = async (userData: UserRegistrationData): Promise<AuthResp
   console.log('🔍 Registrando usuario médico');
   
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(buildApiUrl(AUTH_ENDPOINTS.REGISTER), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getDefaultHeaders(),
       body: JSON.stringify(userData),
     });
 
@@ -138,11 +136,9 @@ export const login = async (loginData: UserLoginData): Promise<AuthResponse> => 
   console.log('🔍 Iniciando sesión médico');
   
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(buildApiUrl(AUTH_ENDPOINTS.LOGIN), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getDefaultHeaders(),
       body: JSON.stringify(loginData),
     });
 
@@ -174,12 +170,9 @@ export const logout = async (): Promise<void> => {
     
     if (token) {
       // Intentar hacer logout en el servidor
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      await fetch(buildApiUrl(AUTH_ENDPOINTS.LOGOUT), {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(token),
       });
     }
   } catch (error) {
@@ -202,12 +195,9 @@ export const checkAuthStatus = async (): Promise<AuthStatus> => {
     }
 
     // Verificar token con el servidor
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    const response = await fetch(buildApiUrl(AUTH_ENDPOINTS.ME), {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
     });
 
     if (response.ok) {
@@ -239,12 +229,9 @@ export const updateProfile = async (userData: Partial<User>): Promise<User> => {
       throw new Error('No autenticado');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(buildApiUrl(AUTH_ENDPOINTS.PROFILE), {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
       body: JSON.stringify(userData),
     });
 
@@ -261,5 +248,36 @@ export const updateProfile = async (userData: Partial<User>): Promise<User> => {
   } catch (error) {
     console.error('Error updating profile:', error);
     throw error;
+  }
+};
+
+// Función para refrescar el token
+export const refreshToken = async (): Promise<string | null> => {
+  try {
+    const token = await getToken();
+    
+    if (!token) {
+      return null;
+    }
+
+    const response = await fetch(buildApiUrl(AUTH_ENDPOINTS.REFRESH), {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const newToken = data.token;
+      
+      if (newToken) {
+        await saveToken(newToken);
+        return newToken;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return null;
   }
 }; 
