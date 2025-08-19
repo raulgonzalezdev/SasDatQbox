@@ -13,7 +13,7 @@ import { mainListItems, secondaryListItems } from './Dashboard/listItems';
 import Logo from './Logo';
 import { useTranslations } from 'next-intl';
 
-const drawerWidth = 240;
+const drawerWidth = 250;
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }: { theme: Theme; open: boolean }) => ({
@@ -124,7 +124,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
            display: 'flex', 
            alignItems: 'center', 
            justifyContent: 'space-between', 
-           px: [0.5, 2], // Reduced left padding, increased right padding
+           px: [1, 2], // Balanced padding
            backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
            color: 'white',
            minHeight: '64px',
@@ -135,20 +135,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
          }}>
                      {open ? (
              // When sidebar is extended - show BoxDoctor brand
-                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexGrow: 1, minWidth: 0 }}>
-                <Logo width={100} height={100} disabledLink={true} />
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    fontWeight: 'bold',
-                    color: 'white',
-                    flexGrow: 1,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    fontSize: '0.85rem'
-                  }}
-                >
+                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, minWidth: 0 }}>
+                <Logo width={80} height={80} disabledLink={true} />
+                                 <Typography 
+                   variant="body1" 
+                   sx={{ 
+                     fontWeight: 'bold',
+                     color: 'white',
+                     flexGrow: 1,
+                     overflow: 'hidden',
+                     textOverflow: 'ellipsis',
+                     whiteSpace: 'nowrap',
+                     fontSize: '0.95rem'
+                   }}
+                 >
                   BoxDoctor
                 </Typography>
               </Box>

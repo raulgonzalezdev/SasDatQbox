@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import LanguageSelector from '../Navbar/LanguageSelector';
 import ThemeToggle from '../ThemeToggle';
 
-const drawerWidth = 240;
+const drawerWidth = 250;
 
 interface DashboardNavbarProps {
   toggleDrawer: () => void;
