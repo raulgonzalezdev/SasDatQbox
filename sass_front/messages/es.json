@@ -12,11 +12,7 @@
 		"dashboard": "Panel",
 		"logout": "Cerrar sesión",
 		"login": "Iniciar sesión",
-		"downloadApp": "Descargar App",
-		"skipToContent": "Saltar al contenido",
-		"loading": "Cargando...",
-		"spanishAbbreviation": "ES",
-		"englishAbbreviation": "EN"
+		"downloadApp": "Descargar App"
 	},
 	"Footer": {
 		"product": "Producto",
@@ -164,222 +160,397 @@
 			"messageMin": "El mensaje debe tener al menos 10 caracteres."
 		}
 	},
+	"SupportChat": {
+		"welcomeMessage": "¡Hola! Bienvenido al soporte. ¿En qué podemos ayudarte?",
+		"responseMessage": "Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto.",
+		"assistantName": "¡Hola, soy SIA!",
+		"assistantSubtitle": "Tu asistente virtual.",
+		"placeholder": "Escribe aquí...",
+		"menu": {
+			"register": "Registrarse",
+			"login": "Iniciar Sesión"
+		}
+	},
+	"ThemeToggle": {
+		"lightMode": "Cambiar a modo claro",
+		"darkMode": "Cambiar a modo oscuro"
+	},
 	"About": {
 		"missionTitle": "Nuestra Misión",
-		"missionSubtitle": "Revolucionar la telemedicina, haciendo que la atención médica de calidad sea accesible para todos, en cualquier lugar.",
+		"missionSubtitle": "Transformar la atención médica a través de la tecnología innovadora",
 		"aboutBoxDoctorTitle": "Sobre BoxDoctor",
-		"aboutBoxDoctorP1": "BoxDoctor nació de la visión de un grupo de médicos y tecnólogos que creían que la tecnología podía cerrar la brecha entre pacientes y proveedores de salud. Cansados de sistemas anticuados y poco intuitivos, nos propusimos crear una plataforma de telemedicina que fuera segura, fácil de usar y totalmente personalizable para adaptarse a las necesidades de cada práctica médica.",
+		"aboutBoxDoctorP1": "BoxDoctor es una plataforma integral de telemedicina diseñada para conectar profesionales de la salud con pacientes de manera segura y eficiente. Nuestra tecnología de vanguardia permite consultas virtuales de alta calidad, gestión de recetas, programación de citas y comunicación en tiempo real, todo mientras mantenemos los más altos estándares de seguridad y cumplimiento HIPAA.",
 		"ourTeamTitle": "Nuestro Equipo",
-		"ourTeamP1": "Somos un equipo diverso de profesionales apasionados por la salud y la innovación. Desde desarrolladores de software hasta expertos en cumplimiento normativo, cada miembro de BoxDoctor comparte el compromiso de ofrecer una herramienta que realmente marque la diferencia en la vida de las personas."
-	},
-	"DashboardNavbar": {
-		"logout": "Cerrar Sesión"
+		"ourTeamP1": "Somos un equipo apasionado de desarrolladores, profesionales de la salud y expertos en tecnología comprometidos con revolucionar la forma en que se brinda la atención médica. Nuestra experiencia combinada en medicina, tecnología y experiencia del usuario nos permite crear soluciones que realmente marcan la diferencia en la vida de médicos y pacientes."
 	},
 	"Dashboard": {
 		"title": "Panel de Control",
-		"welcome": "Bienvenido de vuelta",
 		"stats": {
 			"totalPatients": "Total de Pacientes",
-			"totalAppointments": "Total de Citas",
-			"totalRevenue": "Ingresos Totales",
-			"pendingAppointments": "Citas Pendientes"
+			"totalAppointments": "Citas Totales",
+			"todayAppointments": "Citas de Hoy",
+			"todayRevenue": "Ingresos de Hoy",
+			"activeConversations": "Conversaciones Activas"
 		},
+		"chart": {
+			"title": "Ingresos Mensuales",
+			"revenue": "Ingresos",
+			"expenses": "Gastos"
+		},
+		"months": [
+			"Enero",
+			"Febrero",
+			"Marzo",
+			"Abril",
+			"Mayo",
+			"Junio",
+			"Julio",
+			"Agosto",
+			"Septiembre",
+			"Octubre",
+			"Noviembre",
+			"Diciembre"
+		],
 		"menu": {
 			"dashboard": "Panel",
 			"patients": "Pacientes",
-			"appointments": "Citas",
+			"appointments": "Agenda",
 			"consultations": "Consultas",
 			"prescriptions": "Recetas",
 			"chat": "Chat",
 			"payments": "Pagos",
 			"statistics": "Estadísticas",
-			"maintenance": "Mantenimiento",
+			"mainSite": "Sitio Principal",
 			"blog": "Blog",
 			"settings": "Configuración",
 			"logout": "Cerrar Sesión"
 		},
 		"navbar": {
+			"user": "Usuario",
+			"doctor": "Médico",
+			"profile": "Mi Perfil",
 			"logout": "Cerrar Sesión"
 		},
 		"footer": {
 			"rights": "Todos los derechos reservados.",
-			"about": "Acerca de",
+			"about": "Sobre Nosotros",
 			"security": "Seguridad",
 			"blog": "Blog"
 		},
+		"appointments": {
+			"title": "Agenda de Citas",
+			"noAppointments": "No hay citas este día",
+			"newAppointment": "Agendar nueva cita",
+			"today": "Hoy",
+			"week": "Semana",
+			"months": {
+				"january": "Enero",
+				"february": "Febrero",
+				"march": "Marzo",
+				"april": "Abril",
+				"may": "Mayo",
+				"june": "Junio",
+				"july": "Julio",
+				"august": "Agosto",
+				"september": "Septiembre",
+				"october": "Octubre",
+				"november": "Noviembre",
+				"december": "Diciembre"
+			},
+			"days": {
+				"monday": "Lunes",
+				"tuesday": "Martes",
+				"wednesday": "Miércoles",
+				"thursday": "Jueves",
+				"friday": "Viernes",
+				"saturday": "Sábado",
+				"sunday": "Domingo"
+			}
+		},
 		"patients": {
 			"title": "Pacientes",
-			"addPatient": "Agregar Paciente",
-			"totalPatients": "Total de Pacientes",
-			"womenPercentage": "Mujeres",
-			"menPercentage": "Hombres",
-			"searchPlaceholder": "Buscar pacientes...",
+			"addPatient": "Agregar paciente",
+			"searchPlaceholder": "Buscar por apellido de paciente...",
+			"totalPatients": "Total de pacientes",
+			"womenPercentage": "% Mujeres",
+			"menPercentage": "% Hombres",
 			"tableHeaders": {
-				"patient": "Paciente",
-				"age": "Edad",
-				"gender": "Género",
-				"phone": "Teléfono",
-				"lastVisit": "Última Visita"
+				"patient": "PACIENTE",
+				"age": "EDAD",
+				"gender": "SEXO",
+				"phone": "TELÉFONO",
+				"lastConsultation": "ÚLTIMA CONSULTA",
+				"nextConsultation": "PRÓXIMA CONSULTA",
+				"actions": "ACCIONES"
 			},
 			"age": "años",
+			"continueConsultation": "Continuar consulta",
+			"startConsultation": "Iniciar consulta",
+			"editPatient": "Editar paciente",
+			"deletePatient": "Eliminar paciente",
+			"confirmDelete": "Confirmar eliminación",
+			"confirmDeleteMessage": "¿Estás seguro de que quieres eliminar al paciente",
+			"confirmDeleteWarning": "Esta acción no se puede deshacer.",
+			"cancel": "Cancelar",
+			"save": "Guardar",
+			"delete": "Eliminar",
 			"newPatient": {
+				"title": "Registrar Nuevo Paciente",
+				"description": "Completa los siguientes campos para añadir un nuevo paciente a tu lista.",
 				"createPatient": "Crear Paciente",
-				"saveChanges": "Guardar Cambios",
-				"name": "Nombre Completo",
-				"email": "Email",
-				"phone": "Teléfono",
-				"gender": "Género",
+				"saveChanges": "Guardar Cambios"
+			},
+			"form": {
+				"firstName": "Nombre *",
+				"lastName": "Apellido *",
+				"dateOfBirth": "Fecha de nacimiento *",
+				"gender": "Sexo *",
 				"male": "Masculino",
 				"female": "Femenino",
-				"other": "Otro",
-				"birthDate": "Fecha de Nacimiento",
-				"address": "Dirección",
-				"medicalHistory": "Historial Médico"
-			}
-		},
-		"appointments": {
-			"title": "Citas",
-			"newAppointment": "Nueva Cita",
-			"totalAppointments": "Total de Citas",
-			"confirmed": "Confirmadas",
-			"pending": "Pendientes",
-			"cancelled": "Canceladas",
-			"tableHeaders": {
-				"patient": "Paciente",
-				"date": "Fecha",
-				"time": "Hora",
-				"type": "Tipo",
-				"status": "Estado",
-				"actions": "Acciones"
-			},
-			"status": {
-				"confirmed": "Confirmada",
-				"pending": "Pendiente",
-				"cancelled": "Cancelada"
-			},
-			"actions": {
-				"view": "Ver",
-				"edit": "Editar",
-				"cancel": "Cancelar",
-				"confirm": "Confirmar"
-			}
-		},
-		"consultation": {
-			"title": "Consulta",
-			"patientInfo": "Información del Paciente",
-			"medicalHistory": "Historial Médico",
-			"currentSymptoms": "Síntomas Actuales",
-			"diagnosis": "Diagnóstico",
-			"treatment": "Tratamiento",
-			"notes": "Notas",
-			"endConsultation": "Terminar Consulta",
-			"editInfo": "Editar Información",
-			"videoCall": "Videollamada",
-			"audioCall": "Llamada de Audio",
-			"chat": "Chat",
-			"tabs": {
-				"overview": "Resumen",
-				"history": "Historial",
-				"prescriptions": "Recetas",
+				"email": "Email",
+				"phone": "Teléfono *",
 				"notes": "Notas"
 			}
 		},
+		"consultation": {
+			"title": "Consulta Médica",
+			"patientNotFound": "Paciente no encontrado",
+			"editInfo": "Editar información",
+			"finishConsultation": "Terminar consulta",
+			"tabs": {
+				"file": "Ficha",
+				"medicalHistory": "Historia clínica",
+				"consultation": "Consulta",
+				"history": "Historial",
+				"studies": "Estudios"
+			},
+			"patientInfo": {
+				"personalInfo": "Información personal",
+				"emergencyContact": "Contacto de emergencia",
+				"billingInfo": "Datos de facturación",
+				"notes": "Notas",
+				"notesPlaceholder": "Notas adicionales sobre el paciente...",
+				"fields": {
+					"address": "Dirección",
+					"birthState": "Estado de nacimiento",
+					"nationality": "Nacionalidad",
+					"birthCity": "Ciudad de nacimiento",
+					"relationship": "Parentesco",
+					"bloodType": "Grupo Sanguíneo",
+					"education": "Escolaridad",
+					"profession": "Profesión/Ocupación",
+					"religion": "Religión",
+					"maritalStatus": "Estado civil",
+					"phone": "Teléfono",
+					"email": "Email",
+					"fullName": "Nombre y apellido",
+					"taxRegime": "Régimen fiscal",
+					"cfdiUse": "Uso de CFDI",
+					"rfc": "RFC"
+				}
+			},
+			"medicalHistory": {
+				"hereditaryFamily": "Antecedentes heredo-familiares",
+				"nonPathological": "Antecedentes no patológicos",
+				"pathological": "Antecedentes patológicos",
+				"systemsInterrogation": "Interrogatorio por aparatos y sistemas",
+				"yes": "Sí",
+				"no": "No",
+				"details": "Detalles...",
+				"conditions": {
+					"diabetes": "Diabetes",
+					"hypertension": "Hipertensión",
+					"cardiovascular": "Cardiovascular",
+					"thyroid": "Tiroides",
+					"cancer": "Cáncer",
+					"renal": "Renal",
+					"lupus": "Lupus",
+					"parkinson": "Parkinson",
+					"alzheimer": "Alzheimer",
+					"activeMedications": "Medicamentos activos",
+					"other": "Otros",
+					"smoking": "Tabaquismo",
+					"alcohol": "Alcohol",
+					"drugs": "Drogas",
+					"exercise": "Ejercicio",
+					"diet": "Dieta",
+					"sleep": "Sueño",
+					"stress": "Estrés",
+					"surgeries": "Cirugías",
+					"hospitalizations": "Hospitalizaciones",
+					"allergies": "Alergias",
+					"chronicDiseases": "Enfermedades crónicas",
+					"medications": "Medicamentos",
+					"respiratory": "Respiratorio",
+					"digestive": "Digestivo",
+					"genitourinary": "Genitourinario",
+					"musculoskeletal": "Musculoesquelético",
+					"neurological": "Neurológico",
+					"endocrine": "Endocrino",
+					"skin": "Piel"
+				}
+			},
+			"inDevelopment": {
+				"consultation": "Consulta en desarrollo...",
+				"history": "Historial en desarrollo...",
+				"studies": "Estudios médicos en desarrollo..."
+			},
+			"videoCall": {
+				"patientVideo": "Video del Paciente",
+				"myVideo": "Mi Video"
+			}
+		},
 		"prescriptions": {
-			"title": "Recetas",
+			"title": "Gestión de Recetas",
 			"newPrescription": "Nueva Receta",
-			"totalPrescriptions": "Total de Recetas",
-			"active": "Activas",
-			"expired": "Expiradas",
-			"tableHeaders": {
-				"patient": "Paciente",
-				"medications": "Medicamentos",
-				"date": "Fecha",
-				"status": "Estado",
-				"actions": "Acciones"
+			"stats": {
+				"totalPrescriptions": "Recetas Totales",
+				"activePrescriptions": "Recetas Activas",
+				"completedPrescriptions": "Completadas",
+				"prescribedMedications": "Medicamentos Recetados"
 			},
 			"status": {
 				"active": "Activa",
-				"expired": "Expirada",
-				"cancelled": "Cancelada"
+				"completed": "Completada",
+				"expired": "Expirada"
 			},
 			"actions": {
 				"view": "Ver",
-				"print": "Imprimir",
 				"edit": "Editar",
-				"close": "Cerrar"
+				"print": "Imprimir",
+				"delete": "Eliminar",
+				"close": "Cerrar",
+				"cancel": "Cancelar",
+				"back": "Atrás",
+				"next": "Siguiente",
+				"createPrescription": "Crear Receta"
 			},
-			"form": {
-				"patient": "Seleccionar Paciente",
-				"medication": "Medicamento",
+			"prescription": {
+				"title": "Receta",
+				"patientInfo": "Información del Paciente",
+				"name": "Nombre",
+				"id": "ID",
+				"doctor": "Médico",
+				"date": "Fecha",
+				"status": "Estado",
+				"notes": "Notas",
+				"medications": "Medicamentos",
+				"medicationCount": "medicamento(s)"
+			},
+			"medication": {
+				"name": "Medicamento",
 				"dosage": "Dosis",
 				"frequency": "Frecuencia",
 				"duration": "Duración",
-				"notes": "Notas",
-				"addMedication": "Agregar Medicamento",
-				"review": "Revisar Receta"
+				"instructions": "Instrucciones"
 			},
-			"steps": {
-				"patient": "Selección de Paciente",
-				"medication": "Medicamento",
-				"review": "Revisión"
+			"newPrescriptionForm": {
+				"title": "Nueva Receta",
+				"steps": {
+					"patientInfo": "Información del Paciente",
+					"medications": "Medicamentos",
+					"instructions": "Instrucciones",
+					"review": "Revisión"
+				},
+				"selectPatient": "Seleccionar Paciente",
+				"addMedications": "Añadir Medicamentos",
+				"additionalNotes": "Notas adicionales",
+				"reviewInfo": "Revisa la información antes de crear la receta...",
+				"medicationsWillBeAdded": "Los medicamentos se agregarán en el siguiente paso..."
 			}
 		},
 		"chat": {
-			"title": "Chat",
-			"newConversation": "Nueva Conversación",
-			"totalConversations": "Total de Conversaciones",
-			"unreadMessages": "Mensajes No Leídos",
-			"online": "En Línea",
-			"conversations": "Conversaciones",
-			"searchPlaceholder": "Buscar conversaciones...",
-			"emptyState": "Aún no hay conversaciones",
-			"types": {
-				"medical": "Consulta Médica",
-				"technical": "Soporte Técnico",
-				"general": "General"
+			"title": "Chat y Conversaciones",
+			"stats": {
+				"totalConversations": "Conversaciones Totales",
+				"medicalConsultations": "Consultas Médicas",
+				"technicalSupport": "Soporte Técnico",
+				"generalConversations": "Conversaciones Generales"
 			},
-			"messagePlaceholder": "Escribe tu mensaje..."
+			"conversations": {
+				"title": "Conversaciones",
+				"noConversations": "No hay conversaciones disponibles",
+				"selectConversation": "Selecciona una conversación para comenzar a chatear",
+				"noMessages": "No hay mensajes en esta conversación",
+				"writeMessage": "Escribe un mensaje...",
+				"created": "Creada"
+			},
+			"types": {
+				"medical_consultation": "Consulta Médica",
+				"support": "Soporte",
+				"general": "General"
+			}
 		},
 		"payments": {
-			"title": "Pagos",
+			"title": "Gestión de Pagos",
 			"newPayment": "Nuevo Pago",
-			"addMethod": "Agregar Método de Pago",
-			"totalRevenue": "Ingresos Totales",
-			"totalTransactions": "Total de Transacciones",
-			"pendingPayments": "Pagos Pendientes",
-			"failedPayments": "Pagos Fallidos",
-			"paymentMethods": "Métodos de Pago",
-			"recentPayments": "Pagos Recientes",
-			"tableHeaders": {
-				"date": "Fecha",
-				"amount": "Monto",
-				"method": "Método",
-				"status": "Estado",
-				"actions": "Acciones"
+			"paymentMethod": "Método de Pago",
+			"stats": {
+				"totalRevenue": "Ingresos Totales",
+				"totalTransactions": "Transacciones Totales",
+				"pendingPayments": "Pagos Pendientes",
+				"failedPayments": "Pagos Fallidos"
 			},
 			"status": {
 				"completed": "Completado",
 				"pending": "Pendiente",
-				"failed": "Fallido"
+				"failed": "Fallido",
+				"refunded": "Reembolsado"
 			},
-			"methods": {
+			"paymentMethods": {
+				"title": "Métodos de Pago",
 				"creditCard": "Tarjeta de Crédito",
-				"debitCard": "Tarjeta de Débito",
 				"bankTransfer": "Transferencia Bancaria",
-				"cash": "Efectivo"
+				"cash": "Efectivo",
+				"insurance": "Seguro Médico",
+				"bankAccount": "Cuenta Bancaria",
+				"default": "Predeterminado"
+			},
+			"actions": {
+				"view": "Ver",
+				"edit": "Editar",
+				"delete": "Eliminar",
+				"download": "Descargar",
+				"close": "Cerrar",
+				"cancel": "Cancelar",
+				"add": "Agregar",
+				"processPayment": "Procesar Pago"
+			},
+			"payment": {
+				"title": "Pago",
+				"detail": "Detalle del Pago",
+				"patientInfo": "Información del Paciente",
+				"paymentInfo": "Información del Pago",
+				"name": "Nombre",
+				"id": "ID",
+				"invoice": "Factura",
+				"amount": "Monto",
+				"date": "Fecha",
+				"description": "Descripción",
+				"receipt": "Recibo"
 			},
 			"form": {
-				"amount": "Monto",
-				"description": "Descripción",
-				"method": "Método de Pago",
+				"addPaymentMethod": "Agregar Método de Pago",
+				"newPayment": "Nuevo Pago",
+				"methodType": "Tipo de Método",
 				"cardNumber": "Número de Tarjeta",
 				"expiryDate": "Fecha de Vencimiento",
-				"cvv": "CVV"
+				"cvv": "CVV",
+				"patient": "Paciente",
+				"amount": "Monto",
+				"paymentMethod": "Método de Pago",
+				"description": "Descripción",
+				"descriptionPlaceholder": "Descripción del pago..."
+			},
+			"recentPayments": "Pagos Recientes",
+			"tableHeaders": {
+				"patient": "Paciente",
+				"amount": "Monto",
+				"method": "Método",
+				"status": "Estado",
+				"date": "Fecha",
+				"actions": "Acciones"
 			}
 		}
-	},
-	"ThemeToggle": {
-		"lightMode": "Modo Claro",
-		"darkMode": "Modo Oscuro"
 	}
 }
