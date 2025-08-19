@@ -2,14 +2,19 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Definir los tipos para el estado de la aplicación
+// Definir los tipos para el estado de la aplicación médica
 interface User {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: string;
-  businessName: string;
+  phone?: string;
+  avatar_url?: string;
+  role: 'doctor' | 'patient' | 'admin';
+  businessName?: string;
   isPremium: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface AppState {
@@ -20,13 +25,15 @@ interface AppState {
   // Estado de la aplicación
   isDemo: boolean;
   hidePromotions: boolean;
+  currentLocale: 'es' | 'en';
   
   // Acciones
   setUser: (user: User | null) => void;
-  updateUser: (userData: User) => void;
+  updateUser: (userData: Partial<User>) => void;
   setAuthenticated: (isAuthenticated: boolean) => void;
   setDemo: (isDemo: boolean) => void;
   setHidePromotions: (hidePromotions: boolean) => void;
+  setLocale: (locale: 'es' | 'en') => void;
   logout: () => void;
 }
 
@@ -37,22 +44,28 @@ export const useAppStore = create<AppState>()(
       // Estado inicial
       isAuthenticated: false,
       user: null,
-      isDemo: true, // Por defecto, la aplicación está en modo demo
-      hidePromotions: false, // Por defecto, mostrar promociones
+      isDemo: false, // Cambiado a false para app médica
+      hidePromotions: false,
+      currentLocale: 'es',
       
       // Acciones
       setUser: (user) => set({ user }),
       updateUser: (userData) => set((state) => ({
-        user: { ...state.user, ...userData }
+        user: state.user ? { ...state.user, ...userData } : null
       })),
       setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
       setDemo: (isDemo) => set({ isDemo }),
       setHidePromotions: (hidePromotions) => set({ hidePromotions }),
-      logout: () => set({ isAuthenticated: false, user: null }),
+      setLocale: (currentLocale) => set({ currentLocale }),
+      logout: () => set({ 
+        isAuthenticated: false, 
+        user: null,
+        currentLocale: 'es'
+      }),
     }),
     {
-      name: 'app-storage', // Nombre para la persistencia
-      storage: createJSONStorage(() => AsyncStorage), // Usar AsyncStorage para persistencia
+      name: 'medical-app-storage', // Nombre actualizado para la app médica
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );
@@ -60,7 +73,6 @@ export const useAppStore = create<AppState>()(
 // Funciones de utilidad para acceder al estado
 export const isUserPremium = (): boolean => {
   const { user, isDemo } = useAppStore.getState();
-  // Si está en modo demo o el usuario no es premium, devuelve false
   return !isDemo && user?.isPremium === true;
 };
 
@@ -74,6 +86,22 @@ export const getCurrentUser = (): User | null => {
 
 export const isDemoMode = (): boolean => {
   return useAppStore.getState().isDemo;
+};
+
+export const getUserRole = (): 'doctor' | 'patient' | 'admin' | null => {
+  return useAppStore.getState().user?.role || null;
+};
+
+export const isDoctor = (): boolean => {
+  return getUserRole() === 'doctor';
+};
+
+export const isPatient = (): boolean => {
+  return getUserRole() === 'patient';
+};
+
+export const isAdmin = (): boolean => {
+  return getUserRole() === 'admin';
 };
 
 // Nueva función para verificar si se deben mostrar promociones

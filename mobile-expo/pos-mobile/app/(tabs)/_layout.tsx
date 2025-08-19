@@ -5,8 +5,12 @@ import { Platform, View } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/GlobalStyles';
+import { useAppStore } from '@/store/appStore';
 
 export default function TabLayout() {
+  const { user } = useAppStore();
+  const isDoctor = user?.role === 'doctor';
+
   return (
     <Tabs
       screenOptions={{
@@ -58,40 +62,36 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="reportes"
+        name="appointments"
         options={{
-          title: 'Reportes',
-          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} />,
+          title: isDoctor ? 'Citas' : 'Mis Citas',
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="ventas"
+        name="chat"
         options={{
-          title: 'Balance',
-          tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" size={size} color={color} />,
+          title: 'Chat',
+          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} />,
         }}
       />
+      {isDoctor && (
+        <Tabs.Screen
+          name="patients"
+          options={{
+            title: 'Pacientes',
+            tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          }}
+        />
+      )}
       <Tabs.Screen
-        name="gastos"
+        name="profile"
         options={{
-          title: 'Deudas',
-          tabBarIcon: ({ color, size }) => <Ionicons name="cash-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="inventario"
-        options={{
-          title: 'Menú',
-          tabBarIcon: ({ color, size }) => <Ionicons name="restaurant-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid-outline" size={size} color={color} />,
+          title: 'Perfil',
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
     </Tabs>
   );
 }
+

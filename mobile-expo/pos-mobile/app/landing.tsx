@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image, Linking, Switch, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image, Linking, Alert } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
-import { useAppStore, isUserPremium, getCurrentUser } from '@/store/appStore';
+import { useAppStore } from '@/store/appStore';
 
 export default function LandingPage() {
   const { hidePromotions, setHidePromotions } = useAppStore();
-  const isPremium = isUserPremium();
-  const user = getCurrentUser();
   const [hidePromos, setHidePromos] = useState(hidePromotions);
   
-  // Planes disponibles
+  // Planes disponibles para BoxDoctor
   const plans = [
     {
       id: 1,
@@ -22,9 +20,9 @@ export default function LandingPage() {
       price: '$0',
       period: 'mes',
       features: [
-        'Gestión de inventario básica',
-        'Registro de ventas',
-        'Reportes básicos',
+        'Agendar citas básicas',
+        'Chat con el doctor',
+        'Historial médico básico',
         'Soporte por email',
       ],
       recommended: false,
@@ -37,10 +35,11 @@ export default function LandingPage() {
       price: '$9.99',
       period: 'mes',
       features: [
-        'Gestión de inventario avanzada',
-        'Registro de ventas ilimitado',
-        'Reportes básicos',
-        'Soporte por email',
+        'Agendar citas ilimitadas',
+        'Chat prioritario',
+        'Historial médico completo',
+        'Recordatorios de citas',
+        'Soporte prioritario',
       ],
       recommended: false,
       color: Colors.info,
@@ -52,12 +51,12 @@ export default function LandingPage() {
       price: '$19.99',
       period: 'mes',
       features: [
-        'Gestión de inventario avanzada',
-        'Registro de ventas ilimitado',
-        'Reportes avanzados y exportación',
-        'Impresión de tickets',
-        'Gestión de clientes',
-        'Soporte prioritario',
+        'Todas las funciones básicas',
+        'Video consultas',
+        'Prescripciones digitales',
+        'Análisis médicos',
+        'Soporte 24/7',
+        'Acceso a especialistas',
       ],
       recommended: true,
       color: Colors.primary,
@@ -69,8 +68,8 @@ export default function LandingPage() {
       price: '$39.99',
       period: 'mes',
       features: [
-        'Múltiples sucursales',
-        'Usuarios ilimitados',
+        'Múltiples doctores',
+        'Gestión de clínica',
         'Todas las funciones premium',
         'API para integraciones',
         'Soporte 24/7',
@@ -83,253 +82,186 @@ export default function LandingPage() {
   ];
 
   const handleRegister = (planId: number) => {
-    // Si el usuario ya es premium, mostrar un mensaje
-    if (isPremium) {
-      Alert.alert(
-        'Ya tienes acceso premium',
-        'Ya tienes acceso a todas las funcionalidades premium. No es necesario cambiar de plan.',
-        [{ text: 'Entendido' }]
-      );
-      return;
-    }
-    
-    // Si el usuario no está autenticado, redirigir a la pantalla de registro
-    if (!user) {
-      router.push('/auth/register');
-      return;
-    }
-    
-    // Si el usuario está autenticado pero no es premium, simular la actualización a premium
-    const plan = plans.find(p => p.id === planId);
-    if (plan && plan.isPremium) {
-      Alert.alert(
-        'Actualizar a plan premium',
-        `¿Estás seguro de que deseas actualizar al plan ${plan.name} por ${plan.price}/${plan.period}?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Actualizar', 
-            onPress: () => {
-              // Simular la actualización a premium
-              const { updateUser, setHidePromotions } = useAppStore.getState();
-              updateUser({
-                ...user,
-                isPremium: true
-              });
-              setHidePromotions(true);
-              
-              Alert.alert(
-                'Plan actualizado',
-                `Tu plan ha sido actualizado a ${plan.name}. Ahora tienes acceso a todas las funcionalidades premium.`,
-                [
-                  { 
-                    text: 'Continuar', 
-                    onPress: () => router.replace('/(tabs)') 
-                  }
-                ]
-              );
-            }
-          }
-        ]
-      );
-    }
+    // Redirigir a la pantalla de registro
+    router.push('/auth/register');
   };
-  
-  const toggleHidePromotions = () => {
-    const newValue = !hidePromos;
-    setHidePromos(newValue);
-    setHidePromotions(newValue);
-    
-    if (newValue) {
-      Alert.alert(
-        'Promociones ocultas',
-        'Las promociones y mensajes sobre características premium han sido ocultados. Puedes cambiar esta configuración en cualquier momento desde la pantalla de Configuración.',
-        [{ text: 'Entendido' }]
-      );
-    }
+
+  const handleLogin = () => {
+    router.push('/auth/login');
+  };
+
+  const handleDownloadApp = () => {
+    // Aquí se puede agregar la lógica para descargar la app
+    Alert.alert(
+      'Descargar App',
+      'La app ya está disponible en tu dispositivo. Si necesitas la versión web, visita boxdoctor.com',
+      [{ text: 'Entendido' }]
+    );
   };
 
   return (
     <SafeAreaView style={CommonStyles.safeArea}>
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={Colors.dark} />
-        </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Planes y Precios</ThemedText>
-        <View style={{ width: 24 }} />
-      </View>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <ThemedText style={styles.logo}>BoxDoctor</ThemedText>
+            <ThemedText style={styles.tagline}>Tu salud en tus manos</ThemedText>
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <ThemedText style={styles.loginButtonText}>Iniciar Sesión</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      <ThemedView style={CommonStyles.container}>
-        <ScrollView style={CommonStyles.content}>
-          {/* Banner principal */}
-          <View style={styles.heroBanner}>
-            {isPremium ? (
-              <>
-                <View style={styles.premiumBadge}>
-                  <Ionicons name="star" size={24} color={Colors.white} />
-                  <ThemedText style={styles.premiumBadgeText}>Premium</ThemedText>
-                </View>
-                <ThemedText style={styles.heroTitle}>¡Gracias por tu apoyo!</ThemedText>
-                <ThemedText style={styles.heroSubtitle}>
-                  Estás disfrutando de todas las funcionalidades premium de DatqboxPos
-                </ThemedText>
-              </>
-            ) : (
-              <>
-                <ThemedText style={styles.heroTitle}>Potencia tu Negocio</ThemedText>
-                <ThemedText style={styles.heroSubtitle}>
-                  Elige el plan perfecto para tu restaurante y lleva tu gestión al siguiente nivel
-                </ThemedText>
-              </>
-            )}
-            <View style={styles.heroIconContainer}>
-              <Ionicons name={isPremium ? "checkmark-circle" : "rocket"} size={60} color={Colors.white} />
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <ThemedText style={styles.heroTitle}>
+            Conecta con tu doctor de forma segura y fácil
+          </ThemedText>
+          <ThemedText style={styles.heroSubtitle}>
+            BoxDoctor te permite agendar citas, chatear con tu médico y gestionar tu salud desde cualquier lugar
+          </ThemedText>
+          
+          <View style={styles.heroButtons}>
+            <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/auth/register')}>
+              <ThemedText style={styles.primaryButtonText}>Comenzar Ahora</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryButton} onPress={handleDownloadApp}>
+              <Ionicons name="download" size={20} color={Colors.secondary} />
+              <ThemedText style={styles.secondaryButtonText}>Descargar App</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Features Section */}
+        <View style={styles.featuresSection}>
+          <ThemedText style={styles.sectionTitle}>¿Por qué elegir BoxDoctor?</ThemedText>
+          
+          <View style={styles.featuresGrid}>
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name="calendar" size={32} color={Colors.primary} />
+              </View>
+              <ThemedText style={styles.featureTitle}>Agenda Citas</ThemedText>
+              <ThemedText style={styles.featureDescription}>
+                Reserva tu cita médica en segundos, 24/7
+              </ThemedText>
+            </View>
+
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name="chatbubbles" size={32} color={Colors.primary} />
+              </View>
+              <ThemedText style={styles.featureTitle}>Chat Médico</ThemedText>
+              <ThemedText style={styles.featureDescription}>
+                Comunícate directamente con tu doctor
+              </ThemedText>
+            </View>
+
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name="medical" size={32} color={Colors.primary} />
+              </View>
+              <ThemedText style={styles.featureTitle}>Historial Médico</ThemedText>
+              <ThemedText style={styles.featureDescription}>
+                Accede a tu información médica completa
+              </ThemedText>
+            </View>
+
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name="shield-checkmark" size={32} color={Colors.primary} />
+              </View>
+              <ThemedText style={styles.featureTitle}>100% Seguro</ThemedText>
+              <ThemedText style={styles.featureDescription}>
+                Tus datos médicos están protegidos
+              </ThemedText>
             </View>
           </View>
+        </View>
 
-          {/* Opción para ocultar promociones - Solo se muestra si el usuario no es premium */}
-          {!isPremium && (
-            <View style={styles.hidePromosContainer}>
-              <View style={styles.hidePromosContent}>
-                <Ionicons name="eye-off-outline" size={24} color={Colors.darkGray} style={styles.hidePromosIcon} />
-                <View style={styles.hidePromosTextContainer}>
-                  <ThemedText style={styles.hidePromosTitle}>No estoy interesado</ThemedText>
-                  <ThemedText style={styles.hidePromosSubtitle}>Ocultar mensajes promocionales</ThemedText>
-                </View>
-              </View>
-              <Switch
-                value={hidePromos}
-                onValueChange={toggleHidePromotions}
-                trackColor={{ false: Colors.lightGray, true: Colors.secondaryLight }}
-                thumbColor={hidePromos ? Colors.secondary : Colors.white}
-              />
-            </View>
-          )}
-
-          {/* Planes */}
-          <View style={CommonStyles.section}>
-            <ThemedText style={CommonStyles.sectionTitle}>
-              {isPremium ? 'Tu plan actual' : 'Planes Disponibles'}
+        {/* Pricing Section */}
+        {!hidePromos && (
+          <View style={styles.pricingSection}>
+            <ThemedText style={styles.sectionTitle}>Planes y Precios</ThemedText>
+            <ThemedText style={styles.sectionSubtitle}>
+              Elige el plan que mejor se adapte a tus necesidades
             </ThemedText>
-            
-            {plans.map(plan => (
-              // Si el usuario es premium, solo mostrar planes premium
-              (!isPremium || plan.isPremium) && (
-                <View 
-                  key={plan.id} 
-                  style={[
-                    styles.planCard,
-                    plan.recommended && styles.recommendedPlan,
-                    isPremium && plan.id === 3 && styles.currentPlan, // Asumimos que el usuario premium tiene el plan Premium (id: 3)
-                  ]}
-                >
-                  {plan.recommended && !isPremium && (
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.plansContainer}>
+              {plans.map((plan) => (
+                <View key={plan.id} style={[styles.planCard, plan.recommended && styles.recommendedPlan]}>
+                  {plan.recommended && (
                     <View style={styles.recommendedBadge}>
                       <ThemedText style={styles.recommendedText}>Recomendado</ThemedText>
                     </View>
                   )}
                   
-                  {isPremium && plan.id === 3 && (
-                    <View style={[styles.recommendedBadge, { backgroundColor: Colors.success }]}>
-                      <ThemedText style={styles.recommendedText}>Tu Plan</ThemedText>
-                    </View>
-                  )}
-                  
-                  <View style={styles.planHeader}>
-                    <ThemedText style={styles.planName}>{plan.name}</ThemedText>
-                    <View style={[styles.planIconContainer, { backgroundColor: plan.color }]}>
-                      <Ionicons 
-                        name={plan.id === 1 ? 'gift-outline' : plan.id === 2 ? 'cafe' : plan.id === 3 ? 'restaurant' : 'business'} 
-                        size={24} 
-                        color={Colors.white} 
-                      />
-                    </View>
+                  <ThemedText style={styles.planName}>{plan.name}</ThemedText>
+                  <View style={styles.planPrice}>
+                    <ThemedText style={styles.planPriceAmount}>{plan.price}</ThemedText>
+                    <ThemedText style={styles.planPricePeriod}>/{plan.period}</ThemedText>
                   </View>
-                  
-                  <View style={styles.planPriceContainer}>
-                    <ThemedText style={styles.planPrice}>{plan.price}</ThemedText>
-                    <ThemedText style={styles.planPeriod}>/{plan.period}</ThemedText>
-                  </View>
-                  
+
                   <View style={styles.planFeatures}>
                     {plan.features.map((feature, index) => (
-                      <View key={index} style={styles.featureItem}>
-                        <Ionicons name="checkmark-circle" size={16} color={plan.color} />
-                        <ThemedText style={styles.featureText}>{feature}</ThemedText>
+                      <View key={index} style={styles.planFeature}>
+                        <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
+                        <ThemedText style={styles.planFeatureText}>{feature}</ThemedText>
                       </View>
                     ))}
                   </View>
-                  
-                  {!isPremium && (
-                    <TouchableOpacity 
-                      style={[styles.planButton, { backgroundColor: plan.color }]}
-                      onPress={() => handleRegister(plan.id)}
-                    >
-                      <ThemedText style={styles.planButtonText}>
-                        {plan.isPremium ? 'Elegir Plan' : 'Plan Actual'}
-                      </ThemedText>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )
-            ))}
-          </View>
 
-          {/* Testimonios - Solo se muestran si el usuario no es premium */}
-          {!isPremium && (
-            <View style={CommonStyles.section}>
-              <ThemedText style={CommonStyles.sectionTitle}>Lo que dicen nuestros clientes</ThemedText>
-              
-              <View style={styles.testimonialCard}>
-                <View style={styles.testimonialHeader}>
-                  <View style={styles.testimonialAvatar}>
-                    <ThemedText style={styles.testimonialInitials}>JR</ThemedText>
-                  </View>
-                  <View>
-                    <ThemedText style={styles.testimonialName}>Juan Rodríguez</ThemedText>
-                    <ThemedText style={styles.testimonialBusiness}>Restaurante El Sabor</ThemedText>
-                  </View>
+                  <TouchableOpacity
+                    style={[styles.planButton, { backgroundColor: plan.color }]}
+                    onPress={() => handleRegister(plan.id)}
+                  >
+                    <ThemedText style={styles.planButtonText}>
+                      {plan.isPremium ? 'Comenzar Prueba' : 'Registrarse Gratis'}
+                    </ThemedText>
+                  </TouchableOpacity>
                 </View>
-                <ThemedText style={styles.testimonialText}>
-                  "Desde que empecé a usar esta aplicación, la gestión de mi restaurante es mucho más eficiente. 
-                  Los reportes me ayudan a tomar mejores decisiones y la impresión de tickets ha mejorado la 
-                  experiencia de mis clientes."
-                </ThemedText>
-              </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.footerContent}>
+            <ThemedText style={styles.footerLogo}>BoxDoctor</ThemedText>
+            <ThemedText style={styles.footerTagline}>Tu salud, nuestra prioridad</ThemedText>
+            
+            <View style={styles.footerLinks}>
+              <TouchableOpacity onPress={() => router.push('/about')}>
+                <ThemedText style={styles.footerLink}>Acerca de</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/help')}>
+                <ThemedText style={styles.footerLink}>Ayuda</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/settings')}>
+                <ThemedText style={styles.footerLink}>Configuración</ThemedText>
+              </TouchableOpacity>
             </View>
-          )}
 
-          {/* Contacto */}
-          <View style={[CommonStyles.section, styles.contactSection]}>
-            <ThemedText style={styles.contactTitle}>
-              {isPremium ? '¿Necesitas ayuda con tu plan?' : '¿Necesitas ayuda para elegir?'}
+            <ThemedText style={styles.footerCopyright}>
+              © 2024 BoxDoctor. Todos los derechos reservados.
             </ThemedText>
-            <ThemedText style={styles.contactText}>
-              {isPremium 
-                ? 'Nuestro equipo de soporte está disponible para ayudarte con cualquier duda sobre tu plan premium.'
-                : 'Nuestro equipo está disponible para ayudarte a encontrar el plan perfecto para tu negocio.'
-              }
-            </ThemedText>
-            <TouchableOpacity 
-              style={styles.contactButton}
-              onPress={() => Linking.openURL('mailto:soporte@datqbox.com')}
-            >
-              <Ionicons name="mail" size={20} color={Colors.white} />
-              <ThemedText style={styles.contactButtonText}>Contáctanos</ThemedText>
-            </TouchableOpacity>
           </View>
-        </ScrollView>
-      </ThemedView>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -338,114 +270,163 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: Colors.primary,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoContainer: {
+    flex: 1,
   },
-  headerTitle: {
-    fontSize: Typography.fontSizes.xl,
+  logo: {
+    fontSize: Typography.fontSizes.title,
     fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
+    color: Colors.secondary,
   },
-  heroBanner: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.xl,
-    marginBottom: Spacing.xl,
-    alignItems: 'center',
-    position: 'relative',
+  tagline: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    marginTop: Spacing.xs,
   },
-  premiumBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: Colors.primary,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+  headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  premiumBadgeText: {
+  loginButton: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    backgroundColor: Colors.secondary,
+  },
+  loginButtonText: {
     color: Colors.white,
-    fontSize: Typography.fontSizes.sm,
-    fontWeight: Typography.fontWeights.bold,
-    marginLeft: Spacing.xs,
+    fontWeight: Typography.fontWeights.medium,
+  },
+  heroSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxxl,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
   },
   heroTitle: {
     fontSize: Typography.fontSizes.xxxl,
     fontWeight: Typography.fontWeights.bold,
-    color: Colors.white,
-    marginBottom: Spacing.sm,
+    color: Colors.secondary,
     textAlign: 'center',
+    marginBottom: Spacing.md,
   },
   heroSubtitle: {
+    fontSize: Typography.fontSizes.lg,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+    lineHeight: 24,
+  },
+  heroButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  primaryButton: {
+    backgroundColor: Colors.secondary,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold,
     fontSize: Typography.fontSizes.md,
-    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  secondaryButton: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  secondaryButtonText: {
+    color: Colors.secondary,
+    fontWeight: Typography.fontWeights.medium,
+    fontSize: Typography.fontSizes.md,
+  },
+  featuresSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxxl,
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSizes.xxl,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.dark,
     textAlign: 'center',
     marginBottom: Spacing.lg,
   },
-  heroIconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  hidePromosContainer: {
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
+  featuresGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    ...BordersAndShadows.shadows.sm,
+    gap: Spacing.lg,
   },
-  hidePromosContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  hidePromosIcon: {
-    marginRight: Spacing.md,
-  },
-  hidePromosTextContainer: {
-    flex: 1,
-  },
-  hidePromosTitle: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.medium,
-    color: Colors.dark,
-  },
-  hidePromosSubtitle: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-  },
-  planCard: {
+  featureCard: {
+    width: '48%',
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
     padding: Spacing.lg,
-    marginBottom: Spacing.lg,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    alignItems: 'center',
     ...BordersAndShadows.shadows.md,
   },
-  recommendedPlan: {
-    borderWidth: 2,
-    borderColor: Colors.primary,
+  featureIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
-  currentPlan: {
+  featureTitle: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.dark,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+  },
+  featureDescription: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  pricingSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxxl,
+    backgroundColor: Colors.lightGray,
+  },
+  sectionSubtitle: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+  },
+  plansContainer: {
+    paddingVertical: Spacing.lg,
+  },
+  planCard: {
+    width: 280,
+    backgroundColor: Colors.white,
+    marginRight: Spacing.lg,
+    padding: Spacing.lg,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    ...BordersAndShadows.shadows.md,
+    position: 'relative',
+  },
+  recommendedPlan: {
+    borderColor: Colors.primary,
     borderWidth: 2,
-    borderColor: Colors.success,
   },
   recommendedBadge: {
     position: 'absolute',
     top: -10,
-    right: 10,
+    left: '50%',
+    transform: [{ translateX: -50 }],
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
@@ -453,57 +434,49 @@ const styles = StyleSheet.create({
   },
   recommendedText: {
     color: Colors.white,
-    fontSize: Typography.fontSizes.sm,
+    fontSize: Typography.fontSizes.xs,
     fontWeight: Typography.fontWeights.bold,
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
   },
   planName: {
-    fontSize: Typography.fontSizes.xl,
+    fontSize: Typography.fontSizes.lg,
     fontWeight: Typography.fontWeights.bold,
     color: Colors.dark,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
-  planIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  planPriceContainer: {
+  planPrice: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'baseline',
     marginBottom: Spacing.lg,
   },
-  planPrice: {
-    fontSize: Typography.fontSizes.xxl,
+  planPriceAmount: {
+    fontSize: Typography.fontSizes.xxxl,
     fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
+    color: Colors.secondary,
   },
-  planPeriod: {
+  planPricePeriod: {
     fontSize: Typography.fontSizes.md,
     color: Colors.darkGray,
+    marginLeft: Spacing.xs,
   },
   planFeatures: {
     marginBottom: Spacing.lg,
   },
-  featureItem: {
+  planFeature: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
-  featureText: {
-    fontSize: Typography.fontSizes.md,
+  planFeatureText: {
+    fontSize: Typography.fontSizes.sm,
     color: Colors.dark,
     marginLeft: Spacing.sm,
+    flex: 1,
   },
   planButton: {
-    borderRadius: BordersAndShadows.borderRadius.circle,
     paddingVertical: Spacing.md,
+    borderRadius: BordersAndShadows.borderRadius.md,
     alignItems: 'center',
   },
   planButtonText: {
@@ -511,74 +484,37 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.bold,
     fontSize: Typography.fontSizes.md,
   },
-  testimonialCard: {
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    ...BordersAndShadows.shadows.md,
+  footer: {
+    backgroundColor: Colors.dark,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
   },
-  testimonialHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  testimonialAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-  },
-  testimonialInitials: {
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.white,
-  },
-  testimonialName: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-  },
-  testimonialBusiness: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-  },
-  testimonialText: {
-    fontSize: Typography.fontSizes.md,
-    color: Colors.dark,
-    fontStyle: 'italic',
-    lineHeight: 22,
-  },
-  contactSection: {
+  footerContent: {
     alignItems: 'center',
   },
-  contactTitle: {
-    fontSize: Typography.fontSizes.xl,
+  footerLogo: {
+    fontSize: Typography.fontSizes.xxl,
     fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
+    color: Colors.primary,
     marginBottom: Spacing.sm,
-    textAlign: 'center',
   },
-  contactText: {
+  footerTagline: {
     fontSize: Typography.fontSizes.md,
-    color: Colors.darkGray,
-    textAlign: 'center',
+    color: Colors.white,
     marginBottom: Spacing.lg,
   },
-  contactButton: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
+  footerLinks: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
-  contactButtonText: {
+  footerLink: {
     color: Colors.white,
-    fontWeight: Typography.fontWeights.bold,
     fontSize: Typography.fontSizes.md,
-    marginLeft: Spacing.sm,
+  },
+  footerCopyright: {
+    color: Colors.darkGray,
+    fontSize: Typography.fontSizes.sm,
+    textAlign: 'center',
   },
 }); 

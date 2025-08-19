@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,57 +8,25 @@ import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
 import { register, UserRegistrationData } from '@/services/auth';
-import { ApiError } from '@/services/api';
-
-// Definir los planes disponibles
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Gratuito',
-    description: 'Funcionalidades básicas',
-    isPremium: false,
-    color: Colors.darkGray
-  },
-  {
-    id: 'basic',
-    name: 'Básico',
-    description: '$9.99/mes',
-    isPremium: true,
-    color: Colors.info
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    description: '$19.99/mes',
-    isPremium: true,
-    color: Colors.primary
-  },
-  {
-    id: 'business',
-    name: 'Empresarial',
-    description: '$39.99/mes',
-    isPremium: true,
-    color: Colors.secondary
-  }
-];
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState(PLANS[0].id); // Plan gratuito por defecto
+  const [role, setRole] = useState<'doctor' | 'patient'>('patient');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { setUser, setAuthenticated, setHidePromotions } = useAppStore();
+  const { setUser, setAuthenticated } = useAppStore();
 
   const handleRegister = async () => {
     // Validaciones básicas
-    if (!name || !email || !password || !confirmPassword || !businessName) {
-      Alert.alert('Error', 'Por favor, completa todos los campos');
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Por favor, completa todos los campos obligatorios');
       return;
     }
 
@@ -75,88 +43,55 @@ export default function RegisterScreen() {
     setLoading(true);
 
     try {
-      // Obtener el plan seleccionado
-      const plan = PLANS.find(p => p.id === selectedPlan) || PLANS[0];
-
+      console.log('🔍 Registrando usuario médico');
+      
       // Datos de registro
-      const userData: UserRegistrationData = {
-        first_name: name.split(' ')[0],
-        last_name: name.split(' ').slice(1).join(' ') || '',
+      const registerData: UserRegistrationData = {
+        first_name: firstName,
+        last_name: lastName,
         email,
         password,
-        businessName
+        phone,
+        role
       };
 
-      // Intentar registrar al usuario con el backend
-      const response = await register(userData);
-
-      // Si llegamos aquí, el registro fue exitoso
-      // Guardar el usuario en el store
-      const newUser = {
-        id: response.user.id,
-        name: response.user.first_name + ' ' + response.user.last_name,
-        email: response.user.email,
-        role: 'Propietario',
-        businessName: response.user.businessName || businessName,
-        isPremium: plan.isPremium || (response.user.subscriptionStatus === 'active' || response.user.subscriptionStatus === 'trial'),
-      };
+      // Intentar registrar
+      const response = await register(registerData);
+      console.log('✅ Registro exitoso:', response.user.email);
 
       // Guardar el usuario en el store
-      setUser(newUser);
+      setUser(response.user);
       setAuthenticated(true);
-      
-      // Si el usuario eligió un plan premium, ocultar las promociones
-      if (newUser.isPremium) {
-        setHidePromotions(true);
-      }
 
-      // Navegar a la pantalla principal
+      // Navegar a la app principal
       router.replace('/(tabs)');
     } catch (error) {
-      // Si hay un error, mostrar un mensaje
-      if (error instanceof ApiError) {
-        Alert.alert('Error', error.message);
-      } else {
-        Alert.alert('Error', 'Ocurrió un error durante el registro. Inténtalo de nuevo.');
-      }
-
-      // Para propósitos de demostración, permitimos el registro simulado
-      try {
-        // Obtener el plan seleccionado
-        const plan = PLANS.find(p => p.id === selectedPlan) || PLANS[0];
-
-        // Crear un usuario simulado
-        const newUser = {
-          id: Math.random().toString(36).substring(2, 9),
-          name,
-          email,
-          role: 'Propietario',
-          businessName,
-          isPremium: plan.isPremium,
-        };
-
-        // Guardar el usuario en el store
-        setUser(newUser);
-        setAuthenticated(true);
-        
-        // Si el usuario eligió un plan premium, ocultar las promociones
-        if (plan.isPremium) {
-          setHidePromotions(true);
+      console.error('❌ Error al registrar:', error);
+      
+      let errorMessage = 'Ocurrió un error al registrar. Inténtalo de nuevo.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Network request failed')) {
+          errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+        } else if (error.message.includes('already exists') || error.message.includes('ya existe')) {
+          errorMessage = 'El correo electrónico ya está registrado. Intenta con otro correo o inicia sesión.';
+        } else {
+          errorMessage = error.message;
         }
-
-        // Navegar a la pantalla principal
-        router.replace('/(tabs)');
-      } catch (demoError) {
-        console.error('Error en el registro de demostración:', demoError);
       }
+      
+      Alert.alert('Error de registro', errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    // Navegar a la pantalla principal sin registrarse
-    router.replace('/(tabs)');
+  const handleLogin = () => {
+    router.push('/auth/login');
+  };
+
+  const handleBackToLanding = () => {
+    router.push('/landing');
   };
 
   return (
@@ -166,77 +101,135 @@ export default function RegisterScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBackToLanding}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.dark} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Registro</ThemedText>
-        <View style={{ width: 40 }} />
+        <ThemedText style={styles.headerTitle}>Registrarse</ThemedText>
+        <View style={{ width: 24 }} />
       </View>
 
       <ThemedView style={CommonStyles.container}>
-        <ScrollView 
-          style={CommonStyles.content}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.logoContainer}>
-            <View style={styles.logo}>
-              <Ionicons name="restaurant" size={60} color={Colors.white} />
+        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
+          {/* Logo y título */}
+          <View style={styles.logoSection}>
+            <View style={styles.logoContainer}>
+              <ThemedText style={styles.logo}>BoxDoctor</ThemedText>
             </View>
-            <ThemedText style={styles.appName}>DatqboxPos</ThemedText>
-            <ThemedText style={styles.appSlogan}>Tu punto de venta móvil</ThemedText>
+            <ThemedText style={styles.title}>Crear cuenta</ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Únete a BoxDoctor y gestiona tu salud de forma digital
+            </ThemedText>
           </View>
 
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color={Colors.darkGray} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Nombre completo"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-              />
+          {/* Formulario */}
+          <View style={styles.formSection}>
+            {/* Selección de rol */}
+            <View style={styles.roleSection}>
+              <ThemedText style={styles.roleTitle}>Soy un:</ThemedText>
+              <View style={styles.roleButtons}>
+                <TouchableOpacity
+                  style={[styles.roleButton, role === 'patient' && styles.roleButtonActive]}
+                  onPress={() => setRole('patient')}
+                >
+                  <Ionicons 
+                    name="person" 
+                    size={24} 
+                    color={role === 'patient' ? Colors.white : Colors.darkGray} 
+                  />
+                  <ThemedText style={[styles.roleButtonText, role === 'patient' && styles.roleButtonTextActive]}>
+                    Paciente
+                  </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.roleButton, role === 'doctor' && styles.roleButtonActive]}
+                  onPress={() => setRole('doctor')}
+                >
+                  <Ionicons 
+                    name="medical" 
+                    size={24} 
+                    color={role === 'doctor' ? Colors.white : Colors.darkGray} 
+                  />
+                  <ThemedText style={[styles.roleButtonText, role === 'doctor' && styles.roleButtonTextActive]}>
+                    Doctor
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Campos del formulario */}
+            <View style={styles.inputRow}>
+              <View style={[styles.inputContainer, styles.halfInput]}>
+                <Ionicons name="person" size={20} color={Colors.darkGray} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nombre"
+                  placeholderTextColor={Colors.darkGray}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+              </View>
+              <View style={[styles.inputContainer, styles.halfInput]}>
+                <Ionicons name="person" size={20} color={Colors.darkGray} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Apellido"
+                  placeholderTextColor={Colors.darkGray}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color={Colors.darkGray} style={styles.inputIcon} />
+              <Ionicons name="mail" size={20} color={Colors.darkGray} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
+                placeholderTextColor={Colors.darkGray}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="business-outline" size={20} color={Colors.darkGray} style={styles.inputIcon} />
+              <Ionicons name="call" size={20} color={Colors.darkGray} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Nombre de tu negocio"
-                value={businessName}
-                onChangeText={setBusinessName}
+                placeholder="Teléfono (opcional)"
+                placeholderTextColor={Colors.darkGray}
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                autoCorrect={false}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={Colors.darkGray} style={styles.inputIcon} />
+              <Ionicons name="lock-closed" size={20} color={Colors.darkGray} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
+                placeholderTextColor={Colors.darkGray}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
-              <TouchableOpacity 
-                style={styles.eyeIcon}
+              <TouchableOpacity
+                style={styles.passwordToggle}
                 onPress={() => setShowPassword(!showPassword)}
               >
                 <Ionicons 
-                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  name={showPassword ? "eye-off" : "eye"} 
                   size={20} 
                   color={Colors.darkGray} 
                 />
@@ -244,86 +237,59 @@ export default function RegisterScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={Colors.darkGray} style={styles.inputIcon} />
+              <Ionicons name="lock-closed" size={20} color={Colors.darkGray} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Confirmar contraseña"
+                placeholderTextColor={Colors.darkGray}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
-              <TouchableOpacity 
-                style={styles.eyeIcon}
+              <TouchableOpacity
+                style={styles.passwordToggle}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 <Ionicons 
-                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
+                  name={showConfirmPassword ? "eye-off" : "eye"} 
                   size={20} 
                   color={Colors.darkGray} 
                 />
               </TouchableOpacity>
             </View>
 
-            {/* Selección de plan */}
-            <View style={styles.planSection}>
-              <ThemedText style={styles.planSectionTitle}>Selecciona un plan</ThemedText>
-              
-              <View style={styles.planOptions}>
-                {PLANS.map(plan => (
-                  <TouchableOpacity
-                    key={plan.id}
-                    style={[
-                      styles.planOption,
-                      selectedPlan === plan.id && styles.selectedPlanOption,
-                      { borderColor: selectedPlan === plan.id ? plan.color : Colors.lightGray }
-                    ]}
-                    onPress={() => setSelectedPlan(plan.id)}
-                  >
-                    <View style={[styles.planBadge, { backgroundColor: plan.color }]}>
-                      <Ionicons 
-                        name={plan.id === 'free' ? 'gift-outline' : 'star-outline'} 
-                        size={16} 
-                        color={Colors.white} 
-                      />
-                    </View>
-                    <ThemedText style={styles.planName}>{plan.name}</ThemedText>
-                    <ThemedText style={styles.planDescription}>{plan.description}</ThemedText>
-                    
-                    {selectedPlan === plan.id && (
-                      <View style={styles.selectedPlanIndicator}>
-                        <Ionicons name="checkmark-circle" size={20} color={plan.color} />
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <TouchableOpacity 
-              style={[styles.registerButton, loading && styles.disabledButton]}
+            <TouchableOpacity
+              style={[styles.registerButton, loading && styles.registerButtonDisabled]}
               onPress={handleRegister}
               disabled={loading}
             >
               {loading ? (
-                <ThemedText style={styles.registerButtonText}>Registrando...</ThemedText>
+                <ActivityIndicator color={Colors.white} />
               ) : (
-                <ThemedText style={styles.registerButtonText}>Registrarse</ThemedText>
+                <ThemedText style={styles.registerButtonText}>Crear Cuenta</ThemedText>
               )}
             </TouchableOpacity>
 
-            <View style={styles.loginContainer}>
-              <ThemedText style={styles.loginText}>¿Ya tienes una cuenta?</ThemedText>
-              <TouchableOpacity onPress={() => router.push('/auth/login')}>
-                <ThemedText style={styles.loginLink}>Iniciar sesión</ThemedText>
-              </TouchableOpacity>
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <ThemedText style={styles.dividerText}>o</ThemedText>
+              <View style={styles.dividerLine} />
             </View>
 
-            <TouchableOpacity 
-              style={styles.skipButton}
-              onPress={handleSkip}
-            >
-              <ThemedText style={styles.skipButtonText}>Continuar como invitado</ThemedText>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <ThemedText style={styles.loginButtonText}>
+                ¿Ya tienes cuenta? Inicia sesión
+              </ThemedText>
             </TouchableOpacity>
+          </View>
+
+          {/* Información adicional */}
+          <View style={styles.infoSection}>
+            <ThemedText style={styles.infoText}>
+              Al registrarte, aceptas nuestros términos de servicio y política de privacidad.
+            </ThemedText>
           </View>
         </ScrollView>
       </ThemedView>
@@ -353,144 +319,144 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.bold,
     color: Colors.dark,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Spacing.xxxl,
+  logoSection: {
+    alignItems: 'center',
+    marginBottom: Spacing.xxxl,
   },
   logoContainer: {
-    alignItems: 'center',
-    marginVertical: Spacing.xxxl,
+    marginBottom: Spacing.lg,
   },
   logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
+    fontSize: Typography.fontSizes.title,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.primary,
   },
-  appName: {
-    fontSize: Typography.fontSizes.xxxl,
+  title: {
+    fontSize: Typography.fontSizes.xxl,
     fontWeight: Typography.fontWeights.bold,
     color: Colors.dark,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
-  appSlogan: {
+  subtitle: {
     fontSize: Typography.fontSizes.md,
     color: Colors.darkGray,
+    textAlign: 'center',
   },
-  formContainer: {
-    width: '100%',
+  formSection: {
+    marginBottom: Spacing.xl,
+  },
+  roleSection: {
+    marginBottom: Spacing.lg,
+  },
+  roleTitle: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.medium,
+    color: Colors.dark,
+    marginBottom: Spacing.md,
+  },
+  roleButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  roleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
+    ...BordersAndShadows.shadows.sm,
+  },
+  roleButtonActive: {
+    backgroundColor: Colors.secondary,
+  },
+  roleButtonText: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.medium,
+    color: Colors.darkGray,
+  },
+  roleButtonTextActive: {
+    color: Colors.white,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.md,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     marginBottom: Spacing.lg,
     ...BordersAndShadows.shadows.sm,
   },
+  halfInput: {
+    flex: 1,
+  },
   inputIcon: {
-    paddingHorizontal: Spacing.md,
+    marginRight: Spacing.md,
   },
   input: {
     flex: 1,
-    paddingVertical: Spacing.md,
     fontSize: Typography.fontSizes.md,
     color: Colors.dark,
   },
-  eyeIcon: {
-    paddingHorizontal: Spacing.md,
-  },
-  planSection: {
-    marginBottom: Spacing.xl,
-  },
-  planSectionTitle: {
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-    marginBottom: Spacing.md,
-  },
-  planOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  planOption: {
-    width: '48%',
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.md,
-    borderWidth: 2,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-    ...BordersAndShadows.shadows.sm,
-    position: 'relative',
-  },
-  selectedPlanOption: {
-    borderWidth: 2,
-  },
-  planBadge: {
-    position: 'absolute',
-    top: -10,
-    right: 10,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  planName: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-    marginBottom: Spacing.xs,
-  },
-  planDescription: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-  },
-  selectedPlanIndicator: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
+  passwordToggle: {
+    padding: Spacing.xs,
   },
   registerButton: {
     backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.circle,
+    borderRadius: BordersAndShadows.borderRadius.lg,
     paddingVertical: Spacing.lg,
     alignItems: 'center',
+    marginBottom: Spacing.lg,
   },
-  disabledButton: {
+  registerButtonDisabled: {
     opacity: 0.7,
   },
   registerButtonText: {
     color: Colors.white,
+    fontSize: Typography.fontSizes.md,
     fontWeight: Typography.fontWeights.bold,
-    fontSize: Typography.fontSizes.lg,
   },
-  loginContainer: {
+  divider: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: Spacing.lg,
-  },
-  loginText: {
-    fontSize: Typography.fontSizes.md,
-    color: Colors.darkGray,
-    marginRight: Spacing.xs,
-  },
-  loginLink: {
-    fontSize: Typography.fontSizes.md,
-    color: Colors.secondary,
-    fontWeight: Typography.fontWeights.bold,
-  },
-  skipButton: {
-    marginTop: Spacing.lg,
     alignItems: 'center',
+    marginVertical: Spacing.lg,
   },
-  skipButtonText: {
-    fontSize: Typography.fontSizes.md,
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.lightGray,
+  },
+  dividerText: {
+    marginHorizontal: Spacing.lg,
     color: Colors.darkGray,
-    textDecorationLine: 'underline',
+    fontSize: Typography.fontSizes.sm,
+  },
+  loginButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+  },
+  loginButtonText: {
+    color: Colors.secondary,
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.medium,
+  },
+  infoSection: {
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+  },
+  infoText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 }); 
