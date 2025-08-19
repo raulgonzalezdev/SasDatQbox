@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
 import Providers from '@/components/Providers';
 import { rubik } from '../fonts';
 
@@ -72,13 +72,14 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const messages = await getMessages();
+  unstable_setRequestLocale(locale);
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} className={rubik.variable}>
       <body>
         <Providers>
-          <NextIntlClientProvider messages={messages}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
             <Suspense fallback={<div>Loading...</div>}>
               {children}
             </Suspense>
