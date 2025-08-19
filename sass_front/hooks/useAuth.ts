@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useAppStore } from '@/store/appStore';
 import { customFetch } from '@/utils/api';
 import { handleApiError } from '@/utils/api-helpers';
+import { clearAllAuthData } from '@/utils/auth-helpers';
 import { useParams } from 'next/navigation';
 
 // --- Type Definitions ---
@@ -119,16 +120,19 @@ export function useAuth() {
   });
 
   const logout = async () => {
-    localLogout();
     try {
       await logoutMutation();
+    } catch (error) {
+      console.error('Error during server logout:', error);
+    } finally {
+      // Siempre limpiar todo el estado de autenticación, sin importar si el servidor responde o no
+      clearAllAuthData(); // Limpiar cookies y localStorage
+      localLogout(); // Limpiar el store
       queryClient.setQueryData(['user'], null); // Clear user data immediately
       queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidar la query
       toast.success('Has cerrado sesión.');
       // Redirigir a la landing page después del logout
       router.push(`/${locale}`);
-    } catch (error) {
-      handleApiError(error);
     }
   };
 

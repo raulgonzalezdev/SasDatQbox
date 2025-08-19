@@ -52,7 +52,8 @@ export const useAppStore = create<AppState>()(
     logout: () => set({ 
       user: null, 
       status: 'unauthenticated',
-      currentDashboardSection: 'dashboard' // Resetear a dashboard al hacer logout
+      currentDashboardSection: 'dashboard', // Resetear a dashboard al hacer logout
+      locale: 'es' // Mantener el locale por defecto
     }),
   })
 );
