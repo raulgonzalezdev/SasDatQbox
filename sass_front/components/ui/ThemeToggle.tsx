@@ -4,23 +4,24 @@ import React from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import { Brightness4 as DarkIcon, Brightness7 as LightIcon } from '@mui/icons-material';
 import { useThemeStore } from '@/stores/themeStore';
+import { useTranslations } from 'next-intl';
 
 interface ThemeToggleProps {
   color?: string;
 }
 
 export default function ThemeToggle({ color }: ThemeToggleProps) {
-  const { mode, setMode, isDarkMode } = useThemeStore();
+  const { isDarkMode, toggleTheme } = useThemeStore();
+  const t = useTranslations('ThemeToggle');
   
   const handleToggle = () => {
-    const newMode = isDarkMode() ? 'light' : 'dark';
-    setMode(newMode);
+    toggleTheme();
   };
 
   const isDark = isDarkMode();
 
   return (
-    <Tooltip title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>
+    <Tooltip title={isDark ? t('lightMode') : t('darkMode')}>
       <IconButton
         onClick={handleToggle}
         sx={{ 

@@ -23,8 +23,9 @@ interface ThemeState {
   setLanguage: (language: string) => void;
   setTimezone: (timezone: string) => void;
   
-  // Computed
-  isDarkMode: () => boolean;
+        // Computed
+      isDarkMode: () => boolean;
+      toggleTheme: () => void;
 }
 
 export const useThemeStore = create<ThemeState>()(
@@ -54,6 +55,11 @@ export const useThemeStore = create<ThemeState>()(
           return window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
         return state.mode === 'dark';
+      },
+      toggleTheme: () => {
+        const state = get();
+        const newMode = state.isDarkMode() ? 'light' : 'dark';
+        set({ mode: newMode });
       }
     }),
     {
