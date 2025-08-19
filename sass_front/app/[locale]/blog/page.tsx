@@ -1,6 +1,11 @@
+'use client';
 import { Box, Typography, Container, Grid, Card, CardContent, CardActionArea, CardMedia, Chip, Button, Divider } from '@mui/material';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import Navbar from '@/components/ui/Navbar/Navbar';
+import Footer from '@/components/ui/Footer/Footer';
+import ContactDrawer from '@/components/ui/Landing/ContactDrawer';
+import { useState } from 'react';
 
 const blogPosts = [
   {
@@ -31,45 +36,60 @@ const blogPosts = [
 
 export default function BlogPage() {
   const t = useTranslations('Blog');
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
+  const handleContactClick = () => {
+    setIsContactOpen(true);
+  };
+
   return (
-    <Container sx={{ py: 8 }}>
-      <Typography variant="h2" component="h1" textAlign="center" fontWeight="bold" gutterBottom>
-        {t('title')}
-      </Typography>
-      <Typography variant="h5" color="text.secondary" textAlign="center" sx={{ mb: 6 }}>
-        {t('subtitle')}
-      </Typography>
-      <Grid container spacing={4}>
-        {blogPosts.map((post) => (
-          <Grid item xs={12} md={4} key={post.slug}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardActionArea component={Link} href={`/blog/${post.slug}`}>
-                <Box sx={{ position: 'relative' }}>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={post.image}
-                    alt={post.title}
-                  />
-                  <Chip 
-                    label={post.category} 
-                    sx={{ position: 'absolute', top: 16, left: 16, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }} 
-                  />
-                </Box>
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h5" component="h2" gutterBottom fontWeight="bold">{post.title}</Typography>
-                  <Typography color="text.secondary" paragraph>{post.excerpt}</Typography>
-                </CardContent>
-              </CardActionArea>
-              <Divider />
-              <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Button component={Link} href={`/blog/${post.slug}`} size="small">{t('continueReading')}</Button>
-                <Typography variant="body2" color="text.secondary">{post.readingTime}</Typography>
-              </Box>
-            </Card>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Navbar />
+      
+      <Box sx={{ flex: 1 }}>
+        <Container sx={{ py: 8 }}>
+          <Typography variant="h2" component="h1" textAlign="center" fontWeight="bold" gutterBottom>
+            {t('title')}
+          </Typography>
+          <Typography variant="h5" color="text.secondary" textAlign="center" sx={{ mb: 6 }}>
+            {t('subtitle')}
+          </Typography>
+          <Grid container spacing={4}>
+            {blogPosts.map((post) => (
+              <Grid item xs={12} md={4} key={post.slug}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardActionArea component={Link} href={`/blog/${post.slug}`}>
+                    <Box sx={{ position: 'relative' }}>
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={post.image}
+                        alt={post.title}
+                      />
+                      <Chip 
+                        label={post.category} 
+                        sx={{ position: 'absolute', top: 16, left: 16, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }} 
+                      />
+                    </Box>
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography variant="h5" component="h2" gutterBottom fontWeight="bold">{post.title}</Typography>
+                      <Typography color="text.secondary" paragraph>{post.excerpt}</Typography>
+                    </CardContent>
+                  </CardActionArea>
+                  <Divider />
+                  <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Button component={Link} href={`/blog/${post.slug}`} size="small">{t('continueReading')}</Button>
+                    <Typography variant="body2" color="text.secondary">{post.readingTime}</Typography>
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </Container>
+        </Container>
+      </Box>
+
+      <Footer onContactClick={handleContactClick} />
+      <ContactDrawer open={isContactOpen} onClose={() => setIsContactOpen(false)} />
+    </Box>
   );
 }

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useAppStore } from '@/store/appStore';
 import { customFetch } from '@/utils/api';
 import { handleApiError } from '@/utils/api-helpers';
+import { useParams } from 'next/navigation';
 
 // --- Type Definitions ---
 interface User {
@@ -57,22 +58,27 @@ export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, status, setUserAndAuth, setStatus, logout: localLogout } = useAppStore();
+  const params = useParams();
+  const locale = params.locale as string;
 
-  // Efecto para verificar la sesión del usuario al cargar la app
+  // Query para verificar el estado de autenticación (solo una vez al cargar)
+  const { data: userData, isLoading, error } = useQuery({
+    queryKey: ['user'],
+    queryFn: fetchUser,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
+    enabled: status === 'loading', // Solo ejecutar cuando estemos en estado de loading
+  });
+
+  // Efecto para sincronizar el estado del store con la query (solo una vez)
   useEffect(() => {
-    const checkUserStatus = async () => {
-      try {
-        const userData = await customFetch('/auth/me');
-        setUserAndAuth(userData);
-      } catch (error) {
-        setUserAndAuth(null);
-      }
-    };
-
-    if (status === 'loading') {
-      checkUserStatus();
+    if (userData && status === 'loading') {
+      setUserAndAuth(userData);
+    } else if (error && status === 'loading') {
+      setUserAndAuth(null);
     }
-  }, [status, setUserAndAuth]);
+  }, [userData, error, status, setUserAndAuth]);
 
   const { mutate: login, isPending: isLoggingIn } = useMutation({
     mutationFn: loginUser,
@@ -80,7 +86,8 @@ export function useAuth() {
       toast.success('¡Bienvenido de nuevo!');
       setUserAndAuth(data);
       queryClient.setQueryData(['user'], data);
-      router.push('/account');
+      // Redirigir al dashboard después del login exitoso
+      router.push(`/${locale}/account`);
     },
     onError: (error) => {
       localLogout();
@@ -93,7 +100,7 @@ export function useAuth() {
     mutationFn: registerUser,
     onSuccess: () => {
       toast.success('¡Registro exitoso! Por favor, inicia sesión.');
-      router.push('/signin');
+      router.push(`/${locale}/signin`);
     },
     onError: handleApiError,
   });
@@ -108,22 +115,44 @@ export function useAuth() {
     try {
       await logoutMutation();
       queryClient.setQueryData(['user'], null); // Clear user data immediately
+      queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidar la query
       toast.success('Has cerrado sesión.');
-      router.push('/');
+      // Redirigir a la landing page después del logout
+      router.push(`/${locale}`);
     } catch (error) {
       handleApiError(error);
     }
   };
 
+  // Función para verificar manualmente la autenticación (solo cuando sea necesario)
+  const checkAuth = useCallback(async () => {
+    // Solo verificar si no estamos ya autenticados
+    if (status === 'authenticated') {
+      return true;
+    }
+    
+    try {
+      const userData = await customFetch('/auth/me');
+      setUserAndAuth(userData);
+      queryClient.setQueryData(['user'], userData);
+      return true;
+    } catch (error) {
+      setUserAndAuth(null);
+      queryClient.setQueryData(['user'], null);
+      return false;
+    }
+  }, [status, setUserAndAuth, queryClient]);
+
   return {
     user,
     status,
-    isLoading: status === 'loading',
+    isLoading: status === 'loading' || isLoading,
     isAuthenticated: status === 'authenticated',
     isLoggingIn,
     isRegistering,
     login,
     register,
     logout,
+    checkAuth,
   };
 }

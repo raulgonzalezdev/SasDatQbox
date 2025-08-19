@@ -1,6 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 
-export default createMiddleware({
+// Middleware de internacionalización
+const intlMiddleware = createMiddleware({
   // A list of all locales that are supported
   locales: ['es', 'en'],
 
@@ -10,6 +11,11 @@ export default createMiddleware({
   // Force default locale and disable automatic locale detection
   localePrefix: 'always'
 });
+
+export default function middleware(request) {
+  // Solo aplicar el middleware de internacionalización
+  return intlMiddleware(request);
+}
 
 export const config = {
   // Match only internationalized pathnames

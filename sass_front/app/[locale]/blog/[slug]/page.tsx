@@ -1,5 +1,12 @@
-import { Box, Typography, Container, Divider, CardMedia } from '@mui/material';
+'use client';
+import { Box, Typography, Container, Divider, CardMedia, Button } from '@mui/material';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import Navbar from '@/components/ui/Navbar/Navbar';
+import Footer from '@/components/ui/Footer/Footer';
+import ContactDrawer from '@/components/ui/Landing/ContactDrawer';
+import { useState } from 'react';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Datos mock actualizados
 const blogPosts = [
@@ -46,38 +53,64 @@ const getPostData = (slug: string) => blogPosts.find((post) => post.slug === slu
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = getPostData(params.slug);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
+  const handleContactClick = () => {
+    setIsContactOpen(true);
+  };
 
   if (!post) {
     notFound();
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
-      <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
-        {post.title}
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
-        Por {post.author} • {post.date} • {post.readingTime}
-      </Typography>
-      <Divider sx={{ mb: 4 }} />
-      <CardMedia
-        component="img"
-        height="400"
-        image={post.image}
-        alt={post.title}
-        sx={{ borderRadius: 2, mb: 4 }}
-      />
-      <Box 
-        component="article" 
-        dangerouslySetInnerHTML={{ __html: post.content }} 
-        sx={{
-          '& p': { 
-            lineHeight: 1.7, 
-            fontSize: '1.1rem',
-            marginBottom: '1.5rem',
-          },
-        }}
-      />
-    </Container>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Navbar />
+      
+      <Box sx={{ flex: 1 }}>
+        <Container maxWidth="md" sx={{ py: 8 }}>
+          {/* Botón de regreso */}
+          <Button
+            component={Link}
+            href="/blog"
+            startIcon={<ArrowBackIcon />}
+            sx={{ mb: 4, textTransform: 'none' }}
+          >
+            Volver al Blog
+          </Button>
+
+          <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
+            {post.title}
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
+            Por {post.author} • {post.date} • {post.readingTime}
+          </Typography>
+          <Divider sx={{ mb: 4 }} />
+          {post.image && (
+            <CardMedia
+              component="img"
+              height="400"
+              image={post.image}
+              alt={post.title}
+              sx={{ borderRadius: 2, mb: 4 }}
+            />
+          )}
+          <Box 
+            component="article" 
+            dangerouslySetInnerHTML={{ __html: post.content }} 
+            sx={{
+              '& p': { 
+                lineHeight: 1.7, 
+                fontSize: '1.1rem',
+                marginBottom: '1.5rem',
+              },
+            }}
+          />
+        </Container>
+      </Box>
+
+      <Footer onContactClick={handleContactClick} />
+      <ContactDrawer open={isContactOpen} onClose={() => setIsContactOpen(false)} />
+    </Box>
   );
 }

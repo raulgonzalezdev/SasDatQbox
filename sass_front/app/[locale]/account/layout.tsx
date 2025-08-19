@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import DashboardLayout from '@/components/ui/DashboardLayout';
 import React, { useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
+import { useParams } from 'next/navigation';
 
 export default function AccountLayout({
   children
@@ -12,12 +13,14 @@ export default function AccountLayout({
 }) {
   const { status } = useAuth();
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/signin');
+      router.replace(`/${locale}/signin`);
     }
-  }, [status, router]);
+  }, [status, router, locale]);
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (

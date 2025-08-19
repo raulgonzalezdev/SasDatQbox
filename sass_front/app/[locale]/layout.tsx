@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import Providers from '@/components/Providers';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AuthChecker from '@/components/ui/AuthChecker';
 import { rubik } from '../fonts';
 
 export const metadata: Metadata = {
@@ -80,6 +81,7 @@ export default async function LocaleLayout({
       <body>
         <Providers>
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <AuthChecker />
             <Suspense fallback={<LoadingSpinner />}>
               {children}
             </Suspense>

@@ -17,22 +17,19 @@ import Link from 'next/link';
 import LanguageSelector from './LanguageSelector';
 import Logo from '../Logo';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const t = useTranslations('Navbar');
-
-  console.log('🔍 Navbar Debug:');
-  console.log('  - t("features"):', t('features'));
-  console.log('  - t("pricing"):', t('pricing'));
-  console.log('  - t("login"):', t('login'));
+  const { user, status, isAuthenticated, logout } = useAuth();
 
   const menuItems = [
     { text: t('features'), href: '/#features' },
     { text: t('pricing'), href: '/#pricing' },
-    { text: t('blog'), href: '/blog' },
+    { text: t('blog'), href: '/blog', newWindow: true },
     { text: t('help'), href: '/#help' },
   ];
 
@@ -43,6 +40,29 @@ export default function Navbar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLogout = () => {
+    logout();
+    handleMenuClose();
+  };
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (status === 'loading') {
+    return (
+      <AppBar position="sticky" sx={{ backgroundColor: 'background.paper', color: 'text.primary', boxShadow: 1 }}>
+        <Toolbar>
+          <Box component={Link} href="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, textDecoration: 'none' }}>
+            <Logo width={100} height={100} disabledLink={true} />
+            {!isMobile && (
+              <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+                BoxDoctor
+              </Typography>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+    );
+  }
 
   return (
     <AppBar position="sticky" sx={{ backgroundColor: 'background.paper', color: 'text.primary', boxShadow: 1 }}>
@@ -65,6 +85,8 @@ export default function Navbar() {
                 key={item.text}
                 component={Link}
                 href={item.href}
+                target={item.newWindow ? '_blank' : undefined}
+                rel={item.newWindow ? 'noopener noreferrer' : undefined}
                 variant="text"
                 sx={{ 
                   color: 'text.primary', 
@@ -86,23 +108,44 @@ export default function Navbar() {
           </Box>
         )}
         
-                 {/* Login Button - siempre visible */}
-         <Button
-           component={Link}
-           href="/signin"
-           variant="contained"
-           color="primary"
-           sx={{ 
-             textTransform: 'none',
-             fontWeight: 500,
-             borderRadius: 8,
-             px: 3,
-             py: 1,
-             mr: isMobile ? 1 : 0,
-           }}
-         >
-           {t('login')}
-         </Button>
+        {/* Auth Button - Dashboard o Login */}
+        {isAuthenticated ? (
+          <Button
+            component={Link}
+            href="/account"
+            variant="contained"
+            color="primary"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 500,
+              borderRadius: 8,
+              px: 3,
+              py: 1,
+              mr: isMobile ? 1 : 0,
+            }}
+          >
+            {t('dashboard')}
+          </Button>
+        ) : (
+          <Button
+            component={Link}
+            href="/signin"
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            color="primary"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 500,
+              borderRadius: 8,
+              px: 3,
+              py: 1,
+              mr: isMobile ? 1 : 0,
+            }}
+          >
+            {t('login')}
+          </Button>
+        )}
         
         {/* Mobile Menu Button */}
         {isMobile && (
@@ -147,6 +190,8 @@ export default function Navbar() {
             key={item.text} 
             component={Link} 
             href={item.href}
+            target={item.newWindow ? '_blank' : undefined}
+            rel={item.newWindow ? 'noopener noreferrer' : undefined}
             onClick={handleMenuClose}
             sx={{
               py: 1.5,
@@ -159,6 +204,36 @@ export default function Navbar() {
             {item.text}
           </MenuItem>
         ))}
+        {isAuthenticated && (
+          <MenuItem 
+            component={Link} 
+            href="/account"
+            onClick={handleMenuClose}
+            sx={{
+              py: 1.5,
+              px: 2,
+              '&:hover': {
+                backgroundColor: 'rgba(43, 175, 154, 0.08)',
+              },
+            }}
+          >
+            {t('dashboard')}
+          </MenuItem>
+        )}
+        {isAuthenticated && (
+          <MenuItem 
+            onClick={handleLogout}
+            sx={{
+              py: 1.5,
+              px: 2,
+              '&:hover': {
+                backgroundColor: 'rgba(43, 175, 154, 0.08)',
+              },
+            }}
+          >
+            {t('logout')}
+          </MenuItem>
+        )}
         <MenuItem sx={{ py: 1.5, px: 2 }}>
           <LanguageSelector />
         </MenuItem>
