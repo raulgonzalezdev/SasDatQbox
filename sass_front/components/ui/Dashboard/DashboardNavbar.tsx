@@ -18,7 +18,7 @@ interface DashboardNavbarProps {
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
-})<DashboardNavbarProps>(({ theme, open }) => ({
+})<{ open?: boolean }>(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
   backgroundColor: theme.palette.mode === 'dark' ? '#1a1a1a' : theme.palette.primary.main,
   color: theme.palette.mode === 'dark' ? '#ffffff' : '#ffffff',
@@ -42,7 +42,7 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 export default function DashboardNavbar({ toggleDrawer, title, open }: DashboardNavbarProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, status, isLoading } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const t = useTranslations('Dashboard.navbar');
   

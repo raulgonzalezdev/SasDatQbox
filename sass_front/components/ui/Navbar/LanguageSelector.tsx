@@ -2,9 +2,8 @@
 import { useState } from 'react';
 import { Button, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import Link from 'next/link';
 
 const languages = [
   { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -19,13 +18,9 @@ export default function LanguageSelector({ color = 'text.primary' }: LanguageSel
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const pathname = usePathname();
   const locale = useLocale();
+  const router = useRouter();
   
   const currentLanguage = languages.find(lang => lang.code === locale) || languages[0];
-  
-  console.log('🔍 LanguageSelector Debug:');
-  console.log('  - pathname:', pathname);
-  console.log('  - locale:', locale);
-  console.log('  - currentLanguage:', currentLanguage);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -40,11 +35,11 @@ export default function LanguageSelector({ color = 'text.primary' }: LanguageSel
     // Remove current locale from pathname if it exists
     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '');
     const newPath = `/${newLocale}${pathWithoutLocale}`;
-    console.log('🔍 getLocalizedPath Debug:');
+ /*   console.log('🔍 getLocalizedPath Debug:');
     console.log('  - newLocale:', newLocale);
     console.log('  - pathname:', pathname);
     console.log('  - pathWithoutLocale:', pathWithoutLocale);
-    console.log('  - newPath:', newPath);
+    console.log('  - newPath:', newPath);*/
     return newPath;
   };
 
@@ -82,12 +77,9 @@ export default function LanguageSelector({ color = 'text.primary' }: LanguageSel
            return (
              <MenuItem
                key={language.code}
-               component={Link}
-               href={href}
                onClick={() => {
-                 console.log('🔍 Language Clicked:', language.code);
-                 console.log('🔍 Navigating to:', href);
                  handleClose();
+                 router.push(href);
                }}
                selected={language.code === currentLanguage.code}
              >

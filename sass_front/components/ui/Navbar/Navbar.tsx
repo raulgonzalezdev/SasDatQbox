@@ -9,10 +9,12 @@ import {
   IconButton, 
   Menu,
   MenuItem,
+  Avatar,
   useMediaQuery,
   useTheme
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from 'next/link';
 import LanguageSelector from './LanguageSelector';
 import Logo from '../Logo';
@@ -24,6 +26,7 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const t = useTranslations('Navbar');
   const { user, status, isAuthenticated, logout } = useAuth();
 
@@ -45,6 +48,44 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     handleMenuClose();
+    handleUserMenuClose();
+  };
+
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchorEl(null);
+  };
+
+  // Generate user initials from name
+  const getUserInitials = () => {
+    if (!user?.first_name && !user?.last_name) return 'U';
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!user) {
+      return t('user');
+    }
+    
+    if (user.first_name && user.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    if (user.first_name) {
+      return user.first_name;
+    }
+    if (user.last_name) {
+      return user.last_name;
+    }
+    if (user.email) {
+      return user.email.split('@')[0];
+    }
+    return t('user');
   };
 
   // Mostrar loading mientras se verifica la autenticación
@@ -112,22 +153,47 @@ export default function Navbar() {
         
         {/* Auth Button - Dashboard o Login */}
         {isAuthenticated ? (
-          <Button
-            component={Link}
-            href="/account"
-            variant="contained"
-            color="primary"
-            sx={{ 
-              textTransform: 'none',
-              fontWeight: 500,
-              borderRadius: 8,
-              px: 3,
-              py: 1,
-              mr: isMobile ? 1 : 0,
-            }}
-          >
-            {t('dashboard')}
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Button
+              component={Link}
+              href="/account"
+              variant="contained"
+              color="primary"
+              sx={{ 
+                textTransform: 'none',
+                fontWeight: 500,
+                borderRadius: 8,
+                px: 3,
+                py: 1,
+                mr: isMobile ? 1 : 0,
+              }}
+            >
+              {t('dashboard')}
+            </Button>
+            <IconButton
+              onClick={handleUserMenuClick}
+              sx={{ 
+                border: '2px solid rgba(43, 175, 154, 0.3)',
+                '&:hover': { 
+                  border: '2px solid rgba(43, 175, 154, 0.5)',
+                  backgroundColor: 'rgba(43, 175, 154, 0.1)'
+                }
+              }}
+            >
+              <Avatar 
+                sx={{ 
+                  width: 32, 
+                  height: 32,
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                {getUserInitials()}
+              </Avatar>
+            </IconButton>
+          </Box>
         ) : (
           <Button
             component={Link}
@@ -241,6 +307,67 @@ export default function Navbar() {
         </MenuItem>
         <MenuItem sx={{ py: 1.5, px: 2 }}>
           <LanguageSelector />
+        </MenuItem>
+      </Menu>
+
+      {/* User Menu Dropdown */}
+      <Menu
+        id="user-menu"
+        anchorEl={userMenuAnchorEl}
+        open={Boolean(userMenuAnchorEl)}
+        onClose={handleUserMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        sx={{
+          mt: 1,
+          '& .MuiPaper-root': {
+            minWidth: 200,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            borderRadius: 2,
+          },
+        }}
+      >
+        <MenuItem onClick={handleUserMenuClose} sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+            {getUserDisplayName()}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {user?.email}
+          </Typography>
+        </MenuItem>
+        <MenuItem 
+          component={Link} 
+          href="/account"
+          onClick={handleUserMenuClose}
+          sx={{
+            py: 1.5,
+            px: 2,
+            '&:hover': {
+              backgroundColor: 'rgba(43, 175, 154, 0.08)',
+            },
+          }}
+        >
+          <AccountCircleIcon sx={{ mr: 2, fontSize: 20 }} />
+          {t('dashboard')}
+        </MenuItem>
+        <MenuItem 
+          onClick={handleLogout}
+          sx={{
+            py: 1.5,
+            px: 2,
+            color: 'error.main',
+            '&:hover': {
+              backgroundColor: 'rgba(244, 67, 54, 0.08)',
+            },
+          }}
+        >
+          {t('logout')}
         </MenuItem>
       </Menu>
     </AppBar>

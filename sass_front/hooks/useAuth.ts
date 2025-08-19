@@ -25,11 +25,7 @@ interface AuthPayload {
 
 // --- API Fetcher Functions ---
 const fetchUser = async (): Promise<User> => {
-  const res = await customFetch('/auth/me');
-  if (!res.ok) {
-    throw new Error('Not authenticated');
-  }
-  return res.json();
+  return await customFetch('/auth/me');
 };
 
 const loginUser = async ({ payload }: AuthPayload) => {
@@ -71,6 +67,8 @@ export function useAuth() {
     gcTime: 10 * 60 * 1000, // 10 minutos
     enabled: status === 'loading', // Solo ejecutar cuando estemos en estado de loading
   });
+
+
 
   // Efecto para sincronizar el estado del store con la query (solo una vez)
   useEffect(() => {
@@ -157,6 +155,8 @@ export function useAuth() {
       return false;
     }
   }, [status, setUserAndAuth, queryClient]);
+
+
 
   return {
     user,
