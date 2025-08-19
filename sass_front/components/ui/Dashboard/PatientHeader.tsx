@@ -6,6 +6,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
+import { useTranslations } from 'next-intl';
 
 interface PatientHeaderProps {
   patientName: string;
@@ -24,6 +25,7 @@ export default function PatientHeader({
   email, 
   patientId 
 }: PatientHeaderProps) {
+  const t = useTranslations('Dashboard.consultation');
   const initials = patientName.split(' ').map(n => n[0]).join('').toUpperCase();
 
   return (
@@ -65,7 +67,7 @@ export default function PatientHeader({
             color: 'white'
           }}
         >
-          Terminar consulta
+          {t('finishConsultation')}
         </Button>
       </Box>
 
@@ -74,7 +76,7 @@ export default function PatientHeader({
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
         <Chip 
           icon={gender === 'male' ? <MaleIcon /> : <FemaleIcon />}
-          label={gender === 'male' ? 'Masculino' : 'Femenino'}
+          label={gender === 'male' ? t('patients.form.male') : t('patients.form.female')}
           variant="outlined"
           sx={{ borderColor: 'primary.main', color: 'primary.main' }}
         />
@@ -114,7 +116,7 @@ export default function PatientHeader({
             '&:hover': { color: 'primary.dark' }
           }}
         >
-          Editar información
+          {t('editInfo')}
         </Typography>
       </Box>
     </Box>

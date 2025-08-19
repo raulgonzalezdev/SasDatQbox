@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -53,6 +53,8 @@ import {
   TrendingUp as TrendingUpIcon,
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
 
 interface Payment {
   id: string;
@@ -154,6 +156,15 @@ const mockPaymentMethods: PaymentMethod[] = [
 ];
 
 export default function PaymentsPage() {
+  const t = useTranslations('Dashboard.payments');
+  const locale = useLocale();
+  const { setCurrentDashboardSection } = useAppStore();
+  
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('payments');
+  }, [setCurrentDashboardSection]);
+
   const [payments] = useState<Payment[]>(mockPayments);
   const [paymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
@@ -192,13 +203,13 @@ export default function PaymentsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'Completado';
+        return t('status.completed');
       case 'pending':
-        return 'Pendiente';
+        return t('status.pending');
       case 'failed':
-        return 'Fallido';
+        return t('status.failed');
       case 'refunded':
-        return 'Reembolsado';
+        return t('status.refunded');
       default:
         return status;
     }
@@ -222,13 +233,13 @@ export default function PaymentsPage() {
   const getPaymentMethodText = (method: string) => {
     switch (method) {
       case 'credit_card':
-        return 'Tarjeta de Crédito';
+        return t('paymentMethods.creditCard');
       case 'bank_transfer':
-        return 'Transferencia Bancaria';
+        return t('paymentMethods.bankTransfer');
       case 'cash':
-        return 'Efectivo';
+        return t('paymentMethods.cash');
       case 'insurance':
-        return 'Seguro Médico';
+        return t('paymentMethods.insurance');
       default:
         return method;
     }
@@ -261,7 +272,7 @@ export default function PaymentsPage() {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-          Gestión de Pagos
+          {t('title')}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
@@ -270,7 +281,7 @@ export default function PaymentsPage() {
             onClick={handleAddPaymentMethod}
             sx={{ borderRadius: 2 }}
           >
-            Método de Pago
+            {t('paymentMethod')}
           </Button>
           <Button
             variant="contained"
@@ -278,7 +289,7 @@ export default function PaymentsPage() {
             onClick={handleNewPayment}
             sx={{ borderRadius: 2 }}
           >
-            Nuevo Pago
+            {t('newPayment')}
           </Button>
         </Box>
       </Box>
@@ -298,9 +309,9 @@ export default function PaymentsPage() {
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     ${totalRevenue.toFixed(2)}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Ingresos Totales
-                  </Typography>
+                                     <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                     {t('stats.totalRevenue')}
+                   </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -319,9 +330,9 @@ export default function PaymentsPage() {
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {payments.length}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Transacciones Totales
-                  </Typography>
+                                     <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                     {t('stats.totalTransactions')}
+                   </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -340,9 +351,9 @@ export default function PaymentsPage() {
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {pendingPayments.length}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Pagos Pendientes
-                  </Typography>
+                                     <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                     {t('stats.pendingPayments')}
+                   </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -361,9 +372,9 @@ export default function PaymentsPage() {
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {failedPayments.length}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Pagos Fallidos
-                  </Typography>
+                                     <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                     {t('stats.failedPayments')}
+                   </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -377,7 +388,7 @@ export default function PaymentsPage() {
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Métodos de Pago
+                {t('paymentMethods.title')}
               </Typography>
               <IconButton size="small" onClick={handleAddPaymentMethod}>
                 <AddIcon />
@@ -394,13 +405,13 @@ export default function PaymentsPage() {
                             {method.name}
                           </Typography>
                           {method.isDefault && (
-                            <Chip label="Predeterminado" size="small" color="primary" />
+                            <Chip label={t('paymentMethods.default')} size="small" color="primary" />
                           )}
                         </Box>
                       }
                       secondary={
                         <Typography variant="caption" color="text.secondary">
-                          {method.type === 'credit_card' ? 'Tarjeta de Crédito' : 'Cuenta Bancaria'}
+                          {method.type === 'credit_card' ? t('paymentMethods.creditCard') : t('paymentMethods.bankAccount')}
                         </Typography>
                       }
                     />
@@ -426,18 +437,18 @@ export default function PaymentsPage() {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Pagos Recientes
+              {t('recentPayments')}
             </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: 'primary.main' }}>
-                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Paciente</TableCell>
-                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Monto</TableCell>
-                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Método</TableCell>
-                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Estado</TableCell>
-                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Fecha</TableCell>
-                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Acciones</TableCell>
+                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaders.patient')}</TableCell>
+                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaders.amount')}</TableCell>
+                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaders.method')}</TableCell>
+                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaders.status')}</TableCell>
+                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaders.date')}</TableCell>
+                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaders.actions')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -476,7 +487,7 @@ export default function PaymentsPage() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
-                          {new Date(payment.date).toLocaleDateString('es-ES')}
+                          {new Date(payment.date).toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US')}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -513,7 +524,7 @@ export default function PaymentsPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <PaymentIcon color="primary" />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Detalle del Pago
+              {t('payment.detail')}
             </Typography>
           </Box>
         </DialogTitle>
@@ -523,21 +534,21 @@ export default function PaymentsPage() {
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Información del Paciente
+                    {t('payment.patientInfo')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Nombre:</strong> {selectedPayment.patientName}
+                    <strong>{t('payment.name')}:</strong> {selectedPayment.patientName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>ID:</strong> {selectedPayment.patientId}
+                    <strong>{t('payment.id')}:</strong> {selectedPayment.patientId}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Factura:</strong> {selectedPayment.invoiceNumber}
+                    <strong>{t('payment.invoice')}:</strong> {selectedPayment.invoiceNumber}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Información del Pago
+                    {t('payment.paymentInfo')}
                   </Typography>
                   <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
                     ${selectedPayment.amount.toFixed(2)} {selectedPayment.currency}
@@ -549,12 +560,12 @@ export default function PaymentsPage() {
                     sx={{ mb: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Fecha:</strong> {new Date(selectedPayment.date).toLocaleDateString('es-ES')}
+                    <strong>{t('payment.date')}:</strong> {new Date(selectedPayment.date).toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US')}
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Método de Pago
+                    {t('paymentMethods.title')}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     {getPaymentMethodIcon(selectedPayment.paymentMethod)}
@@ -565,7 +576,7 @@ export default function PaymentsPage() {
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Descripción
+                    {t('payment.description')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {selectedPayment.description}
@@ -576,9 +587,9 @@ export default function PaymentsPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsPaymentDetailDialogOpen(false)}>Cerrar</Button>
+          <Button onClick={() => setIsPaymentDetailDialogOpen(false)}>{t('actions.close')}</Button>
           <Button variant="contained" startIcon={<DownloadIcon />}>
-            Descargar Recibo
+            {t('payment.receipt')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -592,37 +603,79 @@ export default function PaymentsPage() {
       >
         <DialogTitle>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Agregar Método de Pago
+            {t('form.addPaymentMethod')}
           </Typography>
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Tipo de Método</InputLabel>
-              <Select label="Tipo de Método">
-                <MenuItem value="credit_card">Tarjeta de Crédito</MenuItem>
-                <MenuItem value="bank_account">Cuenta Bancaria</MenuItem>
+              <InputLabel>{t('form.methodType')}</InputLabel>
+              <Select label={t('form.methodType')}>
+                <MenuItem value="credit_card">{t('paymentMethods.creditCard')}</MenuItem>
+                <MenuItem value="bank_account">{t('paymentMethods.bankAccount')}</MenuItem>
               </Select>
             </FormControl>
             <TextField
               fullWidth
-              label="Número de Tarjeta"
+              label={t('form.cardNumber')}
               placeholder="1234 5678 9012 3456"
-              sx={{ mb: 2 }}
+              sx={{ 
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'white',
+                  '& fieldset': {
+                    borderColor: 'grey.300',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'grey.400',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                },
+              }}
             />
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <TextField
                   fullWidth
-                  label="Fecha de Vencimiento"
+                  label={t('form.expiryDate')}
                   placeholder="MM/YY"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'white',
+                      '& fieldset': {
+                        borderColor: 'grey.300',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'grey.400',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: 'primary.main',
+                      },
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   fullWidth
-                  label="CVV"
+                  label={t('form.cvv')}
                   placeholder="123"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'white',
+                      '& fieldset': {
+                        borderColor: 'grey.300',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'grey.400',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: 'primary.main',
+                      },
+                    },
+                  }}
                 />
               </Grid>
             </Grid>
@@ -630,10 +683,10 @@ export default function PaymentsPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsAddPaymentMethodDialogOpen(false)}>
-            Cancelar
+            {t('actions.cancel')}
           </Button>
           <Button variant="contained">
-            Agregar
+            {t('actions.add')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -647,14 +700,14 @@ export default function PaymentsPage() {
       >
         <DialogTitle>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Nuevo Pago
+            {t('form.newPayment')}
           </Typography>
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Paciente</InputLabel>
-              <Select label="Paciente">
+              <InputLabel>{t('form.patient')}</InputLabel>
+              <Select label={t('form.patient')}>
                 <MenuItem value="P001">María González (P001)</MenuItem>
                 <MenuItem value="P002">Juan Pérez (P002)</MenuItem>
                 <MenuItem value="P003">Ana López (P003)</MenuItem>
@@ -662,35 +715,49 @@ export default function PaymentsPage() {
             </FormControl>
             <TextField
               fullWidth
-              label="Monto"
+              label={t('form.amount')}
               type="number"
               placeholder="0.00"
-              sx={{ mb: 2 }}
+              sx={{ 
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'white',
+                  '& fieldset': {
+                    borderColor: 'grey.300',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'grey.400',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                },
+              }}
             />
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Método de Pago</InputLabel>
-              <Select label="Método de Pago">
-                <MenuItem value="credit_card">Tarjeta de Crédito</MenuItem>
-                <MenuItem value="bank_transfer">Transferencia Bancaria</MenuItem>
-                <MenuItem value="cash">Efectivo</MenuItem>
-                <MenuItem value="insurance">Seguro Médico</MenuItem>
+              <InputLabel>{t('form.paymentMethod')}</InputLabel>
+              <Select label={t('form.paymentMethod')}>
+                <MenuItem value="credit_card">{t('paymentMethods.creditCard')}</MenuItem>
+                <MenuItem value="bank_transfer">{t('paymentMethods.bankTransfer')}</MenuItem>
+                <MenuItem value="cash">{t('paymentMethods.cash')}</MenuItem>
+                <MenuItem value="insurance">{t('paymentMethods.insurance')}</MenuItem>
               </Select>
             </FormControl>
             <TextField
               fullWidth
               multiline
               rows={3}
-              label="Descripción"
-              placeholder="Descripción del pago..."
+              label={t('form.description')}
+              placeholder={t('form.descriptionPlaceholder')}
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsNewPaymentDialogOpen(false)}>
-            Cancelar
+            {t('actions.cancel')}
           </Button>
           <Button variant="contained">
-            Procesar Pago
+            {t('actions.processPayment')}
           </Button>
         </DialogActions>
       </Dialog>

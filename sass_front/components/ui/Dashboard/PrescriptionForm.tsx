@@ -6,8 +6,7 @@ import {
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-
-const steps = ['Seleccionar Paciente', 'Añadir Medicamentos', 'Revisar y Confirmar'];
+import { useTranslations } from 'next-intl';
 
 // --- Mock Data ---
 const mockPatients = [
@@ -18,10 +17,12 @@ const mockPatients = [
 // --- Step Components ---
 
 function SelectPatientStep({ onSelect }: { onSelect: (id: string) => void }) {
+  const t = useTranslations('Dashboard.prescriptions');
+  
   return (
     <FormControl fullWidth sx={{ mt: 3 }}>
-      <InputLabel>Paciente</InputLabel>
-      <Select label="Paciente" onChange={(e) => onSelect(e.target.value)}>
+      <InputLabel>{t('newPrescriptionForm.selectPatient')}</InputLabel>
+      <Select label={t('newPrescriptionForm.selectPatient')} onChange={(e) => onSelect(e.target.value)}>
         {mockPatients.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
       </Select>
     </FormControl>
@@ -29,6 +30,7 @@ function SelectPatientStep({ onSelect }: { onSelect: (id: string) => void }) {
 }
 
 function AddMedicationsStep() {
+  const t = useTranslations('Dashboard.prescriptions');
   const [medications, setMedications] = useState([{ name: '', dosage: '', frequency: '' }]);
 
   const handleAddMedication = () => {
@@ -44,27 +46,29 @@ function AddMedicationsStep() {
     <Box sx={{ mt: 3 }}>
       {medications.map((med, index) => (
         <Box key={index} sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-          <TextField label="Medicamento" fullWidth />
-          <TextField label="Dosis" />
-          <TextField label="Frecuencia" />
+          <TextField label={t('medication.name')} fullWidth />
+          <TextField label={t('medication.dosage')} />
+          <TextField label={t('medication.frequency')} />
           <IconButton onClick={() => handleRemoveMedication(index)}>
             <RemoveCircleOutlineIcon />
           </IconButton>
         </Box>
       ))}
       <Button startIcon={<AddCircleOutlineIcon />} onClick={handleAddMedication}>
-        Añadir Medicamento
+        {t('newPrescriptionForm.addMedications')}
       </Button>
     </Box>
   );
 }
 
 function ReviewStep() {
+  const t = useTranslations('Dashboard.prescriptions');
+  
   return (
     <Box sx={{ mt: 3, p: 2, border: '1px dashed grey' }}>
-      <Typography variant="h6">Resumen de la Receta</Typography>
-      <Typography><strong>Paciente:</strong> Juan Pérez</Typography>
-      <Typography><strong>Medicamentos:</strong></Typography>
+      <Typography variant="h6">{t('newPrescriptionForm.steps.review')}</Typography>
+      <Typography><strong>{t('prescription.name')}:</strong> Juan Pérez</Typography>
+      <Typography><strong>{t('prescription.medications')}:</strong></Typography>
       <Typography component="div">
         <ul>
           <li>Paracetamol 500mg - cada 8 horas</li>
@@ -76,7 +80,14 @@ function ReviewStep() {
 
 
 export default function PrescriptionForm() {
+  const t = useTranslations('Dashboard.prescriptions');
   const [activeStep, setActiveStep] = useState(0);
+
+  const steps = [
+    t('newPrescriptionForm.steps.patientInfo'),
+    t('newPrescriptionForm.addMedications'),
+    t('newPrescriptionForm.steps.review')
+  ];
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -103,26 +114,25 @@ export default function PrescriptionForm() {
           </Step>
         ))}
       </Stepper>
-      {activeStep === steps.length ? (
-        <>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            Receta creada exitosamente.
-          </Typography>
-        </>
-      ) : (
-        <>
-          {getStepContent(activeStep)}
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-              Atrás
-            </Button>
-            <Box sx={{ flex: '1 1 auto' }} />
-            <Button onClick={handleNext}>
-              {activeStep === steps.length - 1 ? 'Finalizar' : 'Siguiente'}
-            </Button>
-          </Box>
-        </>
-      )}
+
+      <Box sx={{ mt: 3 }}>
+        {getStepContent(activeStep)}
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+        {activeStep > 0 && (
+          <Button onClick={handleBack} sx={{ mr: 1 }}>
+            {t('actions.back')}
+          </Button>
+        )}
+        <Button
+          variant="contained"
+          onClick={handleNext}
+          disabled={activeStep === steps.length - 1}
+        >
+          {activeStep === steps.length - 1 ? t('actions.createPrescription') : t('actions.next')}
+        </Button>
+      </Box>
     </Box>
   );
 }

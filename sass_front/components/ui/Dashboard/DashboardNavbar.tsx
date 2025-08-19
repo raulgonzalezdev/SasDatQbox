@@ -4,6 +4,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import LanguageSelector from '../Navbar/LanguageSelector';
+import ThemeToggle from '../ThemeToggle';
 
 const drawerWidth = 240;
 
@@ -40,6 +43,9 @@ const AppBar = styled(MuiAppBar, {
 export default function DashboardNavbar({ toggleDrawer, title, open }: DashboardNavbarProps) {
   const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const t = useTranslations('Dashboard.navbar');
+  
+
   
   // Detect if screen is small (mobile/tablet)
   const isSmallScreen = useMediaQuery('(max-width:1024px)');
@@ -67,13 +73,23 @@ export default function DashboardNavbar({ toggleDrawer, title, open }: Dashboard
 
   // Get user display name
   const getUserDisplayName = () => {
-    if (user?.first_name && user?.last_name) {
+    if (!user) {
+      return t('user');
+    }
+    
+    if (user.first_name && user.last_name) {
       return `${user.first_name} ${user.last_name}`;
     }
-    if (user?.email) {
+    if (user.first_name) {
+      return user.first_name;
+    }
+    if (user.last_name) {
+      return user.last_name;
+    }
+    if (user.email) {
       return user.email.split('@')[0];
     }
-    return 'Usuario';
+    return t('user');
   };
 
   return (
@@ -111,12 +127,17 @@ export default function DashboardNavbar({ toggleDrawer, title, open }: Dashboard
         
         {/* User Avatar and Menu */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* Theme Toggle */}
+          <ThemeToggle color="white" />
+          {/* Language Selector */}
+          <LanguageSelector color="white" />
+          
           <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
             <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
-              {getUserDisplayName()}
+              {user ? getUserDisplayName() : t('user')}
             </Typography>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-              {user?.role === 'doctor' ? 'Médico' : 'Usuario'}
+              {user?.email || ''}
             </Typography>
           </Box>
           
@@ -185,10 +206,10 @@ export default function DashboardNavbar({ toggleDrawer, title, open }: Dashboard
             </MenuItem>
             <MenuItem onClick={handleClose}>
               <AccountCircleIcon sx={{ mr: 2, fontSize: 20 }} />
-              Mi Perfil
+              {t('profile')}
             </MenuItem>
             <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-              Cerrar Sesión
+              {t('logout')}
             </MenuItem>
           </Menu>
         </Box>

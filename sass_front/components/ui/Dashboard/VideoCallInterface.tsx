@@ -9,8 +9,10 @@ import ScreenShareIcon from '@mui/icons-material/ScreenShare';
 import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CallEndIcon from '@mui/icons-material/CallEnd';
+import { useTranslations } from 'next-intl';
 
 export default function VideoCallInterface() {
+  const t = useTranslations('Dashboard.consultation');
   const [isMicMuted, setMicMuted] = useState(false);
   const [isCamOff, setCamOff] = useState(false);
   const [isSharingScreen, setSharingScreen] = useState(false);
@@ -32,13 +34,13 @@ export default function VideoCallInterface() {
     <Box sx={{ position: 'relative', width: '100%', height: '70vh', bgcolor: 'black', borderRadius: 2, overflow: 'hidden' }}>
       {/* Paciente's Video Feed (main) */}
       <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <Typography>Video del Paciente</Typography>
+        <Typography>{t('videoCall.patientVideo')}</Typography>
       </Box>
 
       {/* Doctor's Video Feed (small, floating) */}
       <Paper sx={{ position: 'absolute', top: 16, right: 16, width: 200, height: 150, bgcolor: 'grey.800', border: '2px solid white' }}>
         <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Typography variant="body2">Mi Video</Typography>
+          <Typography variant="body2">{t('videoCall.myVideo')}</Typography>
         </Box>
       </Paper>
       

@@ -1,8 +1,11 @@
 'use client';
 import { Box, Typography, Container, Link as MuiLink } from '@mui/material';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function DashboardFooter() {
+  const t = useTranslations('Dashboard.footer');
+
   return (
     <Box
       component="footer"
@@ -30,7 +33,7 @@ export default function DashboardFooter() {
             fontWeight: 500, // Keep the bold weight
             opacity: 0.9 // Keep the opacity
           }}>
-            © {new Date().getFullYear()} BoxDoctor. Todos los derechos reservados.
+            © {new Date().getFullYear()} BoxDoctor. {t('rights')}
           </Typography>
           
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
@@ -51,7 +54,7 @@ export default function DashboardFooter() {
                 },
               }}
             >
-              Sobre Nosotros
+              {t('about')}
             </MuiLink>
             <MuiLink
               component={Link}
@@ -70,7 +73,7 @@ export default function DashboardFooter() {
                 },
               }}
             >
-              Seguridad
+              {t('security')}
             </MuiLink>
             <MuiLink
               component={Link}
@@ -89,7 +92,7 @@ export default function DashboardFooter() {
                 },
               }}
             >
-              Blog
+              {t('blog')}
             </MuiLink>
           </Box>
         </Box>

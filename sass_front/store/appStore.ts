@@ -12,13 +12,27 @@ interface User {
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
+// Tipos de navegación del dashboard
+type DashboardSection = 
+  | 'dashboard' 
+  | 'patients' 
+  | 'appointments' 
+  | 'consultations' 
+  | 'prescriptions' 
+  | 'chat' 
+  | 'payments' 
+  | 'statistics' 
+  | 'settings';
+
 interface AppState {
   user: User | null;
   status: AuthStatus;
   locale: string;
+  currentDashboardSection: DashboardSection;
   setUserAndAuth: (user: User | null) => void;
   setStatus: (status: AuthStatus) => void;
   setLocale: (locale: string) => void;
+  setCurrentDashboardSection: (section: DashboardSection) => void;
   logout: () => void;
 }
 
@@ -27,12 +41,18 @@ export const useAppStore = create<AppState>()(
     user: null,
     status: 'loading', // Empezamos en estado de carga
     locale: 'es', // Idioma por defecto
+    currentDashboardSection: 'dashboard', // Sección por defecto del dashboard
     setUserAndAuth: (user: User | null) => set({ 
       user, 
       status: user ? 'authenticated' : 'unauthenticated' 
     }),
     setStatus: (status: AuthStatus) => set({ status }),
     setLocale: (locale: string) => set({ locale }),
-    logout: () => set({ user: null, status: 'unauthenticated' }),
+    setCurrentDashboardSection: (section: DashboardSection) => set({ currentDashboardSection: section }),
+    logout: () => set({ 
+      user: null, 
+      status: 'unauthenticated',
+      currentDashboardSection: 'dashboard' // Resetear a dashboard al hacer logout
+    }),
   })
 );

@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { customFetch } from '@/utils/api';
 import { handleApiError } from '@/utils/api-helpers';
+import { useTranslations } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
+import { useEffect } from 'react';
 
 // La función que se comunica con la API para crear el paciente
 const createPatient = async (data: any) => {
@@ -23,6 +26,13 @@ const createPatient = async (data: any) => {
 export default function NewPatientPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const t = useTranslations('Dashboard.patients');
+  const { setCurrentDashboardSection } = useAppStore();
+
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('patients');
+  }, [setCurrentDashboardSection]);
 
   const mutation = useMutation({
     mutationFn: createPatient,
@@ -45,10 +55,10 @@ export default function NewPatientPage() {
     <Container maxWidth="md">
       <Paper sx={{ p: { xs: 2, md: 4 }, mt: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Registrar Nuevo Paciente
+          {t('newPatient.title')}
         </Typography>
         <Typography paragraph color="text.secondary">
-          Completa los siguientes campos para añadir un nuevo paciente a tu lista.
+          {t('newPatient.description')}
         </Typography>
         <Box mt={4}>
           <PatientForm onSubmit={handleSubmit} isSubmitting={mutation.isPending} />

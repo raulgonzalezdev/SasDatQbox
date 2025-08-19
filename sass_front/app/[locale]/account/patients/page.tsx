@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -60,9 +60,25 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { usePatientStore, Patient } from '@/stores/patientStore';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
 
 export default function PatientsPage() {
   const router = useRouter();
+  const t = useTranslations('Dashboard.patients');
+  const locale = useLocale();
+  const { setCurrentDashboardSection } = useAppStore();
+  
+  // Configurar el idioma de dayjs según el locale actual
+  useEffect(() => {
+    dayjs.locale(locale);
+  }, [locale]);
+
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('patients');
+  }, [setCurrentDashboardSection]);
+
   const {
     patients,
     selectedPatient,
@@ -201,7 +217,7 @@ export default function PatientsPage() {
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            Pacientes
+            {t('title')}
           </Typography>
           <Button
             variant="contained"
@@ -212,7 +228,7 @@ export default function PatientsPage() {
               '&:hover': { backgroundColor: 'orange.dark' }
             }}
           >
-            Agregar paciente
+            {t('addPatient')}
           </Button>
         </Box>
 
@@ -230,7 +246,7 @@ export default function PatientsPage() {
                       {totalPatients}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Total de pacientes
+                      {t('totalPatients')}
                     </Typography>
                   </Box>
                 </Box>
@@ -246,10 +262,10 @@ export default function PatientsPage() {
                   </Avatar>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                      {genderDistribution.femalePercentage}% Mujeres
+                      {genderDistribution.femalePercentage}{t('womenPercentage')}
                     </Typography>
                     <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                      {genderDistribution.malePercentage}% Hombres
+                      {genderDistribution.malePercentage}{t('menPercentage')}
                     </Typography>
                   </Box>
                 </Box>
@@ -263,7 +279,7 @@ export default function PatientsPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <TextField
               fullWidth
-              placeholder="Buscar por apellido de paciente..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={handleSearchChange}
               InputProps={{
@@ -297,13 +313,13 @@ export default function PatientsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>PACIENTE</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>EDAD</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>SEXO</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>TELÉFONO</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>ÚLTIMA CONSULTA</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>PRÓXIMA CONSULTA</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>ACCIONES</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.patient')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.age')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.gender')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.phone')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.lastConsultation')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.nextConsultation')}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: 'orange.main' }}>{t('tableHeaders.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -326,7 +342,7 @@ export default function PatientsPage() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {calculateAge(patient.date_of_birth)} años
+                        {calculateAge(patient.date_of_birth)} {t('age')}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -362,7 +378,7 @@ export default function PatientsPage() {
                             '&:hover': { backgroundColor: 'orange.dark' }
                           }}
                         >
-                          {hasActiveConsultation(patient) ? 'Continuar consulta' : 'Iniciar consulta'}
+                          {hasActiveConsultation(patient) ? t('continueConsultation') : t('startConsultation')}
                         </Button>
                         <IconButton
                           size="small"
@@ -390,7 +406,7 @@ export default function PatientsPage() {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <EditIcon sx={{ color: 'orange.main' }} />
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Editar paciente
+                {t('editPatient')}
               </Typography>
             </Box>
           </DialogTitle>
@@ -400,7 +416,7 @@ export default function PatientsPage() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Nombre *"
+                    label={t('form.firstName')}
                     value={editForm.first_name || ''}
                     onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
                   />
@@ -408,14 +424,14 @@ export default function PatientsPage() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Apellido *"
+                    label={t('form.lastName')}
                     value={editForm.last_name || ''}
                     onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <DatePicker
-                    label="Fecha de nacimiento *"
+                    label={t('form.dateOfBirth')}
                     value={editForm.date_of_birth ? dayjs(editForm.date_of_birth) : null}
                     onChange={(date) => setEditForm({ 
                       ...editForm, 
@@ -426,21 +442,21 @@ export default function PatientsPage() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FormControl component="fieldset">
-                    <FormLabel component="legend">Sexo *</FormLabel>
+                    <FormLabel component="legend">{t('form.gender')}</FormLabel>
                     <RadioGroup
                       row
                       value={editForm.gender || ''}
                       onChange={(e) => setEditForm({ ...editForm, gender: e.target.value as 'male' | 'female' })}
                     >
-                      <FormControlLabel value="male" control={<Radio />} label="Masculino" />
-                      <FormControlLabel value="female" control={<Radio />} label="Femenino" />
+                      <FormControlLabel value="male" control={<Radio />} label={t('form.male')} />
+                      <FormControlLabel value="female" control={<Radio />} label={t('form.female')} />
                     </RadioGroup>
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Email"
+                    label={t('form.email')}
                     value={editForm.email || ''}
                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   />
@@ -448,7 +464,7 @@ export default function PatientsPage() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Teléfono *"
+                    label={t('form.phone')}
                     value={editForm.phone || ''}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                   />
@@ -456,7 +472,7 @@ export default function PatientsPage() {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Notas"
+                    label={t('form.notes')}
                     value={editForm.notes || ''}
                     onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                     multiline
@@ -468,14 +484,14 @@ export default function PatientsPage() {
           </DialogContent>
           <DialogActions>
             <Button onClick={closeEditDialog} sx={{ color: 'orange.main' }}>
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button 
               onClick={handleSaveEdit} 
               variant="contained"
               sx={{ backgroundColor: 'orange.main', '&:hover': { backgroundColor: 'orange.dark' } }}
             >
-              Guardar
+              {t('save')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -489,26 +505,26 @@ export default function PatientsPage() {
         >
           <DialogTitle>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Confirmar eliminación
+              {t('confirmDelete')}
             </Typography>
           </DialogTitle>
           <DialogContent>
             <Typography>
-              ¿Estás seguro de que quieres eliminar al paciente{' '}
+              {t('confirmDeleteMessage')}{' '}
               <strong>{selectedPatient?.first_name} {selectedPatient?.last_name}</strong>?
-              Esta acción no se puede deshacer.
+              {t('confirmDeleteWarning')}
             </Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={closeDeleteDialog}>
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button 
               onClick={handleConfirmDelete} 
               color="error" 
               variant="contained"
             >
-              Eliminar
+              {t('delete')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -521,11 +537,11 @@ export default function PatientsPage() {
         >
           <MenuItem onClick={() => selectedPatientForMenu && handleEditClick(selectedPatientForMenu)}>
             <EditIcon sx={{ mr: 1 }} />
-            Editar paciente
+            {t('editPatient')}
           </MenuItem>
           <MenuItem onClick={() => selectedPatientForMenu && handleDeleteClick(selectedPatientForMenu)}>
             <DeleteIcon sx={{ mr: 1 }} />
-            Eliminar paciente
+            {t('deletePatient')}
           </MenuItem>
         </Menu>
       </Container>

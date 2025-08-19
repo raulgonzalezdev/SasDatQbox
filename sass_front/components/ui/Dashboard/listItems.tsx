@@ -14,6 +14,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import BookIcon from '@mui/icons-material/Book';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import StethoscopeIcon from '@mui/icons-material/MedicalServices';
+import { useTranslations } from 'next-intl';
 
 // Custom hook to properly detect route changes
 function useCurrentPath() {
@@ -32,6 +33,7 @@ function useCurrentPath() {
 
 export const mainListItems = () => {
   const currentPath = useCurrentPath();
+  const t = useTranslations('Dashboard.menu');
   
   // Clean the pathname to remove trailing slashes and ensure consistent matching
   const cleanPathname = currentPath?.replace(/\/$/, '') || '';
@@ -62,7 +64,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><DashboardIcon /></ListItemIcon>
-        <ListItemText primary="Dashboard" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('dashboard')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -87,7 +89,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><PeopleIcon /></ListItemIcon>
-        <ListItemText primary="Pacientes" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('patients')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -112,7 +114,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><EventIcon /></ListItemIcon>
-        <ListItemText primary="Agenda" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('appointments')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -137,7 +139,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><StethoscopeIcon /></ListItemIcon>
-        <ListItemText primary="Consultas" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('consultations')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -162,7 +164,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><DescriptionIcon /></ListItemIcon>
-        <ListItemText primary="Recetas" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('prescriptions')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -187,7 +189,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><ChatIcon /></ListItemIcon>
-        <ListItemText primary="Chat" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('chat')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -212,7 +214,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><PaymentIcon /></ListItemIcon>
-        <ListItemText primary="Pagos" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('payments')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -237,7 +239,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><BarChartIcon /></ListItemIcon>
-        <ListItemText primary="Estadísticas" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('statistics')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       
       <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
@@ -266,7 +268,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><HomeIcon /></ListItemIcon>
-        <ListItemText primary="Sitio Principal" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('mainSite')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
       <ListItemButton 
         component={Link} 
@@ -291,7 +293,7 @@ export const mainListItems = () => {
         }}
       >
         <ListItemIcon sx={{ color: 'white' }}><BookIcon /></ListItemIcon>
-        <ListItemText primary="Blog" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('blog')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
     </React.Fragment>
   );
@@ -300,6 +302,7 @@ export const mainListItems = () => {
 // Items secundarios, podrían ser específicos para admins o configuraciones
 export const secondaryListItems = () => {
   const currentPath = useCurrentPath();
+  const t = useTranslations('Dashboard.menu');
   
   // Clean the pathname to remove trailing slashes and ensure consistent matching
   const cleanPathname = currentPath?.replace(/\/$/, '') || '';
@@ -329,7 +332,7 @@ export const secondaryListItems = () => {
         <ListItemIcon sx={{ color: 'white' }}>
           <AssignmentIcon />
         </ListItemIcon>
-        <ListItemText primary="Configuración" sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
+        <ListItemText primary={t('settings')} sx={{ '& .MuiListItemText-primary': { color: 'white' } }} />
       </ListItemButton>
     </React.Fragment>
   );

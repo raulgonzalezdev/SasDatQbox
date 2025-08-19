@@ -11,7 +11,11 @@ const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
 ];
 
-export default function LanguageSelector() {
+interface LanguageSelectorProps {
+  color?: string;
+}
+
+export default function LanguageSelector({ color = 'text.primary' }: LanguageSelectorProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const pathname = usePathname();
   const locale = useLocale();
@@ -50,9 +54,12 @@ export default function LanguageSelector() {
         onClick={handleClick}
         startIcon={<LanguageIcon />}
         sx={{ 
-          color: 'text.primary', 
+          color: color, 
           textTransform: 'none',
-          minWidth: 'auto'
+          minWidth: 'auto',
+          '&:hover': {
+            backgroundColor: 'rgba(255,255,255,0.1)',
+          }
         }}
       >
         {currentLanguage.flag}

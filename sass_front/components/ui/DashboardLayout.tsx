@@ -11,6 +11,7 @@ import DashboardNavbar from './Dashboard/DashboardNavbar';
 import DashboardFooter from './Dashboard/DashboardFooter';
 import { mainListItems, secondaryListItems } from './Dashboard/listItems';
 import Logo from './Logo';
+import { useTranslations } from 'next-intl';
 
 const drawerWidth = 240;
 
@@ -44,25 +45,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-const pageTitles: { [key: string]: string } = {
-  '/account': 'Dashboard',
-  '/account/': 'Dashboard',
-  '/account/patients': 'Pacientes',
-  '/account/patients/': 'Pacientes',
-  '/account/appointments': 'Agenda',
-  '/account/appointments/': 'Agenda',
-  '/account/chat': 'Chat',
-  '/account/chat/': 'Chat',
-  '/account/consultation': 'Consultas',
-  '/account/consultation/': 'Consultas',
-  '/account/prescriptions': 'Recetas',
-  '/account/prescriptions/': 'Recetas',
-  '/account/payments': 'Pagos',
-  '/account/payments/': 'Pagos',
-  '/account/reports': 'Estadísticas',
-  '/account/reports/': 'Estadísticas',
-};
-
 // Custom hook to properly detect route changes
 function useCurrentPath() {
   const pathname = usePathname();
@@ -80,6 +62,7 @@ function useCurrentPath() {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const currentPath = useCurrentPath();
+  const t = useTranslations('Dashboard.menu');
   
   // Detect if screen is small (mobile/tablet)
   const isSmallScreen = useMediaQuery('(max-width:1024px)');
@@ -94,7 +77,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   
   // Clean the pathname to remove trailing slashes and ensure consistent matching
   const cleanPathname = currentPath?.replace(/\/$/, '') || '';
-  const title = pageTitles[cleanPathname] || pageTitles[currentPath] || 'Dashboard';
+  
+  // Get translated title based on path
+  const getTranslatedTitle = () => {
+    switch (cleanPathname) {
+      case '/account':
+        return t('dashboard');
+      case '/account/patients':
+        return t('patients');
+      case '/account/appointments':
+        return t('appointments');
+      case '/account/consultation':
+        return t('consultations');
+      case '/account/prescriptions':
+        return t('prescriptions');
+      case '/account/chat':
+        return t('chat');
+      case '/account/payments':
+        return t('payments');
+      case '/account/reports':
+        return t('statistics');
+      case '/account/settings':
+        return t('settings');
+      default:
+        return t('dashboard');
+    }
+  };
+  
+  const title = getTranslatedTitle();
   
   // Toggle drawer only on larger screens
   const toggleDrawer = () => {
@@ -103,14 +113,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   };
 
-  // Debug - remove this later
-  console.log('DashboardLayout - currentPath:', currentPath, 'cleanPathname:', cleanPathname, 'title:', title, 'isSmallScreen:', isSmallScreen);
-
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <CssBaseline />
       <DashboardNavbar toggleDrawer={toggleDrawer} title={title} open={open} />
-      <Drawer variant="permanent" open={isSmallScreen ? false : open}>
+              <Drawer variant="permanent" open={isSmallScreen ? false : open} theme={undefined as any}>
         <Toolbar sx={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -125,7 +132,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
               <Logo width={100} height={100} disabledLink={true} />
               <Typography 
-                variant="h7" 
+                variant="h6" 
                 sx={{ 
                   fontWeight: 'bold',
                   color: 'white',

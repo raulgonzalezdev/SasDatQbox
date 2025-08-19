@@ -16,6 +16,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
 import LanguageSelector from './LanguageSelector';
 import Logo from '../Logo';
+import ThemeToggle from '../ThemeToggle';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -104,6 +105,7 @@ export default function Navbar() {
                 {item.text}
               </Button>
             ))}
+            <ThemeToggle />
             <LanguageSelector />
           </Box>
         )}
@@ -234,6 +236,9 @@ export default function Navbar() {
             {t('logout')}
           </MenuItem>
         )}
+        <MenuItem sx={{ py: 1.5, px: 2 }}>
+          <ThemeToggle />
+        </MenuItem>
         <MenuItem sx={{ py: 1.5, px: 2 }}>
           <LanguageSelector />
         </MenuItem>

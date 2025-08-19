@@ -71,6 +71,8 @@ import { useSearchParams } from 'next/navigation';
 import { usePatientStore } from '@/stores/patientStore';
 import { useConsultationStore } from '@/stores/consultationStore';
 import dayjs from 'dayjs';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -97,6 +99,19 @@ function TabPanel(props: TabPanelProps) {
 export default function ConsultationPage() {
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId');
+  const t = useTranslations('Dashboard.consultation');
+  const locale = useLocale();
+  const { setCurrentDashboardSection } = useAppStore();
+  
+  // Configurar el idioma de dayjs según el locale actual
+  useEffect(() => {
+    dayjs.locale(locale);
+  }, [locale]);
+
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('consultations');
+  }, [setCurrentDashboardSection]);
   
   const { getPatientById } = usePatientStore();
   const {
@@ -142,11 +157,16 @@ export default function ConsultationPage() {
     }
   };
 
+  // Helper function to get condition name
+  const getConditionName = (key: string) => {
+    return t(`medicalHistory.conditions.${key}`) || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   if (!patient) {
     return (
       <Container maxWidth="xl" sx={{ py: 3 }}>
         <Typography variant="h5" color="error">
-          Paciente no encontrado
+          {t('patientNotFound')}
         </Typography>
       </Container>
     );
@@ -170,13 +190,13 @@ export default function ConsultationPage() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {patient.gender === 'male' ? <MaleIcon color="primary" /> : <FemaleIcon color="secondary" />}
                 <Typography variant="body2">
-                  {patient.gender === 'male' ? 'Masculino' : 'Femenino'}
+                  {patient.gender === 'male' ? t('patients.form.male') : t('patients.form.female')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CalendarIcon color="action" />
                 <Typography variant="body2">
-                  {calculateAge(patient.date_of_birth)} años
+                  {calculateAge(patient.date_of_birth)} {t('patients.age')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -198,7 +218,7 @@ export default function ConsultationPage() {
               sx={{ cursor: 'pointer', mt: 1 }}
               onClick={() => setIsEditMode(true)}
             >
-              Editar información
+              {t('editInfo')}
             </Typography>
           </Grid>
           <Grid item>
@@ -213,11 +233,11 @@ export default function ConsultationPage() {
       <Paper sx={{ mb: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="consultation tabs">
-            <Tab label="Ficha" />
-            <Tab label="Historia clínica" />
-            <Tab label="Consulta" />
-            <Tab label="Historial" />
-            <Tab label="Estudios" />
+            <Tab label={t('tabs.file')} />
+            <Tab label={t('tabs.medicalHistory')} />
+            <Tab label={t('tabs.consultation')} />
+            <Tab label={t('tabs.history')} />
+            <Tab label={t('tabs.studies')} />
           </Tabs>
         </Box>
       </Paper>
@@ -233,7 +253,7 @@ export default function ConsultationPage() {
             '&:hover': { backgroundColor: 'orange.dark' }
           }}
         >
-          Terminar consulta
+          {t('finishConsultation')}
         </Button>
       </Box>
 
@@ -247,7 +267,7 @@ export default function ConsultationPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <PersonIcon color="primary" />
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Información personal
+                    {t('patientInfo.personalInfo')}
                   </Typography>
                   <IconButton size="small" sx={{ ml: 'auto' }}>
                     <EditIcon />
@@ -257,7 +277,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Dirección"
+                      label={t('patientInfo.fields.address')}
                       value={patient.address || ''}
                       variant="outlined"
                       size="small"
@@ -266,7 +286,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Estado de nacimiento"
+                      label={t('patientInfo.fields.birthState')}
                       value={patient.place_of_birth || ''}
                       variant="outlined"
                       size="small"
@@ -275,7 +295,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Nacionalidad"
+                      label={t('patientInfo.fields.nationality')}
                       value={patient.nationality || ''}
                       variant="outlined"
                       size="small"
@@ -284,7 +304,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Ciudad de nacimiento"
+                      label={t('patientInfo.fields.birthCity')}
                       value={patient.city_of_birth || ''}
                       variant="outlined"
                       size="small"
@@ -293,7 +313,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Parentesco"
+                      label={t('patientInfo.fields.relationship')}
                       value={patient.relationship || ''}
                       variant="outlined"
                       size="small"
@@ -302,7 +322,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Grupo Sanguíneo"
+                      label={t('patientInfo.fields.bloodType')}
                       value={patient.blood_type || ''}
                       variant="outlined"
                       size="small"
@@ -311,7 +331,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Escolaridad"
+                      label={t('patientInfo.fields.education')}
                       value={patient.education_level || ''}
                       variant="outlined"
                       size="small"
@@ -320,7 +340,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Profesión/Ocupación"
+                      label={t('patientInfo.fields.profession')}
                       value={patient.profession || ''}
                       variant="outlined"
                       size="small"
@@ -329,7 +349,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Religión"
+                      label={t('patientInfo.fields.religion')}
                       value={patient.religion || ''}
                       variant="outlined"
                       size="small"
@@ -338,7 +358,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Estado civil"
+                      label={t('patientInfo.fields.maritalStatus')}
                       value={patient.marital_status || ''}
                       variant="outlined"
                       size="small"
@@ -347,7 +367,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Teléfono"
+                      label={t('patientInfo.fields.phone')}
                       value={patient.phone || ''}
                       variant="outlined"
                       size="small"
@@ -356,7 +376,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Email"
+                      label={t('patientInfo.fields.email')}
                       value={patient.email || ''}
                       variant="outlined"
                       size="small"
@@ -373,7 +393,7 @@ export default function ConsultationPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <PhoneIcon color="primary" />
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Contacto de emergencia
+                    {t('patientInfo.emergencyContact')}
                   </Typography>
                   <IconButton size="small" sx={{ ml: 'auto' }}>
                     <EditIcon />
@@ -383,7 +403,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Nombre y apellido"
+                      label={t('patientInfo.fields.fullName')}
                       value={patient.emergency_contact?.name || ''}
                       variant="outlined"
                       size="small"
@@ -392,7 +412,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Parentesco"
+                      label={t('patientInfo.fields.relationship')}
                       value={patient.emergency_contact?.relationship || ''}
                       variant="outlined"
                       size="small"
@@ -401,7 +421,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Teléfono"
+                      label={t('patientInfo.fields.phone')}
                       value={patient.emergency_contact?.phone || ''}
                       variant="outlined"
                       size="small"
@@ -410,7 +430,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Email"
+                      label={t('patientInfo.fields.email')}
                       value={patient.emergency_contact?.email || ''}
                       variant="outlined"
                       size="small"
@@ -425,7 +445,7 @@ export default function ConsultationPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <AssignmentIcon color="primary" />
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Datos de facturación
+                    {t('patientInfo.billingInfo')}
                   </Typography>
                   <IconButton size="small" sx={{ ml: 'auto' }}>
                     <EditIcon />
@@ -435,7 +455,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Nombre y apellido"
+                      label={t('patientInfo.fields.fullName')}
                       value={patient.billing_info?.name || ''}
                       variant="outlined"
                       size="small"
@@ -444,7 +464,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Dirección"
+                      label={t('patientInfo.fields.address')}
                       value={patient.billing_info?.address || ''}
                       variant="outlined"
                       size="small"
@@ -453,7 +473,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Régimen fiscal"
+                      label={t('patientInfo.fields.taxRegime')}
                       value={patient.billing_info?.tax_regime || ''}
                       variant="outlined"
                       size="small"
@@ -462,7 +482,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Uso de CFDI"
+                      label={t('patientInfo.fields.cfdiUse')}
                       value={patient.billing_info?.cfdi_use || ''}
                       variant="outlined"
                       size="small"
@@ -471,7 +491,7 @@ export default function ConsultationPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="RFC"
+                      label={t('patientInfo.fields.rfc')}
                       value={patient.billing_info?.rfc || ''}
                       variant="outlined"
                       size="small"
@@ -486,7 +506,7 @@ export default function ConsultationPage() {
             <Card>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Notas
+                  {t('patientInfo.notes')}
                 </Typography>
                 <TextField
                   fullWidth
@@ -494,7 +514,7 @@ export default function ConsultationPage() {
                   rows={4}
                   value={patient.notes || ''}
                   variant="outlined"
-                  placeholder="Notas adicionales sobre el paciente..."
+                  placeholder={t('patientInfo.notesPlaceholder')}
                 />
               </CardContent>
             </Card>
@@ -509,7 +529,7 @@ export default function ConsultationPage() {
             <Accordion defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Antecedentes heredo-familiares
+                  {t('medicalHistory.hereditaryFamily')}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -519,12 +539,12 @@ export default function ConsultationPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                         <FormControl component="fieldset">
                           <RadioGroup row value={value.has ? 'yes' : 'no'}>
-                            <FormControlLabel value="yes" control={<Radio />} label="Sí" />
-                            <FormControlLabel value="no" control={<Radio />} label="No" />
+                            <FormControlLabel value="yes" control={<Radio />} label={t('medicalHistory.yes')} />
+                            <FormControlLabel value="no" control={<Radio />} label={t('medicalHistory.no')} />
                           </RadioGroup>
                         </FormControl>
                         <Typography variant="body2" sx={{ minWidth: 120 }}>
-                          {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {getConditionName(key)}
                         </Typography>
                       </Box>
                       {value.has && (
@@ -532,7 +552,7 @@ export default function ConsultationPage() {
                           fullWidth
                           multiline
                           rows={2}
-                          placeholder="Detalles..."
+                          placeholder={t('medicalHistory.details')}
                           value={value.details || ''}
                           size="small"
                         />
@@ -548,7 +568,7 @@ export default function ConsultationPage() {
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Antecedentes no patológicos
+                  {t('medicalHistory.nonPathological')}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -558,12 +578,12 @@ export default function ConsultationPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                         <FormControl component="fieldset">
                           <RadioGroup row value={value.has ? 'yes' : 'no'}>
-                            <FormControlLabel value="yes" control={<Radio />} label="Sí" />
-                            <FormControlLabel value="no" control={<Radio />} label="No" />
+                            <FormControlLabel value="yes" control={<Radio />} label={t('medicalHistory.yes')} />
+                            <FormControlLabel value="no" control={<Radio />} label={t('medicalHistory.no')} />
                           </RadioGroup>
                         </FormControl>
                         <Typography variant="body2" sx={{ minWidth: 120 }}>
-                          {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {getConditionName(key)}
                         </Typography>
                       </Box>
                       {value.has && (
@@ -571,7 +591,7 @@ export default function ConsultationPage() {
                           fullWidth
                           multiline
                           rows={2}
-                          placeholder="Detalles..."
+                          placeholder={t('medicalHistory.details')}
                           value={value.details || ''}
                           size="small"
                         />
@@ -587,7 +607,7 @@ export default function ConsultationPage() {
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Antecedentes patológicos
+                  {t('medicalHistory.pathological')}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -597,12 +617,12 @@ export default function ConsultationPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                         <FormControl component="fieldset">
                           <RadioGroup row value={value.has ? 'yes' : 'no'}>
-                            <FormControlLabel value="yes" control={<Radio />} label="Sí" />
-                            <FormControlLabel value="no" control={<Radio />} label="No" />
+                            <FormControlLabel value="yes" control={<Radio />} label={t('medicalHistory.yes')} />
+                            <FormControlLabel value="no" control={<Radio />} label={t('medicalHistory.no')} />
                           </RadioGroup>
                         </FormControl>
                         <Typography variant="body2" sx={{ minWidth: 120 }}>
-                          {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {getConditionName(key)}
                         </Typography>
                       </Box>
                       {value.has && (
@@ -610,7 +630,7 @@ export default function ConsultationPage() {
                           fullWidth
                           multiline
                           rows={2}
-                          placeholder="Detalles..."
+                          placeholder={t('medicalHistory.details')}
                           value={value.details || ''}
                           size="small"
                         />
@@ -626,7 +646,7 @@ export default function ConsultationPage() {
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Interrogatorio por aparatos y sistemas
+                  {t('medicalHistory.systemsInterrogation')}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -636,12 +656,12 @@ export default function ConsultationPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                         <FormControl component="fieldset">
                           <RadioGroup row value={value.has ? 'yes' : 'no'}>
-                            <FormControlLabel value="yes" control={<Radio />} label="Sí" />
-                            <FormControlLabel value="no" control={<Radio />} label="No" />
+                            <FormControlLabel value="yes" control={<Radio />} label={t('medicalHistory.yes')} />
+                            <FormControlLabel value="no" control={<Radio />} label={t('medicalHistory.no')} />
                           </RadioGroup>
                         </FormControl>
                         <Typography variant="body2" sx={{ minWidth: 120 }}>
-                          {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {getConditionName(key)}
                         </Typography>
                       </Box>
                       {value.has && (
@@ -649,7 +669,7 @@ export default function ConsultationPage() {
                           fullWidth
                           multiline
                           rows={2}
-                          placeholder="Detalles..."
+                          placeholder={t('medicalHistory.details')}
                           value={value.details || ''}
                           size="small"
                         />
@@ -666,21 +686,21 @@ export default function ConsultationPage() {
       <TabPanel value={tabValue} index={2}>
         {/* Consulta Tab */}
         <Typography variant="h5" sx={{ mb: 3 }}>
-          Consulta en desarrollo...
+          {t('inDevelopment.consultation')}
         </Typography>
       </TabPanel>
 
       <TabPanel value={tabValue} index={3}>
         {/* Historial Tab */}
         <Typography variant="h5" sx={{ mb: 3 }}>
-          Historial en desarrollo...
+          {t('inDevelopment.history')}
         </Typography>
       </TabPanel>
 
       <TabPanel value={tabValue} index={4}>
         {/* Estudios Tab */}
         <Typography variant="h5" sx={{ mb: 3 }}>
-          Estudios médicos en desarrollo...
+          {t('inDevelopment.studies')}
         </Typography>
       </TabPanel>
     </Container>

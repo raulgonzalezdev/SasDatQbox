@@ -82,10 +82,18 @@ export function useAuth() {
 
   const { mutate: login, isPending: isLoggingIn } = useMutation({
     mutationFn: loginUser,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success('¡Bienvenido de nuevo!');
-      setUserAndAuth(data);
-      queryClient.setQueryData(['user'], data);
+      // Después del login exitoso, obtener los datos del usuario
+      try {
+        const userData = await fetchUser();
+        setUserAndAuth(userData);
+        queryClient.setQueryData(['user'], userData);
+      } catch (error) {
+        console.error('Error fetching user data after login:', error);
+        // Si no podemos obtener los datos del usuario, al menos establecer el estado como autenticado
+        setUserAndAuth(data);
+      }
       // Redirigir al dashboard después del login exitoso
       router.push(`/${locale}/account`);
     },

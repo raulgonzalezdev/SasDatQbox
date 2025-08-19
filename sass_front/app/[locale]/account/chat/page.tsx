@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -29,9 +29,20 @@ import {
 } from '@mui/icons-material';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
 import dayjs from 'dayjs';
 
 export default function ChatPage() {
+  const t = useTranslations('Dashboard.chat');
+  const locale = useLocale();
+  const { setCurrentDashboardSection } = useAppStore();
+  
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('chat');
+  }, [setCurrentDashboardSection]);
+
   const { user } = useAuth();
   const { 
     conversations, 
@@ -88,11 +99,11 @@ export default function ChatPage() {
   const getConversationTypeText = (type: string) => {
     switch (type) {
       case 'medical_consultation':
-        return 'Consulta Médica';
+        return t('types.medical_consultation');
       case 'support':
-        return 'Soporte';
+        return t('types.support');
       default:
-        return 'General';
+        return t('types.general');
     }
   };
 
@@ -109,7 +120,7 @@ export default function ChatPage() {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-          Chat y Conversaciones
+          {t('title')}
         </Typography>
       </Box>
 
@@ -125,9 +136,9 @@ export default function ChatPage() {
               <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                 {conversations.length}
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Conversaciones Totales
-              </Typography>
+                             <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                 {t('stats.totalConversations')}
+               </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -141,9 +152,9 @@ export default function ChatPage() {
               <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                 {getMedicalConsultations().length}
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Consultas Médicas
-              </Typography>
+                             <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                 {t('stats.medicalConsultations')}
+               </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -157,9 +168,9 @@ export default function ChatPage() {
               <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                 {getSupportConversations().length}
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Soporte Técnico
-              </Typography>
+                             <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                 {t('stats.technicalSupport')}
+               </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -173,9 +184,9 @@ export default function ChatPage() {
               <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                 {getGeneralConversations().length}
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Conversaciones Generales
-              </Typography>
+                             <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                 {t('stats.generalConversations')}
+               </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -187,7 +198,7 @@ export default function ChatPage() {
           <Paper sx={{ height: '600px', overflow: 'auto' }}>
             <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Conversaciones
+                {t('conversations.title')}
               </Typography>
             </Box>
             <List>
@@ -239,7 +250,7 @@ export default function ChatPage() {
                   <ListItemText
                     primary={
                       <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                        No hay conversaciones disponibles
+                        {t('conversations.noConversations')}
                       </Typography>
                     }
                   />
@@ -260,7 +271,7 @@ export default function ChatPage() {
                     {getConversationTypeText(selectedConversation.type)}
                   </Typography>
                   <Typography variant="caption">
-                    Creada: {dayjs(selectedConversation.created_at).format('DD/MM/YYYY HH:mm')}
+                    {t('conversations.created')}: {dayjs(selectedConversation.created_at).format('DD/MM/YYYY HH:mm')}
                   </Typography>
                 </Box>
 
@@ -296,7 +307,7 @@ export default function ChatPage() {
                   {messages.length === 0 && (
                     <Box sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
-                        No hay mensajes en esta conversación
+                        {t('conversations.noMessages')}
                       </Typography>
                     </Box>
                   )}
@@ -307,11 +318,25 @@ export default function ChatPage() {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <TextField
                       fullWidth
-                      placeholder="Escribe un mensaje..."
+                      placeholder={t('conversations.writeMessage')}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       disabled={isSendingMessage}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'white',
+                          '& fieldset': {
+                            borderColor: 'grey.300',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'grey.400',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'primary.main',
+                          },
+                        },
+                      }}
                     />
                     <Button
                       variant="contained"
@@ -327,7 +352,7 @@ export default function ChatPage() {
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <Typography variant="body1" color="text.secondary">
-                  Selecciona una conversación para comenzar a chatear
+                  {t('conversations.selectConversation')}
                 </Typography>
               </Box>
             )}

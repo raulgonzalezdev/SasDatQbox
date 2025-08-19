@@ -5,17 +5,33 @@ import { Box, Container, Typography, Paper, Grid, Button, IconButton } from '@mu
 import { useRouter } from 'next/navigation';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/es';
+import 'dayjs/locale/en';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
+import { useEffect } from 'react';
 dayjs.extend(weekOfYear);
-dayjs.locale('es');
 
 import { useAppointmentStore } from '@/stores/appointmentStore';
 
 export default function AppointmentsPage() {
   const { selectedDate, setSelectedDate, getAppointmentsForDate } = useAppointmentStore();
+  const { setCurrentDashboardSection } = useAppStore();
   const router = useRouter();
+  const t = useTranslations('Dashboard.appointments');
+  const locale = useLocale();
+
+  // Configurar el idioma de dayjs según el locale actual
+  useEffect(() => {
+    dayjs.locale(locale);
+  }, [locale]);
+
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('appointments');
+  }, [setCurrentDashboardSection]);
 
   const sd = useMemo(() => dayjs(selectedDate), [selectedDate]);
 
@@ -62,7 +78,7 @@ export default function AppointmentsPage() {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
-        Agenda de citas
+        {t('title')}
       </Typography>
 
       <Grid container spacing={2}>
@@ -117,7 +133,7 @@ export default function AppointmentsPage() {
             </Typography>
             {getAppointmentsForDate(sd).length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                No hay citas este día
+                {t('noAppointments')}
               </Typography>
             ) : (
               getAppointmentsForDate(sd).map((apt) => (
@@ -149,7 +165,7 @@ export default function AppointmentsPage() {
             color="secondary"
             onClick={() => router.push('/account/appointments/new')}
           >
-            Agendar nueva cita
+            {t('newAppointment')}
           </Button>
         </Grid>
 
@@ -161,13 +177,13 @@ export default function AppointmentsPage() {
               <ChevronLeftIcon />
             </IconButton>
             <Typography variant="h6" sx={{ mx: 2 }}>
-              Semana {sd.week()} ({sd.format('MMMM YYYY')})
+              {t('week')} {sd.week()} ({sd.format('MMMM YYYY')})
             </Typography>
             <IconButton onClick={() => setSelectedDate(sd.add(1, 'week'))}>
               <ChevronRightIcon />
             </IconButton>
             <Button sx={{ ml: 2 }} onClick={() => setSelectedDate(dayjs())}>
-              Hoy
+              {t('today')}
             </Button>
           </Box>
 

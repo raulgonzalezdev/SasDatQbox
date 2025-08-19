@@ -12,6 +12,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { Patient } from '@/app/schemas/patient'; // Asumiendo que tienes un schema de Zod para Patient
+import { useTranslations } from 'next-intl';
 
 // Schema de validación para el formulario
 const patientFormSchema = z.object({
@@ -32,6 +33,8 @@ interface PatientFormProps {
 }
 
 export default function PatientForm({ patient, onSubmit, isSubmitting }: PatientFormProps) {
+  const t = useTranslations('Dashboard.patients');
+  
   const {
     control,
     handleSubmit,
@@ -58,7 +61,7 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Nombre"
+                label={t('form.firstName')}
                 required
                 fullWidth
                 error={!!errors.first_name}
@@ -74,7 +77,7 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Apellido"
+                label={t('form.lastName')}
                 required
                 fullWidth
                 error={!!errors.last_name}
@@ -90,7 +93,7 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Email"
+                label={t('form.email')}
                 type="email"
                 required
                 fullWidth
@@ -105,7 +108,7 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
             name="phone_number"
             control={control}
             render={({ field }) => (
-              <TextField {...field} label="Número de Teléfono" fullWidth />
+              <TextField {...field} label={t('form.phone')} fullWidth />
             )}
           />
         </Grid>
@@ -116,7 +119,7 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Fecha de Nacimiento"
+                label={t('form.dateOfBirth')}
                 type="date"
                 required
                 fullWidth
@@ -135,14 +138,14 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
               <TextField
                 {...field}
                 select
-                label="Género"
+                label={t('form.gender')}
                 fullWidth
                 required
                 error={!!errors.gender}
                 helperText={errors.gender?.message}
               >
-                <MenuItem value="MALE">Masculino</MenuItem>
-                <MenuItem value="FEMALE">Femenino</MenuItem>
+                <MenuItem value="MALE">{t('form.male')}</MenuItem>
+                <MenuItem value="FEMALE">{t('form.female')}</MenuItem>
                 <MenuItem value="OTHER">Otro</MenuItem>
               </TextField>
             )}
@@ -156,7 +159,7 @@ export default function PatientForm({ patient, onSubmit, isSubmitting }: Patient
         sx={{ mt: 3, mb: 2 }}
         disabled={isSubmitting}
       >
-        {isSubmitting ? <CircularProgress size={24} /> : (patient ? 'Guardar Cambios' : 'Crear Paciente')}
+        {isSubmitting ? <CircularProgress size={24} /> : (patient ? t('newPatient.saveChanges') : t('newPatient.createPatient'))}
       </Button>
     </Box>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -43,6 +43,8 @@ import {
   CalendarToday as CalendarIcon,
   LocalPharmacy as PharmacyIcon
 } from '@mui/icons-material';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAppStore } from '@/store/appStore';
 
 interface Prescription {
   id: string;
@@ -113,9 +115,16 @@ const mockPrescriptions: Prescription[] = [
   }
 ];
 
-const steps = ['Información del Paciente', 'Medicamentos', 'Instrucciones', 'Revisión'];
-
 export default function PrescriptionsPage() {
+  const t = useTranslations('Dashboard.prescriptions');
+  const locale = useLocale();
+  const { setCurrentDashboardSection } = useAppStore();
+  
+  // Establecer la sección actual del dashboard
+  useEffect(() => {
+    setCurrentDashboardSection('prescriptions');
+  }, [setCurrentDashboardSection]);
+
   const [prescriptions] = useState<Prescription[]>(mockPrescriptions);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -126,6 +135,13 @@ export default function PrescriptionsPage() {
     medications: [] as Medication[],
     notes: ''
   });
+
+  const steps = [
+    t('newPrescriptionForm.steps.patientInfo'),
+    t('newPrescriptionForm.steps.medications'),
+    t('newPrescriptionForm.steps.instructions'),
+    t('newPrescriptionForm.steps.review')
+  ];
 
   const handleViewPrescription = (prescription: Prescription) => {
     setSelectedPrescription(prescription);
@@ -168,11 +184,11 @@ export default function PrescriptionsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Activa';
+        return t('status.active');
       case 'completed':
-        return 'Completada';
+        return t('status.completed');
       case 'expired':
-        return 'Expirada';
+        return t('status.expired');
       default:
         return status;
     }
@@ -183,7 +199,7 @@ export default function PrescriptionsPage() {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-          Gestión de Recetas
+          {t('title')}
         </Typography>
         <Button
           variant="contained"
@@ -191,7 +207,7 @@ export default function PrescriptionsPage() {
           onClick={handleNewPrescription}
           sx={{ borderRadius: 2 }}
         >
-          Nueva Receta
+          {t('newPrescription')}
         </Button>
       </Box>
 
@@ -208,7 +224,7 @@ export default function PrescriptionsPage() {
                 {prescriptions.length}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Recetas Totales
+                {t('stats.totalPrescriptions')}
               </Typography>
             </CardContent>
           </Card>
@@ -224,7 +240,7 @@ export default function PrescriptionsPage() {
                 {prescriptions.filter(p => p.status === 'active').length}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Recetas Activas
+                {t('stats.activePrescriptions')}
               </Typography>
             </CardContent>
           </Card>
@@ -240,7 +256,7 @@ export default function PrescriptionsPage() {
                 {prescriptions.filter(p => p.status === 'completed').length}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Completadas
+                {t('stats.completedPrescriptions')}
               </Typography>
             </CardContent>
           </Card>
@@ -256,7 +272,7 @@ export default function PrescriptionsPage() {
                 {prescriptions.reduce((acc, p) => acc + p.medications.length, 0)}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Medicamentos Recetados
+                {t('stats.prescribedMedications')}
               </Typography>
             </CardContent>
           </Card>
@@ -280,7 +296,7 @@ export default function PrescriptionsPage() {
                           {prescription.patientName}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          ID: {prescription.patientId} • {prescription.doctorName}
+                          {t('prescription.id')}: {prescription.patientId} • {prescription.doctorName}
                         </Typography>
                       </Box>
                     </Box>
@@ -290,7 +306,7 @@ export default function PrescriptionsPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <CalendarIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="body2">
-                          {new Date(prescription.date).toLocaleDateString('es-ES')}
+                          {new Date(prescription.date).toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US')}
                         </Typography>
                       </Box>
                       <Chip
@@ -301,7 +317,7 @@ export default function PrescriptionsPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <MedicationIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="body2">
-                          {prescription.medications.length} medicamento(s)
+                          {prescription.medications.length} {t('prescription.medicationCount')}
                         </Typography>
                       </Box>
                     </Box>
@@ -345,7 +361,7 @@ export default function PrescriptionsPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <MedicationIcon color="primary" />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Receta - {selectedPrescription?.patientName}
+              {t('prescription.title')} - {selectedPrescription?.patientName}
             </Typography>
           </Box>
         </DialogTitle>
@@ -355,24 +371,24 @@ export default function PrescriptionsPage() {
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Información del Paciente
+                    {t('prescription.patientInfo')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Nombre:</strong> {selectedPrescription.patientName}
+                    <strong>{t('prescription.name')}:</strong> {selectedPrescription.patientName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>ID:</strong> {selectedPrescription.patientId}
+                    <strong>{t('prescription.id')}:</strong> {selectedPrescription.patientId}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Médico:</strong> {selectedPrescription.doctorName}
+                    <strong>{t('prescription.doctor')}:</strong> {selectedPrescription.doctorName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Fecha:</strong> {new Date(selectedPrescription.date).toLocaleDateString('es-ES')}
+                    <strong>{t('prescription.date')}:</strong> {new Date(selectedPrescription.date).toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US')}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Estado
+                    {t('prescription.status')}
                   </Typography>
                   <Chip
                     label={getStatusText(selectedPrescription.status)}
@@ -382,7 +398,7 @@ export default function PrescriptionsPage() {
                   {selectedPrescription.notes && (
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        Notas
+                        {t('prescription.notes')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {selectedPrescription.notes}
@@ -392,7 +408,7 @@ export default function PrescriptionsPage() {
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2 }}>
-                    Medicamentos
+                    {t('prescription.medications')}
                   </Typography>
                   <List>
                     {selectedPrescription.medications.map((medication, index) => (
@@ -404,22 +420,22 @@ export default function PrescriptionsPage() {
                           <Grid container spacing={2} sx={{ mt: 1 }}>
                             <Grid item xs={6} md={3}>
                               <Typography variant="body2" color="text.secondary">
-                                <strong>Dosis:</strong> {medication.dosage}
+                                <strong>{t('medication.dosage')}:</strong> {medication.dosage}
                               </Typography>
                             </Grid>
                             <Grid item xs={6} md={3}>
                               <Typography variant="body2" color="text.secondary">
-                                <strong>Frecuencia:</strong> {medication.frequency}
+                                <strong>{t('medication.frequency')}:</strong> {medication.frequency}
                               </Typography>
                             </Grid>
                             <Grid item xs={6} md={3}>
                               <Typography variant="body2" color="text.secondary">
-                                <strong>Duración:</strong> {medication.duration}
+                                <strong>{t('medication.duration')}:</strong> {medication.duration}
                               </Typography>
                             </Grid>
                             <Grid item xs={12}>
                               <Typography variant="body2" color="text.secondary">
-                                <strong>Instrucciones:</strong> {medication.instructions}
+                                <strong>{t('medication.instructions')}:</strong> {medication.instructions}
                               </Typography>
                             </Grid>
                           </Grid>
@@ -433,9 +449,9 @@ export default function PrescriptionsPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsDialogOpen(false)}>Cerrar</Button>
+          <Button onClick={() => setIsDialogOpen(false)}>{t('actions.close')}</Button>
           <Button variant="contained" startIcon={<PrintIcon />}>
-            Imprimir
+            {t('actions.print')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -449,7 +465,7 @@ export default function PrescriptionsPage() {
       >
         <DialogTitle>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Nueva Receta
+            {t('newPrescriptionForm.title')}
           </Typography>
         </DialogTitle>
         <DialogContent>
@@ -465,14 +481,14 @@ export default function PrescriptionsPage() {
             {activeStep === 0 && (
               <Box>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  Información del Paciente
+                  {t('newPrescriptionForm.steps.patientInfo')}
                 </Typography>
                 <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Seleccionar Paciente</InputLabel>
+                  <InputLabel>{t('newPrescriptionForm.selectPatient')}</InputLabel>
                   <Select
                     value={newPrescription.patientId}
                     onChange={(e) => setNewPrescription({...newPrescription, patientId: e.target.value})}
-                    label="Seleccionar Paciente"
+                    label={t('newPrescriptionForm.selectPatient')}
                   >
                     <MenuItem value="P001">María González (P001)</MenuItem>
                     <MenuItem value="P002">Juan Pérez (P002)</MenuItem>
@@ -485,10 +501,10 @@ export default function PrescriptionsPage() {
             {activeStep === 1 && (
               <Box>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  Medicamentos
+                  {t('newPrescriptionForm.steps.medications')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Los medicamentos se agregarán en el siguiente paso...
+                  {t('newPrescriptionForm.medicationsWillBeAdded')}
                 </Typography>
               </Box>
             )}
@@ -496,13 +512,13 @@ export default function PrescriptionsPage() {
             {activeStep === 2 && (
               <Box>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  Instrucciones
+                  {t('newPrescriptionForm.steps.instructions')}
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
                   rows={4}
-                  label="Notas adicionales"
+                  label={t('newPrescriptionForm.additionalNotes')}
                   value={newPrescription.notes}
                   onChange={(e) => setNewPrescription({...newPrescription, notes: e.target.value})}
                 />
@@ -512,10 +528,10 @@ export default function PrescriptionsPage() {
             {activeStep === 3 && (
               <Box>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  Revisión
+                  {t('newPrescriptionForm.steps.review')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Revisa la información antes de crear la receta...
+                  {t('newPrescriptionForm.reviewInfo')}
                 </Typography>
               </Box>
             )}
@@ -523,20 +539,20 @@ export default function PrescriptionsPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsNewPrescriptionDialogOpen(false)}>
-            Cancelar
+            {t('actions.cancel')}
           </Button>
           {activeStep > 0 && (
             <Button onClick={handleBack}>
-              Atrás
+              {t('actions.back')}
             </Button>
           )}
           {activeStep < steps.length - 1 ? (
             <Button variant="contained" onClick={handleNext}>
-              Siguiente
+              {t('actions.next')}
             </Button>
           ) : (
             <Button variant="contained" onClick={handleCreatePrescription}>
-              Crear Receta
+              {t('actions.createPrescription')}
             </Button>
           )}
         </DialogActions>
