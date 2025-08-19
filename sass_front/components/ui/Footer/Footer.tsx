@@ -52,10 +52,12 @@ export default function Footer({ onContactClick }: FooterProps) {
       <Container maxWidth="lg">
         <Grid container spacing={5}>
           <Grid item xs={12} sm={4}>
-            <Logo />
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              © {new Date().getFullYear()} BoxDoctor. {t('rights') ?? 'Todos los derechos reservados.'}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Logo width={100} height={100} />
+              <Typography variant="body2" color="text.secondary">
+                © {new Date().getFullYear()} BoxDoctor. {t('rights') ?? 'Todos los derechos reservados.'}
+              </Typography>
+            </Box>
           </Grid>
           <Grid item xs={6} sm={2}>
             <Typography variant="h6" gutterBottom>{t('product')}</Typography>

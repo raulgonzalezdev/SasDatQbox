@@ -2,10 +2,10 @@ import createMiddleware from 'next-intl/middleware';
 
 export default createMiddleware({
   // A list of all locales that are supported
-  locales: ['es', 'en'], // Must match the locales in next.config.js
+  locales: ['es', 'en'],
 
   // Used when no locale matches
-  defaultLocale: 'es', // Must match the defaultLocale in next.config.js
+  defaultLocale: 'es',
   
   // Force default locale and disable automatic locale detection
   localePrefix: 'always'
@@ -13,5 +13,5 @@ export default createMiddleware({
 
 export const config = {
   // Match only internationalized pathnames
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)']
 };

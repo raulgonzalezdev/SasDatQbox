@@ -1,21 +1,24 @@
 import { getRequestConfig } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 
 export default getRequestConfig(async ({ locale }) => {
-  console.log('🔍 i18n Config Debug:');
-  console.log('  - Requested locale:', locale);
-  
+  // Validate that the incoming `locale` parameter is valid
   if (!['es', 'en'].includes(locale as any)) {
-    console.log('  - Locale not found, redirecting to default');
-    notFound();
+    locale = 'es';
   }
 
-  const messages = (await import(`./messages/${locale}.json`)).default;
-  console.log('  - Loaded messages for locale:', locale);
-  console.log('  - Available keys:', Object.keys(messages));
-
-  return {
-    locale: locale as string,
-    messages
-  };
+  try {
+    const messages = (await import(`./messages/${locale}.json`)).default;
+    
+    return {
+      locale: locale as string,
+      messages
+    };
+  } catch (error) {
+    // Fallback to default locale
+    const messages = (await import('./messages/es.json')).default;
+    return {
+      locale: 'es',
+      messages
+    };
+  }
 });

@@ -2,8 +2,9 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
+import { getMessages } from 'next-intl/server';
 import Providers from '@/components/Providers';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { rubik } from '../fonts';
 
 export const metadata: Metadata = {
@@ -72,7 +73,6 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  unstable_setRequestLocale(locale);
   const messages = await getMessages({ locale });
 
   return (
@@ -80,7 +80,7 @@ export default async function LocaleLayout({
       <body>
         <Providers>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<LoadingSpinner />}>
               {children}
             </Suspense>
           </NextIntlClientProvider>
