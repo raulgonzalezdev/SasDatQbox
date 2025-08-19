@@ -13,7 +13,7 @@ export default function SecuritySection() {
       id="seguridad"
       sx={{
         py: 8,
-        backgroundColor: 'grey.50',
+        backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : 'grey.50',
       }}
     >
       <Container maxWidth="lg">
@@ -53,10 +53,11 @@ export default function SecuritySection() {
                 p: 4,
                 height: '100%',
                 borderRadius: 2,
+                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.background.paper,
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   transition: 'transform 0.3s ease-in-out',
-                  boxShadow: 4,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' ? 8 : 4,
                 },
               }}
             >
@@ -101,10 +102,11 @@ export default function SecuritySection() {
                 p: 4,
                 height: '100%',
                 borderRadius: 2,
+                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.background.paper,
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   transition: 'transform 0.3s ease-in-out',
-                  boxShadow: 4,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' ? 8 : 4,
                 },
               }}
             >
@@ -149,10 +151,11 @@ export default function SecuritySection() {
                 p: 4,
                 height: '100%',
                 borderRadius: 2,
+                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.background.paper,
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   transition: 'transform 0.3s ease-in-out',
-                  boxShadow: 4,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' ? 8 : 4,
                 },
               }}
             >
@@ -197,10 +200,11 @@ export default function SecuritySection() {
                 p: 4,
                 height: '100%',
                 borderRadius: 2,
+                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.background.paper,
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   transition: 'transform 0.3s ease-in-out',
-                  boxShadow: 4,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' ? 8 : 4,
                 },
               }}
             >

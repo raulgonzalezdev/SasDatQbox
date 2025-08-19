@@ -9,7 +9,9 @@ export default function Hero() {
   return (
     <Box
       sx={{
-        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+        background: (theme) => theme.palette.mode === 'dark' 
+          ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
+          : 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
         py: { xs: 8, md: 12 },
         position: 'relative',
         overflow: 'hidden'

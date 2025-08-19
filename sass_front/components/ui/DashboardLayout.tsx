@@ -28,6 +28,8 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
         duration: theme.transitions.duration.enteringScreen,
       }),
       boxSizing: 'border-box',
+      overflowX: 'hidden', // Always prevent horizontal scroll
+      overflowY: 'auto', // Allow vertical scroll if needed
       ...(!open && {
         overflowX: 'hidden',
         transition: theme.transitions.create('width', {
@@ -114,80 +116,97 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
       <DashboardNavbar toggleDrawer={toggleDrawer} title={title} open={open} />
-              <Drawer variant="permanent" open={isSmallScreen ? false : open} theme={undefined as any}>
-        <Toolbar sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          px: [1],
-          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
-          color: 'white',
-          minHeight: '64px'
-        }}>
-          {open ? (
-            // When sidebar is extended - show BoxDoctor brand
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, mr: 2 }}>
-              <Logo width={100} height={100} disabledLink={true} />
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  color: 'white',
-                  flexGrow: 1
-                }}
-              >
-                BoxDoctor
-              </Typography>
-            </Box>
-          ) : (
-            // When sidebar is collapsed - show compact logo
-            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Logo width={48} height={48} disabledLink={true} />
-            </Box>
-          )}
-          {!isSmallScreen && (
-            <IconButton 
-              onClick={toggleDrawer} 
-              sx={{ 
-                color: 'white',
-                ml: 1,
-                '&:hover': {
-                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.1)',
-                }
-              }}
-            >
-              <ChevronLeftIcon />
-            </IconButton>
-          )}
+      <Drawer variant="permanent" open={isSmallScreen ? false : open} theme={undefined as any}>
+                 <Toolbar sx={{ 
+           display: 'flex', 
+           alignItems: 'center', 
+           justifyContent: 'space-between', 
+           px: [0.5, 2], // Reduced left padding, increased right padding
+           backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : theme.palette.primary.main,
+           color: 'white',
+           minHeight: '64px',
+           flexShrink: 0, // Prevent toolbar from shrinking
+           position: 'sticky',
+           top: 0,
+           zIndex: 1
+         }}>
+                     {open ? (
+             // When sidebar is extended - show BoxDoctor brand
+                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexGrow: 1, minWidth: 0 }}>
+                <Logo width={100} height={100} disabledLink={true} />
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    color: 'white',
+                    flexGrow: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  BoxDoctor
+                </Typography>
+              </Box>
+            ) : (
+             // When sidebar is collapsed - show compact logo
+             <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+               <Logo width={48} height={48} disabledLink={true} />
+             </Box>
+           )}
+           
+           {/* Toggle button - positioned next to BoxDoctor */}
+           {!isSmallScreen && (
+             <IconButton 
+               onClick={toggleDrawer} 
+               sx={{ 
+                 color: 'white',
+                 minWidth: '40px',
+                 minHeight: '40px',
+                 flexShrink: 0,
+                 '&:hover': {
+                   backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.1)',
+                 }
+               }}
+             >
+               <ChevronLeftIcon sx={{ 
+                 transform: open ? 'rotate(0deg)' : 'rotate(180deg)',
+                 transition: 'transform 0.3s ease',
+                 fontSize: '1.5rem'
+               }} />
+             </IconButton>
+           )}
         </Toolbar>
-        <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
-        <List component="nav">{mainListItems()}</List>
-        <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
-        <List component="nav">{secondaryListItems()}</List>
+                           <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
+          <List component="nav">{mainListItems()}</List>
+          <Divider sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)' }} />
+          <List component="nav">{secondaryListItems()}</List>
       </Drawer>
-      <Box
-        component="main"
-        sx={{
-          backgroundColor: (theme: Theme) =>
-            theme.palette.mode === 'light'
-              ? theme.palette.background.default
-              : '#1e1e1e',
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-          overflow: 'hidden',
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ flex: 1, p: 3, overflow: 'auto' }}>
-          {children}
-        </Box>
-        <DashboardFooter />
-      </Box>
+             <Box
+         component="main"
+         sx={{
+           backgroundColor: (theme: Theme) =>
+             theme.palette.mode === 'light'
+               ? theme.palette.background.default
+               : '#1e1e1e',
+           flexGrow: 1,
+           display: 'flex',
+           flexDirection: 'column',
+           height: '100vh',
+           overflow: 'hidden',
+           minWidth: 0, // Prevents flex item from overflowing
+         }}
+       >
+         <Toolbar />
+         <Box sx={{ flex: 1, p: 3, overflow: 'auto', minWidth: 0 }}>
+           {children}
+         </Box>
+         <DashboardFooter />
+       </Box>
     </Box>
   );
 }
