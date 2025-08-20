@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import Header from '@/components/ui/Header';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
@@ -22,9 +23,7 @@ export default function LandingPage() {
   const plans = i18n.t('Pricing.plans', { returnObjects: true }) || [];
   const features = i18n.t('Features.items', { returnObjects: true }) || [];
 
-  const handleLogin = () => {
-    router.push('/auth/login');
-  };
+  
 
   const handleDownloadApp = () => {
     Alert.alert(
@@ -38,17 +37,7 @@ export default function LandingPage() {
     <SafeAreaView style={CommonStyles.safeArea}>
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <ThemedText style={styles.logo}>BoxDoctor</ThemedText>
-          </View>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <ThemedText style={styles.loginButtonText}>{i18n.t('Navbar.login')}</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <Header />
 
         {/* Hero Section */}
         <View style={styles.heroSection}>
@@ -153,12 +142,6 @@ export default function LandingPage() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, backgroundColor: Colors.white },
-  logoContainer: { flex: 1 },
-  logo: { fontSize: Typography.fontSizes.title, fontWeight: Typography.fontWeights.bold, color: Colors.primary },
-  headerButtons: { flexDirection: 'row', alignItems: 'center' },
-  loginButton: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, borderRadius: BordersAndShadows.borderRadius.md, backgroundColor: Colors.primary },
-  loginButtonText: { color: Colors.white, fontWeight: Typography.fontWeights.medium },
   heroSection: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.xxxl, backgroundColor: Colors.lightGray, alignItems: 'center' },
   heroTitle: { fontSize: Typography.fontSizes.xxxl, fontWeight: Typography.fontWeights.bold, color: Colors.dark, textAlign: 'center', marginBottom: Spacing.md },
   heroSubtitle: { fontSize: Typography.fontSizes.lg, color: Colors.darkGray, textAlign: 'center', marginBottom: Spacing.xl, lineHeight: 24 },

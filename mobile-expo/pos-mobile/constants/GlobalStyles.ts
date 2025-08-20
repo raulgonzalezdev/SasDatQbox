@@ -2,8 +2,8 @@ import { StyleSheet } from 'react-native';
 
 // Colores principales de la aplicación
 export const Colors = {
-  primary: '#FFD700', // Amarillo dorado para el encabezado
-  primaryDark: '#E6C200', // Versión más oscura del amarillo
+  primary: '#4db6ac', // Verde azulado
+  primaryDark: '#009ba9', // Verde azulado más oscuro
   secondary: '#1E3A8A', // Azul oscuro para botones y acentos
   secondaryLight: '#3B82F6', // Azul más claro
   success: '#4CAF50', // Verde para elementos positivos

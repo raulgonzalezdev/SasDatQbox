@@ -1,139 +1,173 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedText } from '@/components/ThemedText';
-import { Colors, Spacing, BordersAndShadows } from '@/constants/GlobalStyles';
-import { SideMenu } from './SideMenu';
-import { useAppStore, getCurrentUser, isUserAuthenticated } from '@/store/appStore';
+import { router } from 'expo-router';
+import i18n from '@/config/i18n';
+import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
 
-interface HeaderProps {
-  title: string;
-  subtitle?: string;
-  onHelpPress?: () => void;
-  showHelp?: boolean;
-}
-
-export function Header({ 
-  title, 
-  subtitle = "Propietario", 
-  onHelpPress, 
-  showHelp = true 
-}: HeaderProps) {
-  const insets = useSafeAreaInsets();
+const Header = () => {
+  const [modalVisible, setModalVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
-  const isAuthenticated = isUserAuthenticated();
-  const user = getCurrentUser();
 
-  const toggleMenu = () => {
-    setMenuVisible(!menuVisible);
+  const changeLanguage = (lang) => {
+    i18n.locale = lang;
+    setModalVisible(false);
   };
 
-  const closeMenu = () => {
-    setMenuVisible(false);
-  };
-
-  // Determinar las iniciales o el icono para mostrar
-  const renderUserIcon = () => {
-    if (isAuthenticated && user) {
-      return (
-        <ThemedText style={styles.userInitials}>
-          {user.name.substring(0, 1).toUpperCase()}
-        </ThemedText>
-      );
-    } else {
-      return <Ionicons name="person" size={24} color="black" />;
-    }
+  const handleLogin = () => {
+    router.push('/auth/login');
   };
 
   return (
-    <>
-      <View style={[styles.header, { paddingTop: insets.top > 0 ? 0 : 12 }]}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity 
-            style={[
-              styles.userIconButton, 
-              isAuthenticated ? styles.authenticatedUserIcon : {}
-            ]}
-            onPress={toggleMenu}
-          >
-            {renderUserIcon()}
-          </TouchableOpacity>
-          <View style={styles.userInfo}>
-            <ThemedText style={styles.storeName}>{title}</ThemedText>
-            <ThemedText style={styles.userRole}>
-              {isAuthenticated && user ? user.businessName : subtitle}
-            </ThemedText>
-          </View>
-        </View>
-        
-        {showHelp && (
-          <TouchableOpacity 
-            style={styles.helpButton}
-            onPress={onHelpPress}
-          >
-            <Ionicons name="help-circle-outline" size={24} color="black" />
-          </TouchableOpacity>
-        )}
+    <View style={styles.headerContainer}>
+      <Image source={require('@/assets/images/logo-doctorbox.png')} style={styles.logo} />
+
+      <View style={styles.rightContainer}>
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconButton}>
+          <Ionicons name="language-outline" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleLogin} style={styles.iconButton}>
+          <Ionicons name="log-in-outline" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconButton}>
+          <Ionicons name="menu-outline" size={24} color={Colors.primary} />
+        </TouchableOpacity>
       </View>
 
-      <SideMenu visible={menuVisible} onClose={closeMenu} />
-    </>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Select Language</Text>
+            <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('en')}>
+              <Text style={styles.languageButtonText}>English</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('es')}>
+              <Text style={styles.languageButtonText}>Español</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#features'); }}>
+              <Text style={styles.menuItemText}>{i18n.t('Navbar.features')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#pricing'); }}>
+              <Text style={styles.menuItemText}>{i18n.t('Navbar.pricing')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#blog'); }}>
+              <Text style={styles.menuItemText}>{i18n.t('Navbar.blog')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#help'); }}>
+              <Text style={styles.menuItemText}>{i18n.t('Navbar.help')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setMenuVisible(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  header: {
+  headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
   },
-  headerLeft: {
+  logo: {
+    width: 120,
+    height: 40,
+    resizeMode: 'contain',
+  },
+  rightContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.md,
   },
-  userIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
+  iconButton: {
+    padding: Spacing.sm,
+  },
+  modalContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Spacing.sm,
-    ...BordersAndShadows.shadows.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  authenticatedUserIcon: {
+  modalView: {
+    margin: Spacing.lg,
+    backgroundColor: 'white',
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    ...BordersAndShadows.shadows.md,
+  },
+  modalText: {
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold,
+  },
+  languageButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    padding: Spacing.md,
+    elevation: 2,
+    marginBottom: Spacing.md,
+    width: 200,
+    alignItems: 'center',
+  },
+  languageButtonText: {
+    color: 'white',
+    fontWeight: Typography.fontWeights.bold,
+    textAlign: 'center',
+  },
+  closeButton: {
     backgroundColor: Colors.secondary,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    padding: Spacing.md,
+    elevation: 2,
+    marginTop: Spacing.lg,
   },
-  userInitials: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.white,
+  closeButtonText: {
+    color: 'white',
+    fontWeight: Typography.fontWeights.bold,
+    textAlign: 'center',
   },
-  userInfo: {
-    justifyContent: 'center',
+  menuItem: {
+    padding: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+    width: '100%',
   },
-  storeName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.dark,
-    marginBottom: 0,
+  menuItemText: {
+    fontSize: Typography.fontSizes.md,
+    textAlign: 'center',
   },
-  userRole: {
-    fontSize: 14,
-    color: Colors.dark,
-    opacity: 0.8,
-  },
-  helpButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...BordersAndShadows.shadows.sm,
-  },
-}); 
+});
+
+export default Header;

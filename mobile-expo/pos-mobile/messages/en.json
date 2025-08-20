@@ -12,11 +12,7 @@
 		"dashboard": "Dashboard",
 		"logout": "Logout",
 		"login": "Login",
-		"downloadApp": "Download App",
-		"skipToContent": "Skip to content",
-		"loading": "Loading...",
-		"spanishAbbreviation": "ES",
-		"englishAbbreviation": "EN"
+		"downloadApp": "Download App"
 	},
 	"Footer": {
 		"product": "Product",
@@ -75,7 +71,7 @@
 		"subtitle": "Tips, news and best practices for healthcare professionals in the digital age.",
 		"continueReading": "Continue reading"
 	}
-		,
+	,
 		"FAQ": {
 			"title": "Frequently Asked Questions",
 			"questions": [
@@ -108,12 +104,12 @@
 	,
 	"Features": {
 		"title": "Cutting-edge telemedicine services",
-		"subtitle": "Experience advanced telemedicine designed for today's healthcare needs.",
+		"subtitle": "Experience advanced telemedicine, designed for today's healthcare needs.",
 		"items": [
 			{ "title": "Video consultations" },
 			{ "title": "EMR and EHR integration" },
 			{ "title": "Patient tools" },
-			{ "title": "Language support" },
+			{ "title": "Language compatibility" },
 			{ "title": "Appointment scheduling" },
 			{ "title": "Prescription management" },
 			{ "title": "Real-time messaging" },
@@ -122,57 +118,439 @@
 	},
 	"SocialProof": {
 		"stats": [
-			{ "value": "10,000+", "label": "Video consultations completed" },
+			{ "value": "10,000+", "label": "Video consultations conducted" },
 			{ "value": "4.9 ★", "label": "Play Store rating" },
 			{ "value": "500+", "label": "Healthcare professionals" },
-			{ "value": "50+", "label": "White-label deployments" }
+			{ "value": "50+", "label": "White-label products" }
 		]
 	},
 	"LogoCloud": {
-		"trustedBy": "Trusted by clinics, startups and industry leaders in healthcare"
+		"trustedBy": "Trusted by clinics, startups and healthcare industry leaders"
 	}
 	,
 	"Testimonials": {
 		"title": "Our users love us",
 		"subtitle": "Hundreds of thousands of users worldwide trust BoxDoctor",
 		"items": [
-			{ "name": "Mariana López", "initial": "M", "rating": 5, "quote": "Great initiative, very useful and simple..." },
-			{ "name": "Carlos", "initial": "C", "rating": 4.5, "quote": "The app works very well..." },
-			{ "name": "Pipo", "initial": "P", "rating": 5, "quote": "Saves me a lot for payments..." }
+			{ "name": "Mariana López", "initial": "M", "rating": 5, "quote": "Great initiative, very useful and simple, looking forward to the physical card coming soon." },
+			{ "name": "Carlos", "initial": "C", "rating": 4.5, "quote": "The app works very well, so far I haven't been able to have any problems." },
+			{ "name": "Pipo", "initial": "P", "rating": 5, "quote": "It saves me full for payments." }
 		]
 	}
 	,
 	"Security": {
-		"title": "Security & Compliance",
+		"title": "Security and Compliance",
 		"subtitle": "At BoxDoctor, the security and privacy of your data and your patients' data is our top priority.",
-		"p1": "Our platform is designed from the ground up to meet the highest industry standards, including HIPAA (Health Insurance Portability and Accountability Act). We use end-to-end encryption for all communications to ensure only you and your patients can access shared information.",
-		"p2": "Additionally, our servers are hosted on secure infrastructures that comply with certifications such as ISO 27001 and SOC 2, ensuring the integrity and availability of your data at all times. We perform regular security audits and are committed to continuous improvement of our practices to protect your information against threats."
+		"p1": "Our platform is designed from the ground up to meet the highest industry standards, including HIPAA (Health Insurance Portability and Accountability Act) regulations. We use end-to-end encryption for all communications, ensuring that only you and your patients have access to shared information.",
+		"p2": "Additionally, our servers are hosted on secure infrastructures that comply with certifications such as ISO 27001 and SOC 2, guaranteeing the integrity and availability of your data at all times. We conduct periodic security audits and are committed to continuous improvement of our practices to protect your information against any threat."
 	},
 	"ContactDrawer": {
 		"title": "Contact Sales",
-		"subtitle": "Leave your details and we'll reach out to schedule a demo.",
+		"subtitle": "Leave us your details and we'll get in touch with you for a demo.",
 		"form": {
-			"name": "Full name",
-			"email": "Work email",
-			"message": "How can we help?",
+			"name": "Full Name",
+			"email": "Work Email",
+			"message": "How can we help you?",
 			"submit": "Send Message"
 		},
-		"successMessage": "Thanks for your message — we'll contact you soon.",
+		"successMessage": "Thank you for your message! We'll contact you soon.",
 		"errors": {
 			"nameRequired": "Name is required.",
-			"invalidEmail": "Please enter a valid email.",
+			"invalidEmail": "Must be a valid email.",
 			"messageMin": "Message must be at least 10 characters."
 		}
 	},
+	"SupportChat": {
+		"welcomeMessage": "Hello! Welcome to support. How can we help you?",
+		"responseMessage": "Thank you for your message. An agent will contact you soon.",
+		"assistantName": "Hello, I'm SIA!",
+		"assistantSubtitle": "Your virtual assistant.",
+		"placeholder": "Write here...",
+		"menu": {
+			"register": "Register",
+			"login": "Login"
+		}
+	},
+	"ThemeToggle": {
+		"lightMode": "Switch to light mode",
+		"darkMode": "Switch to dark mode"
+	},
 	"About": {
 		"missionTitle": "Our Mission",
-		"missionSubtitle": "Revolutionizing telemedicine, making quality healthcare accessible to everyone, everywhere.",
+		"missionSubtitle": "Transform healthcare through innovative technology",
 		"aboutBoxDoctorTitle": "About BoxDoctor",
-		"aboutBoxDoctorP1": "BoxDoctor was born from the vision of a group of doctors and technologists who believed that technology could bridge the gap between patients and healthcare providers. Tired of outdated and unintuitive systems, we set out to create a telemedicine platform that was secure, easy to use, and fully customizable to adapt to the needs of each medical practice.",
+		"aboutBoxDoctorP1": "BoxDoctor is a comprehensive telemedicine platform designed to connect healthcare professionals with patients securely and efficiently. Our cutting-edge technology enables high-quality virtual consultations, prescription management, appointment scheduling and real-time communication, all while maintaining the highest standards of security and HIPAA compliance.",
 		"ourTeamTitle": "Our Team",
-		"ourTeamP1": "We are a diverse team of professionals passionate about health and innovation. From software developers to regulatory compliance experts, every member of BoxDoctor shares the commitment to offer a tool that truly makes a difference in people's lives."
+		"ourTeamP1": "We are a passionate team of developers, healthcare professionals and technology experts committed to revolutionizing the way healthcare is delivered. Our combined experience in medicine, technology and user experience allows us to create solutions that truly make a difference in the lives of doctors and patients."
 	},
-	"DashboardNavbar": {
-		"logout": "Logout"
+	"Dashboard": {
+		"title": "Dashboard",
+		"stats": {
+			"totalPatients": "Total Patients",
+			"totalAppointments": "Total Appointments",
+			"todayAppointments": "Today's Appointments",
+			"todayRevenue": "Today's Revenue",
+			"activeConversations": "Active Conversations"
+		},
+		"chart": {
+			"title": "Monthly Revenue",
+			"revenue": "Revenue",
+			"expenses": "Expenses"
+		},
+		"months": [
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December"
+		],
+		"menu": {
+			"dashboard": "Dashboard",
+			"patients": "Patients",
+			"appointments": "Schedule",
+			"consultations": "Consultations",
+			"prescriptions": "Prescriptions",
+			"chat": "Chat",
+			"payments": "Payments",
+			"statistics": "Statistics",
+			"mainSite": "Main Site",
+			"blog": "Blog",
+			"settings": "Settings",
+			"logout": "Logout"
+		},
+		"navbar": {
+			"user": "User",
+			"doctor": "Doctor",
+			"profile": "My Profile",
+			"logout": "Logout"
+		},
+		"footer": {
+			"rights": "All rights reserved.",
+			"about": "About Us",
+			"security": "Security",
+			"blog": "Blog"
+		},
+		"appointments": {
+			"title": "Appointments Schedule",
+			"noAppointments": "No appointments this day",
+			"newAppointment": "Schedule new appointment",
+			"today": "Today",
+			"week": "Week",
+			"months": {
+				"january": "January",
+				"february": "February",
+				"march": "March",
+				"april": "April",
+				"may": "May",
+				"june": "June",
+				"july": "July",
+				"august": "August",
+				"september": "September",
+				"october": "October",
+				"november": "November",
+				"december": "December"
+			},
+			"days": {
+				"monday": "Monday",
+				"tuesday": "Tuesday",
+				"wednesday": "Wednesday",
+				"thursday": "Thursday",
+				"friday": "Friday",
+				"saturday": "Saturday",
+				"sunday": "Sunday"
+			}
+		},
+		"patients": {
+			"title": "Patients",
+			"addPatient": "Add Patient",
+			"searchPlaceholder": "Search by patient last name...",
+			"totalPatients": "Total patients",
+			"womenPercentage": "% Women",
+			"menPercentage": "% Men",
+			"tableHeaders": {
+				"patient": "PATIENT",
+				"age": "AGE",
+				"gender": "GENDER",
+				"phone": "PHONE",
+				"lastConsultation": "LAST CONSULTATION",
+				"nextConsultation": "NEXT CONSULTATION",
+				"actions": "ACTIONS"
+			},
+			"age": "years",
+			"continueConsultation": "Continue consultation",
+			"startConsultation": "Start consultation",
+			"editPatient": "Edit patient",
+			"deletePatient": "Delete patient",
+			"confirmDelete": "Confirm deletion",
+			"confirmDeleteMessage": "Are you sure you want to delete the patient",
+			"confirmDeleteWarning": "This action cannot be undone.",
+			"cancel": "Cancel",
+			"save": "Save",
+			"delete": "Delete",
+			"newPatient": {
+				"title": "Register New Patient",
+				"description": "Complete the following fields to add a new patient to your list.",
+				"createPatient": "Create Patient",
+				"saveChanges": "Save Changes"
+			},
+			"form": {
+				"firstName": "First Name *",
+				"lastName": "Last Name *",
+				"dateOfBirth": "Date of Birth *",
+				"gender": "Gender *",
+				"male": "Male",
+				"female": "Female",
+				"email": "Email",
+				"phone": "Phone *",
+				"notes": "Notes"
+			}
+		},
+		"consultation": {
+			"title": "Medical Consultation",
+			"patientNotFound": "Patient not found",
+			"editInfo": "Edit information",
+			"finishConsultation": "Finish consultation",
+			"tabs": {
+				"file": "File",
+				"medicalHistory": "Medical History",
+				"consultation": "Consultation",
+				"history": "History",
+				"studies": "Studies"
+			},
+			"patientInfo": {
+				"personalInfo": "Personal Information",
+				"emergencyContact": "Emergency Contact",
+				"billingInfo": "Billing Information",
+				"notes": "Notes",
+				"notesPlaceholder": "Additional notes about the patient...",
+				"fields": {
+					"address": "Address",
+					"birthState": "Birth State",
+					"nationality": "Nationality",
+					"birthCity": "Birth City",
+					"relationship": "Relationship",
+					"bloodType": "Blood Type",
+					"education": "Education",
+					"profession": "Profession/Occupation",
+					"religion": "Religion",
+					"maritalStatus": "Marital Status",
+					"phone": "Phone",
+					"email": "Email",
+					"fullName": "Full Name",
+					"taxRegime": "Tax Regime",
+					"cfdiUse": "CFDI Use",
+					"rfc": "RFC"
+				}
+			},
+			"medicalHistory": {
+				"hereditaryFamily": "Hereditary-Family Background",
+				"nonPathological": "Non-Pathological Background",
+				"pathological": "Pathological Background",
+				"systemsInterrogation": "Systems Interrogation",
+				"yes": "Yes",
+				"no": "No",
+				"details": "Details...",
+				"conditions": {
+					"diabetes": "Diabetes",
+					"hypertension": "Hypertension",
+					"cardiovascular": "Cardiovascular",
+					"thyroid": "Thyroid",
+					"cancer": "Cancer",
+					"renal": "Renal",
+					"lupus": "Lupus",
+					"parkinson": "Parkinson",
+					"alzheimer": "Alzheimer",
+					"activeMedications": "Active Medications",
+					"other": "Other",
+					"smoking": "Smoking",
+					"alcohol": "Alcohol",
+					"drugs": "Drugs",
+					"exercise": "Exercise",
+					"diet": "Diet",
+					"sleep": "Sleep",
+					"stress": "Stress",
+					"surgeries": "Surgeries",
+					"hospitalizations": "Hospitalizations",
+					"allergies": "Allergies",
+					"chronicDiseases": "Chronic Diseases",
+					"medications": "Medications",
+					"respiratory": "Respiratory",
+					"digestive": "Digestive",
+					"genitourinary": "Genitourinary",
+					"musculoskeletal": "Musculoskeletal",
+					"neurological": "Neurological",
+					"endocrine": "Endocrine",
+					"skin": "Skin"
+				}
+			},
+			"inDevelopment": {
+				"consultation": "Consultation in development...",
+				"history": "History in development...",
+				"studies": "Medical studies in development..."
+			},
+			"videoCall": {
+				"patientVideo": "Patient Video",
+				"myVideo": "My Video"
+			}
+		},
+		"prescriptions": {
+			"title": "Prescription Management",
+			"newPrescription": "New Prescription",
+			"stats": {
+				"totalPrescriptions": "Total Prescriptions",
+				"activePrescriptions": "Active Prescriptions",
+				"completedPrescriptions": "Completed",
+				"prescribedMedications": "Prescribed Medications"
+			},
+			"status": {
+				"active": "Active",
+				"completed": "Completed",
+				"expired": "Expired"
+			},
+			"actions": {
+				"view": "View",
+				"edit": "Edit",
+				"print": "Print",
+				"delete": "Delete",
+				"close": "Close",
+				"cancel": "Cancel",
+				"back": "Back",
+				"next": "Next",
+				"createPrescription": "Create Prescription"
+			},
+			"prescription": {
+				"title": "Prescription",
+				"patientInfo": "Patient Information",
+				"name": "Name",
+				"id": "ID",
+				"doctor": "Doctor",
+				"date": "Date",
+				"status": "Status",
+				"notes": "Notes",
+				"medications": "Medications",
+				"medicationCount": "medication(s)"
+			},
+			"medication": {
+				"name": "Medication",
+				"dosage": "Dosage",
+				"frequency": "Frequency",
+				"duration": "Duration",
+				"instructions": "Instructions"
+			},
+			"newPrescriptionForm": {
+				"title": "New Prescription",
+				"steps": {
+					"patientInfo": "Patient Information",
+					"medications": "Medications",
+					"instructions": "Instructions",
+					"review": "Review"
+				},
+				"selectPatient": "Select Patient",
+				"addMedications": "Add Medications",
+				"additionalNotes": "Additional Notes",
+				"reviewInfo": "Review the information before creating the prescription...",
+				"medicationsWillBeAdded": "Medications will be added in the next step..."
+			}
+		},
+		"chat": {
+			"title": "Chat and Conversations",
+			"stats": {
+				"totalConversations": "Total Conversations",
+				"medicalConsultations": "Medical Consultations",
+				"technicalSupport": "Technical Support",
+				"generalConversations": "General Conversations"
+			},
+			"conversations": {
+				"title": "Conversations",
+				"noConversations": "No conversations available",
+				"selectConversation": "Select a conversation to start chatting",
+				"noMessages": "No messages in this conversation",
+				"writeMessage": "Write a message...",
+				"created": "Created"
+			},
+			"types": {
+				"medical_consultation": "Medical Consultation",
+				"support": "Support",
+				"general": "General"
+			}
+		},
+		"payments": {
+			"title": "Payment Management",
+			"newPayment": "New Payment",
+			"paymentMethod": "Payment Method",
+			"stats": {
+				"totalRevenue": "Total Revenue",
+				"totalTransactions": "Total Transactions",
+				"pendingPayments": "Pending Payments",
+				"failedPayments": "Failed Payments"
+			},
+			"status": {
+				"completed": "Completed",
+				"pending": "Pending",
+				"failed": "Failed",
+				"refunded": "Refunded"
+			},
+			"paymentMethods": {
+				"title": "Payment Methods",
+				"creditCard": "Credit Card",
+				"bankTransfer": "Bank Transfer",
+				"cash": "Cash",
+				"insurance": "Insurance",
+				"bankAccount": "Bank Account",
+				"default": "Default"
+			},
+			"actions": {
+				"view": "View",
+				"edit": "Edit",
+				"delete": "Delete",
+				"download": "Download",
+				"close": "Close",
+				"cancel": "Cancel",
+				"add": "Add",
+				"processPayment": "Process Payment"
+			},
+			"payment": {
+				"title": "Payment",
+				"detail": "Payment Detail",
+				"patientInfo": "Patient Information",
+				"paymentInfo": "Payment Information",
+				"name": "Name",
+				"id": "ID",
+				"invoice": "Invoice",
+				"amount": "Amount",
+				"date": "Date",
+				"description": "Description",
+				"receipt": "Receipt"
+			},
+			"form": {
+				"addPaymentMethod": "Add Payment Method",
+				"newPayment": "New Payment",
+				"methodType": "Method Type",
+				"cardNumber": "Card Number",
+				"expiryDate": "Expiry Date",
+				"cvv": "CVV",
+				"patient": "Patient",
+				"amount": "Amount",
+				"paymentMethod": "Payment Method",
+				"description": "Description",
+				"descriptionPlaceholder": "Payment description..."
+			},
+			"recentPayments": "Recent Payments",
+			"tableHeaders": {
+				"patient": "Patient",
+				"amount": "Amount",
+				"method": "Method",
+				"status": "Status",
+				"date": "Date",
+				"actions": "Actions"
+			}
+		}
 	}
 }
