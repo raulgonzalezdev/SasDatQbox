@@ -7,7 +7,6 @@ import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
-import { TabScreenWrapper } from '@/components/ui/TabScreenWrapper';
 
 export default function ChatScreen() {
   const { user } = useAppStore();
@@ -76,159 +75,157 @@ export default function ChatScreen() {
   };
 
   return (
-    <TabScreenWrapper>
-      <SafeAreaView style={CommonStyles.safeArea}>
-        <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-        
-        <ThemedView style={CommonStyles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerContent}>
-              <ThemedText style={styles.headerTitle}>Chat</ThemedText>
-              <ThemedText style={styles.headerSubtitle}>
-                {isDoctor ? 'Conversaciones con pacientes' : 'Conversaciones con doctores'}
-              </ThemedText>
+    <SafeAreaView style={CommonStyles.safeArea}>
+      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+      
+      <ThemedView style={CommonStyles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <ThemedText style={styles.headerTitle}>Chat</ThemedText>
+            <ThemedText style={styles.headerSubtitle}>
+              {isDoctor ? 'Conversaciones con pacientes' : 'Conversaciones con doctores'}
+            </ThemedText>
+          </View>
+          <TouchableOpacity 
+            style={styles.newChatButton}
+            onPress={() => router.push('/new-chat')}
+          >
+            <Ionicons name="add" size={24} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
+          {/* Barra de búsqueda */}
+          <View style={styles.searchSection}>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar conversaciones..."
+                placeholderTextColor={Colors.darkGray}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color={Colors.darkGray} />
+                </TouchableOpacity>
+              )}
             </View>
-            <TouchableOpacity 
-              style={styles.newChatButton}
-              onPress={() => router.push('/new-chat')}
-            >
-              <Ionicons name="add" size={24} color={Colors.white} />
-            </TouchableOpacity>
           </View>
 
-          <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-            {/* Barra de búsqueda */}
-            <View style={styles.searchSection}>
-              <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Buscar conversaciones..."
-                  placeholderTextColor={Colors.darkGray}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-                {searchQuery.length > 0 && (
-                  <TouchableOpacity onPress={() => setSearchQuery('')}>
-                    <Ionicons name="close-circle" size={20} color={Colors.darkGray} />
+          {/* Estadísticas rápidas */}
+          <View style={styles.statsSection}>
+            <View style={styles.statCard}>
+              <Ionicons name="chatbubbles" size={24} color={Colors.primary} />
+              <ThemedText style={styles.statNumber}>{conversations.length}</ThemedText>
+              <ThemedText style={styles.statLabel}>Conversaciones</ThemedText>
+            </View>
+            <View style={styles.statCard}>
+              <Ionicons name="mail-unread" size={24} color={Colors.warning} />
+              <ThemedText style={styles.statNumber}>
+                {conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)}
+              </ThemedText>
+              <ThemedText style={styles.statLabel}>Mensajes Nuevos</ThemedText>
+            </View>
+            <View style={styles.statCard}>
+              <Ionicons name="radio-button-on" size={24} color={Colors.success} />
+              <ThemedText style={styles.statNumber}>
+                {conversations.filter(conv => conv.isOnline).length}
+              </ThemedText>
+              <ThemedText style={styles.statLabel}>En Línea</ThemedText>
+            </View>
+          </View>
+
+          {/* Lista de conversaciones */}
+          <View style={styles.conversationsSection}>
+            <ThemedText style={styles.sectionTitle}>Conversaciones Recientes</ThemedText>
+            
+            {filteredConversations.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="chatbubbles-outline" size={64} color={Colors.darkGray} />
+                <ThemedText style={styles.emptyTitle}>
+                  {searchQuery ? 'No se encontraron conversaciones' : 'No hay conversaciones'}
+                </ThemedText>
+                <ThemedText style={styles.emptySubtitle}>
+                  {searchQuery 
+                    ? 'Intenta con otros términos de búsqueda'
+                    : isDoctor 
+                      ? 'Los pacientes podrán iniciar conversaciones contigo'
+                      : 'Inicia una conversación con tu doctor'
+                  }
+                </ThemedText>
+                {!searchQuery && (
+                  <TouchableOpacity 
+                    style={styles.emptyButton}
+                    onPress={() => router.push('/new-chat')}
+                  >
+                    <ThemedText style={styles.emptyButtonText}>
+                      {isDoctor ? 'Ver Pacientes' : 'Nueva Conversación'}
+                    </ThemedText>
                   </TouchableOpacity>
                 )}
               </View>
-            </View>
-
-            {/* Estadísticas rápidas */}
-            <View style={styles.statsSection}>
-              <View style={styles.statCard}>
-                <Ionicons name="chatbubbles" size={24} color={Colors.primary} />
-                <ThemedText style={styles.statNumber}>{conversations.length}</ThemedText>
-                <ThemedText style={styles.statLabel}>Conversaciones</ThemedText>
-              </View>
-              <View style={styles.statCard}>
-                <Ionicons name="mail-unread" size={24} color={Colors.warning} />
-                <ThemedText style={styles.statNumber}>
-                  {conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)}
-                </ThemedText>
-                <ThemedText style={styles.statLabel}>Mensajes Nuevos</ThemedText>
-              </View>
-              <View style={styles.statCard}>
-                <Ionicons name="radio-button-on" size={24} color={Colors.success} />
-                <ThemedText style={styles.statNumber}>
-                  {conversations.filter(conv => conv.isOnline).length}
-                </ThemedText>
-                <ThemedText style={styles.statLabel}>En Línea</ThemedText>
-              </View>
-            </View>
-
-            {/* Lista de conversaciones */}
-            <View style={styles.conversationsSection}>
-              <ThemedText style={styles.sectionTitle}>Conversaciones Recientes</ThemedText>
-              
-              {filteredConversations.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Ionicons name="chatbubbles-outline" size={64} color={Colors.darkGray} />
-                  <ThemedText style={styles.emptyTitle}>
-                    {searchQuery ? 'No se encontraron conversaciones' : 'No hay conversaciones'}
-                  </ThemedText>
-                  <ThemedText style={styles.emptySubtitle}>
-                    {searchQuery 
-                      ? 'Intenta con otros términos de búsqueda'
-                      : isDoctor 
-                        ? 'Los pacientes podrán iniciar conversaciones contigo'
-                        : 'Inicia una conversación con tu doctor'
-                    }
-                  </ThemedText>
-                  {!searchQuery && (
-                    <TouchableOpacity 
-                      style={styles.emptyButton}
-                      onPress={() => router.push('/new-chat')}
-                    >
-                      <ThemedText style={styles.emptyButtonText}>
-                        {isDoctor ? 'Ver Pacientes' : 'Nueva Conversación'}
-                      </ThemedText>
+            ) : (
+              filteredConversations.map((conversation) => (
+                <TouchableOpacity
+                  key={conversation.id}
+                  style={styles.conversationCard}
+                  onPress={() => router.push(`/chat/${conversation.id}`)}
+                >
+                  <View style={styles.conversationHeader}>
+                    <View style={styles.avatarContainer}>
+                      <View style={[styles.avatar, { backgroundColor: conversation.avatarColor }]}>
+                        <ThemedText style={styles.avatarText}>
+                          {conversation.name.charAt(0).toUpperCase()}
+                        </ThemedText>
+                      </View>
+                      {conversation.isOnline && <View style={styles.onlineIndicator} />}
+                    </View>
+                    <View style={styles.conversationInfo}>
+                      <View style={styles.conversationHeaderRow}>
+                        <ThemedText style={styles.conversationName}>{conversation.name}</ThemedText>
+                        <ThemedText style={styles.conversationTime}>{conversation.lastMessageTime}</ThemedText>
+                      </View>
+                      <View style={styles.conversationSubheader}>
+                        <ThemedText style={styles.conversationType}>{conversation.type}</ThemedText>
+                        {conversation.unreadCount > 0 && (
+                          <View style={styles.unreadBadge}>
+                            <ThemedText style={styles.unreadCount}>{conversation.unreadCount}</ThemedText>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.conversationContent}>
+                    <ThemedText style={styles.lastMessage} numberOfLines={2}>
+                      {conversation.lastMessage}
+                    </ThemedText>
+                  </View>
+                  
+                  <View style={styles.conversationActions}>
+                    <TouchableOpacity style={styles.actionButton}>
+                      <Ionicons name="call" size={20} color={Colors.info} />
+                      <ThemedText style={styles.actionText}>Llamar</ThemedText>
                     </TouchableOpacity>
-                  )}
-                </View>
-              ) : (
-                filteredConversations.map((conversation) => (
-                  <TouchableOpacity
-                    key={conversation.id}
-                    style={styles.conversationCard}
-                    onPress={() => router.push(`/chat/${conversation.id}`)}
-                  >
-                    <View style={styles.conversationHeader}>
-                      <View style={styles.avatarContainer}>
-                        <View style={[styles.avatar, { backgroundColor: conversation.avatarColor }]}>
-                          <ThemedText style={styles.avatarText}>
-                            {conversation.name.charAt(0).toUpperCase()}
-                          </ThemedText>
-                        </View>
-                        {conversation.isOnline && <View style={styles.onlineIndicator} />}
-                      </View>
-                      <View style={styles.conversationInfo}>
-                        <View style={styles.conversationHeaderRow}>
-                          <ThemedText style={styles.conversationName}>{conversation.name}</ThemedText>
-                          <ThemedText style={styles.conversationTime}>{conversation.lastMessageTime}</ThemedText>
-                        </View>
-                        <View style={styles.conversationSubheader}>
-                          <ThemedText style={styles.conversationType}>{conversation.type}</ThemedText>
-                          {conversation.unreadCount > 0 && (
-                            <View style={styles.unreadBadge}>
-                              <ThemedText style={styles.unreadCount}>{conversation.unreadCount}</ThemedText>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    </View>
-                    
-                    <View style={styles.conversationContent}>
-                      <ThemedText style={styles.lastMessage} numberOfLines={2}>
-                        {conversation.lastMessage}
-                      </ThemedText>
-                    </View>
-                    
-                    <View style={styles.conversationActions}>
-                      <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="call" size={20} color={Colors.info} />
-                        <ThemedText style={styles.actionText}>Llamar</ThemedText>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="videocam" size={20} color={Colors.success} />
-                        <ThemedText style={styles.actionText}>Video</ThemedText>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="ellipsis-vertical" size={20} color={Colors.darkGray} />
-                        <ThemedText style={styles.actionText}>Más</ThemedText>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableOpacity>
-                ))
-              )}
-            </View>
-          </ScrollView>
-        </ThemedView>
-      </SafeAreaView>
-    </TabScreenWrapper>
+                    <TouchableOpacity style={styles.actionButton}>
+                      <Ionicons name="videocam" size={20} color={Colors.success} />
+                      <ThemedText style={styles.actionText}>Video</ThemedText>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionButton}>
+                      <Ionicons name="ellipsis-vertical" size={20} color={Colors.darkGray} />
+                      <ThemedText style={styles.actionText}>Más</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 

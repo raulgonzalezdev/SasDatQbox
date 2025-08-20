@@ -14,8 +14,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary, // Color amarillo para los iconos activos
-        tabBarInactiveTintColor: Colors.white, // Color blanco para los iconos inactivos
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.white,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: () => (
@@ -32,9 +32,9 @@ export default function TabLayout() {
           ios: {
             height: 60,
             paddingBottom: 5,
-            backgroundColor: Colors.tabBar, // Fondo oscuro para el menú
-            borderTopWidth: 0, // Eliminar la línea superior
-            elevation: 8, // Sombra para Android
+            backgroundColor: Colors.tabBar,
+            borderTopWidth: 0,
+            elevation: 8,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
@@ -43,15 +43,15 @@ export default function TabLayout() {
           default: {
             height: 60,
             paddingBottom: 5,
-            backgroundColor: Colors.tabBar, // Fondo oscuro para el menú
-            borderTopWidth: 0, // Eliminar la línea superior
-            elevation: 8, // Sombra para Android
+            backgroundColor: Colors.tabBar,
+            borderTopWidth: 0,
+            elevation: 8,
           },
         }),
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '500',
-          color: Colors.white, // Color blanco para el texto
+          color: Colors.white,
         },
       }}>
       <Tabs.Screen
@@ -64,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="appointments"
         options={{
-          title: isDoctor ? 'Citas' : 'Mis Citas',
+          title: 'Citas',
           tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
         }}
       />
@@ -85,10 +85,10 @@ export default function TabLayout() {
         />
       )}
       <Tabs.Screen
-        name="profile"
+        name="more"
         options={{
-          title: 'Perfil',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          title: 'Más',
+          tabBarIcon: ({ color, size }) => <Ionicons name="menu" size={size} color={color} />,
         }}
       />
     </Tabs>

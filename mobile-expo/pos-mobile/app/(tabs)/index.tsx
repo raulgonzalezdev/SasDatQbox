@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,7 +7,6 @@ import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
-import { TabScreenWrapper } from '@/components/ui/TabScreenWrapper';
 
 export default function HomeScreen() {
   const { user } = useAppStore();
@@ -159,83 +158,81 @@ export default function HomeScreen() {
   ];
 
   return (
-    <TabScreenWrapper>
-      <SafeAreaView style={CommonStyles.safeArea}>
-        <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-        
-        <ThemedView style={CommonStyles.container}>
-          <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={styles.headerContent}>
-                <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
-                <ThemedText style={styles.userName}>{getUserDisplayName()}</ThemedText>
-                <ThemedText style={styles.userRole}>
-                  {isDoctor ? 'Doctor' : 'Paciente'}
+    <SafeAreaView style={CommonStyles.safeArea}>
+      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+      
+      <ThemedView style={CommonStyles.container}>
+        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
+              <ThemedText style={styles.userName}>{getUserDisplayName()}</ThemedText>
+              <ThemedText style={styles.userRole}>
+                {isDoctor ? 'Doctor' : 'Paciente'}
+              </ThemedText>
+            </View>
+            <TouchableOpacity 
+              style={styles.profileButton}
+              onPress={() => router.push('/(tabs)/profile')}
+            >
+              <Ionicons name="person-circle" size={48} color={Colors.secondary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Estadísticas */}
+          <View style={styles.statsSection}>
+            <ThemedText style={styles.sectionTitle}>
+              {isDoctor ? 'Resumen del Día' : 'Mi Resumen'}
+            </ThemedText>
+            <View style={styles.statsGrid}>
+              {stats.map((stat) => (
+                <View key={stat.id} style={styles.statCard}>
+                  <View style={[styles.statIcon, { backgroundColor: stat.color }]}>
+                    <Ionicons name={stat.icon as any} size={24} color={Colors.white} />
+                  </View>
+                  <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
+                  <ThemedText style={styles.statTitle}>{stat.title}</ThemedText>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Acciones Rápidas */}
+          <View style={styles.actionsSection}>
+            <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
+            <View style={styles.actionsGrid}>
+              {quickActions.map((action) => (
+                <TouchableOpacity
+                  key={action.id}
+                  style={styles.actionCard}
+                  onPress={action.onPress}
+                >
+                  <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
+                    <Ionicons name={action.icon as any} size={28} color={Colors.white} />
+                  </View>
+                  <ThemedText style={styles.actionTitle}>{action.title}</ThemedText>
+                  <ThemedText style={styles.actionSubtitle}>{action.subtitle}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Información Adicional */}
+          <View style={styles.infoSection}>
+            <View style={styles.infoCard}>
+              <Ionicons name="shield-checkmark" size={24} color={Colors.success} />
+              <View style={styles.infoContent}>
+                <ThemedText style={styles.infoTitle}>Tu información está segura</ThemedText>
+                <ThemedText style={styles.infoText}>
+                  Todos tus datos médicos están protegidos con encriptación de nivel bancario.
                 </ThemedText>
               </View>
-              <TouchableOpacity 
-                style={styles.profileButton}
-                onPress={() => router.push('/(tabs)/profile')}
-              >
-                <Ionicons name="person-circle" size={48} color={Colors.secondary} />
-              </TouchableOpacity>
             </View>
-
-            {/* Estadísticas */}
-            <View style={styles.statsSection}>
-              <ThemedText style={styles.sectionTitle}>
-                {isDoctor ? 'Resumen del Día' : 'Mi Resumen'}
-              </ThemedText>
-              <View style={styles.statsGrid}>
-                {stats.map((stat) => (
-                  <View key={stat.id} style={styles.statCard}>
-                    <View style={[styles.statIcon, { backgroundColor: stat.color }]}>
-                      <Ionicons name={stat.icon as any} size={24} color={Colors.white} />
-                    </View>
-                    <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
-                    <ThemedText style={styles.statTitle}>{stat.title}</ThemedText>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* Acciones Rápidas */}
-            <View style={styles.actionsSection}>
-              <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
-              <View style={styles.actionsGrid}>
-                {quickActions.map((action) => (
-                  <TouchableOpacity
-                    key={action.id}
-                    style={styles.actionCard}
-                    onPress={action.onPress}
-                  >
-                    <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
-                      <Ionicons name={action.icon as any} size={28} color={Colors.white} />
-                    </View>
-                    <ThemedText style={styles.actionTitle}>{action.title}</ThemedText>
-                    <ThemedText style={styles.actionSubtitle}>{action.subtitle}</ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Información Adicional */}
-            <View style={styles.infoSection}>
-              <View style={styles.infoCard}>
-                <Ionicons name="shield-checkmark" size={24} color={Colors.success} />
-                <View style={styles.infoContent}>
-                  <ThemedText style={styles.infoTitle}>Tu información está segura</ThemedText>
-                  <ThemedText style={styles.infoText}>
-                    Todos tus datos médicos están protegidos con encriptación de nivel bancario.
-                  </ThemedText>
-                </View>
-              </View>
-            </View>
-          </ScrollView>
-        </ThemedView>
-      </SafeAreaView>
-    </TabScreenWrapper>
+          </View>
+        </ScrollView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
