@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert, Switch } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import { TabScreenWrapper } from '@/components/ui/TabScreenWrapper';
 import { logout } from '@/services/auth';
 
 export default function ProfileScreen() {
@@ -119,90 +120,92 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={CommonStyles.safeArea}>
-      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
-      <ThemedView style={CommonStyles.container}>
-        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Header del perfil */}
-          <View style={styles.profileHeader}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <ThemedText style={styles.avatarText}>{getUserInitials()}</ThemedText>
+    <TabScreenWrapper>
+      <SafeAreaView style={CommonStyles.safeArea}>
+        <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+        
+        <ThemedView style={CommonStyles.container}>
+          <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
+            {/* Header del perfil */}
+            <View style={styles.profileHeader}>
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatar}>
+                  <ThemedText style={styles.avatarText}>{getUserInitials()}</ThemedText>
+                </View>
+                <TouchableOpacity style={styles.editAvatarButton}>
+                  <Ionicons name="camera" size={16} color={Colors.white} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.editAvatarButton}>
-                <Ionicons name="camera" size={16} color={Colors.white} />
+              
+              <View style={styles.profileInfo}>
+                <ThemedText style={styles.profileName}>{getUserDisplayName()}</ThemedText>
+                <ThemedText style={styles.profileEmail}>{user?.email}</ThemedText>
+                <View style={styles.roleBadge}>
+                  <ThemedText style={styles.roleText}>{getRoleText()}</ThemedText>
+                </View>
+              </View>
+            </View>
+
+            {/* Estadísticas del perfil */}
+            <View style={styles.statsSection}>
+              <View style={styles.statCard}>
+                <Ionicons name="calendar" size={24} color={Colors.primary} />
+                <ThemedText style={styles.statNumber}>15</ThemedText>
+                <ThemedText style={styles.statLabel}>Citas</ThemedText>
+              </View>
+              <View style={styles.statCard}>
+                <Ionicons name="chatbubbles" size={24} color={Colors.secondary} />
+                <ThemedText style={styles.statNumber}>8</ThemedText>
+                <ThemedText style={styles.statLabel}>Chats</ThemedText>
+              </View>
+              <View style={styles.statCard}>
+                <Ionicons name="document-text" size={24} color={Colors.success} />
+                <ThemedText style={styles.statNumber}>12</ThemedText>
+                <ThemedText style={styles.statLabel}>Recetas</ThemedText>
+              </View>
+            </View>
+
+            {/* Menú de opciones */}
+            <View style={styles.menuSection}>
+              <ThemedText style={styles.sectionTitle}>Configuración</ThemedText>
+              
+              {menuItems.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.menuItem}
+                  onPress={item.onPress}
+                >
+                  <View style={[styles.menuIcon, { backgroundColor: item.color }]}>
+                    <Ionicons name={item.icon as any} size={20} color={Colors.white} />
+                  </View>
+                  <View style={styles.menuContent}>
+                    <ThemedText style={styles.menuTitle}>{item.title}</ThemedText>
+                    <ThemedText style={styles.menuSubtitle}>{item.subtitle}</ThemedText>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Botón de cerrar sesión */}
+            <View style={styles.logoutSection}>
+              <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                <Ionicons name="log-out" size={20} color={Colors.white} />
+                <ThemedText style={styles.logoutText}>Cerrar Sesión</ThemedText>
               </TouchableOpacity>
             </View>
-            
-            <View style={styles.profileInfo}>
-              <ThemedText style={styles.profileName}>{getUserDisplayName()}</ThemedText>
-              <ThemedText style={styles.profileEmail}>{user?.email}</ThemedText>
-              <View style={styles.roleBadge}>
-                <ThemedText style={styles.roleText}>{getRoleText()}</ThemedText>
-              </View>
-            </View>
-          </View>
 
-          {/* Estadísticas del perfil */}
-          <View style={styles.statsSection}>
-            <View style={styles.statCard}>
-              <Ionicons name="calendar" size={24} color={Colors.primary} />
-              <ThemedText style={styles.statNumber}>15</ThemedText>
-              <ThemedText style={styles.statLabel}>Citas</ThemedText>
+            {/* Información de la app */}
+            <View style={styles.appInfoSection}>
+              <ThemedText style={styles.appVersion}>BoxDoctor v1.0.0</ThemedText>
+              <ThemedText style={styles.appCopyright}>
+                © 2024 BoxDoctor. Todos los derechos reservados.
+              </ThemedText>
             </View>
-            <View style={styles.statCard}>
-              <Ionicons name="chatbubbles" size={24} color={Colors.secondary} />
-              <ThemedText style={styles.statNumber}>8</ThemedText>
-              <ThemedText style={styles.statLabel}>Chats</ThemedText>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="document-text" size={24} color={Colors.success} />
-              <ThemedText style={styles.statNumber}>12</ThemedText>
-              <ThemedText style={styles.statLabel}>Recetas</ThemedText>
-            </View>
-          </View>
-
-          {/* Menú de opciones */}
-          <View style={styles.menuSection}>
-            <ThemedText style={styles.sectionTitle}>Configuración</ThemedText>
-            
-            {menuItems.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.menuItem}
-                onPress={item.onPress}
-              >
-                <View style={[styles.menuIcon, { backgroundColor: item.color }]}>
-                  <Ionicons name={item.icon as any} size={20} color={Colors.white} />
-                </View>
-                <View style={styles.menuContent}>
-                  <ThemedText style={styles.menuTitle}>{item.title}</ThemedText>
-                  <ThemedText style={styles.menuSubtitle}>{item.subtitle}</ThemedText>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Botón de cerrar sesión */}
-          <View style={styles.logoutSection}>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Ionicons name="log-out" size={20} color={Colors.white} />
-              <ThemedText style={styles.logoutText}>Cerrar Sesión</ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          {/* Información de la app */}
-          <View style={styles.appInfoSection}>
-            <ThemedText style={styles.appVersion}>BoxDoctor v1.0.0</ThemedText>
-            <ThemedText style={styles.appCopyright}>
-              © 2024 BoxDoctor. Todos los derechos reservados.
-            </ThemedText>
-          </View>
-        </ScrollView>
-      </ThemedView>
-    </SafeAreaView>
+          </ScrollView>
+        </ThemedView>
+      </SafeAreaView>
+    </TabScreenWrapper>
   );
 }
 

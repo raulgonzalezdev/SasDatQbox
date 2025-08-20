@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import { TabScreenWrapper } from '@/components/ui/TabScreenWrapper';
 
 export default function PatientsScreen() {
   const { user } = useAppStore();
@@ -125,159 +126,161 @@ export default function PatientsScreen() {
   ];
 
   return (
-    <SafeAreaView style={CommonStyles.safeArea}>
-      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
-      <ThemedView style={CommonStyles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <ThemedText style={styles.headerTitle}>Pacientes</ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              Gestiona tu lista de pacientes
-            </ThemedText>
-          </View>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/add-patient')}
-          >
-            <Ionicons name="add" size={24} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Barra de búsqueda */}
-          <View style={styles.searchSection}>
-            <View style={styles.searchContainer}>
-              <Ionicons name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar pacientes..."
-                placeholderTextColor={Colors.darkGray}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color={Colors.darkGray} />
-                </TouchableOpacity>
-              )}
+    <TabScreenWrapper>
+      <SafeAreaView style={CommonStyles.safeArea}>
+        <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+        
+        <ThemedView style={CommonStyles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <ThemedText style={styles.headerTitle}>Pacientes</ThemedText>
+              <ThemedText style={styles.headerSubtitle}>
+                Gestiona tu lista de pacientes
+              </ThemedText>
             </View>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => router.push('/add-patient')}
+            >
+              <Ionicons name="add" size={24} color={Colors.white} />
+            </TouchableOpacity>
           </View>
 
-          {/* Estadísticas */}
-          <View style={styles.statsSection}>
-            {stats.map((stat) => (
-              <View key={stat.id} style={styles.statCard}>
-                <Ionicons name={stat.icon as any} size={24} color={stat.color} />
-                <ThemedText style={styles.statNumber}>{stat.value}</ThemedText>
-                <ThemedText style={styles.statLabel}>{stat.title}</ThemedText>
-              </View>
-            ))}
-          </View>
-
-          {/* Lista de pacientes */}
-          <View style={styles.patientsSection}>
-            <ThemedText style={styles.sectionTitle}>Lista de Pacientes</ThemedText>
-            
-            {filteredPatients.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={64} color={Colors.darkGray} />
-                <ThemedText style={styles.emptyTitle}>
-                  {searchQuery ? 'No se encontraron pacientes' : 'No hay pacientes registrados'}
-                </ThemedText>
-                <ThemedText style={styles.emptySubtitle}>
-                  {searchQuery 
-                    ? 'Intenta con otros términos de búsqueda'
-                    : 'Comienza agregando tu primer paciente'
-                  }
-                </ThemedText>
-                {!searchQuery && (
-                  <TouchableOpacity 
-                    style={styles.emptyButton}
-                    onPress={() => router.push('/add-patient')}
-                  >
-                    <ThemedText style={styles.emptyButtonText}>
-                      Agregar Paciente
-                    </ThemedText>
+          <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
+            {/* Barra de búsqueda */}
+            <View style={styles.searchSection}>
+              <View style={styles.searchContainer}>
+                <Ionicons name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Buscar pacientes..."
+                  placeholderTextColor={Colors.darkGray}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearchQuery('')}>
+                    <Ionicons name="close-circle" size={20} color={Colors.darkGray} />
                   </TouchableOpacity>
                 )}
               </View>
-            ) : (
-              filteredPatients.map((patient) => (
-                <TouchableOpacity
-                  key={patient.id}
-                  style={styles.patientCard}
-                  onPress={() => router.push(`/patient/${patient.id}`)}
-                >
-                  <View style={styles.patientAvatar}>
-                    <View style={styles.avatar}>
-                      <ThemedText style={styles.avatarText}>{patient.avatar}</ThemedText>
-                    </View>
-                    <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(patient.status) }]} />
-                  </View>
-                  
-                  <View style={styles.patientContent}>
-                    <View style={styles.patientHeader}>
-                      <ThemedText style={styles.patientName}>{patient.name}</ThemedText>
-                      <View style={[styles.statusBadge, { backgroundColor: getStatusColor(patient.status) }]}>
-                        <ThemedText style={styles.statusText}>
-                          {getStatusText(patient.status)}
-                        </ThemedText>
+            </View>
+
+            {/* Estadísticas */}
+            <View style={styles.statsSection}>
+              {stats.map((stat) => (
+                <View key={stat.id} style={styles.statCard}>
+                  <Ionicons name={stat.icon as any} size={24} color={stat.color} />
+                  <ThemedText style={styles.statNumber}>{stat.value}</ThemedText>
+                  <ThemedText style={styles.statLabel}>{stat.title}</ThemedText>
+                </View>
+              ))}
+            </View>
+
+            {/* Lista de pacientes */}
+            <View style={styles.patientsSection}>
+              <ThemedText style={styles.sectionTitle}>Lista de Pacientes</ThemedText>
+              
+              {filteredPatients.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Ionicons name="people-outline" size={64} color={Colors.darkGray} />
+                  <ThemedText style={styles.emptyTitle}>
+                    {searchQuery ? 'No se encontraron pacientes' : 'No hay pacientes registrados'}
+                  </ThemedText>
+                  <ThemedText style={styles.emptySubtitle}>
+                    {searchQuery 
+                      ? 'Intenta con otros términos de búsqueda'
+                      : 'Comienza agregando tu primer paciente'
+                    }
+                  </ThemedText>
+                  {!searchQuery && (
+                    <TouchableOpacity 
+                      style={styles.emptyButton}
+                      onPress={() => router.push('/add-patient')}
+                    >
+                      <ThemedText style={styles.emptyButtonText}>
+                        Agregar Paciente
+                      </ThemedText>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ) : (
+                filteredPatients.map((patient) => (
+                  <TouchableOpacity
+                    key={patient.id}
+                    style={styles.patientCard}
+                    onPress={() => router.push(`/patient/${patient.id}`)}
+                  >
+                    <View style={styles.patientAvatar}>
+                      <View style={styles.avatar}>
+                        <ThemedText style={styles.avatarText}>{patient.avatar}</ThemedText>
                       </View>
+                      <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(patient.status) }]} />
                     </View>
                     
-                    <View style={styles.patientInfo}>
-                      <View style={styles.infoRow}>
-                        <Ionicons name="mail" size={16} color={Colors.darkGray} />
-                        <ThemedText style={styles.infoText}>{patient.email}</ThemedText>
-                      </View>
-                      <View style={styles.infoRow}>
-                        <Ionicons name="call" size={16} color={Colors.darkGray} />
-                        <ThemedText style={styles.infoText}>{patient.phone}</ThemedText>
-                      </View>
-                      <View style={styles.infoRow}>
-                        <Ionicons name="person" size={16} color={Colors.darkGray} />
-                        <ThemedText style={styles.infoText}>{patient.age} años</ThemedText>
-                      </View>
-                    </View>
-                    
-                    <View style={styles.patientFooter}>
-                      <View style={styles.footerInfo}>
-                        <ThemedText style={styles.footerLabel}>Última visita:</ThemedText>
-                        <ThemedText style={styles.footerValue}>
-                          {formatDate(patient.lastVisit)}
-                        </ThemedText>
-                      </View>
-                      {patient.nextAppointment && (
-                        <View style={styles.footerInfo}>
-                          <ThemedText style={styles.footerLabel}>Próxima cita:</ThemedText>
-                          <ThemedText style={[styles.footerValue, { color: Colors.secondary }]}>
-                            {formatDate(patient.nextAppointment)}
+                    <View style={styles.patientContent}>
+                      <View style={styles.patientHeader}>
+                        <ThemedText style={styles.patientName}>{patient.name}</ThemedText>
+                        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(patient.status) }]}>
+                          <ThemedText style={styles.statusText}>
+                            {getStatusText(patient.status)}
                           </ThemedText>
                         </View>
-                      )}
+                      </View>
+                      
+                      <View style={styles.patientInfo}>
+                        <View style={styles.infoRow}>
+                          <Ionicons name="mail" size={16} color={Colors.darkGray} />
+                          <ThemedText style={styles.infoText}>{patient.email}</ThemedText>
+                        </View>
+                        <View style={styles.infoRow}>
+                          <Ionicons name="call" size={16} color={Colors.darkGray} />
+                          <ThemedText style={styles.infoText}>{patient.phone}</ThemedText>
+                        </View>
+                        <View style={styles.infoRow}>
+                          <Ionicons name="person" size={16} color={Colors.darkGray} />
+                          <ThemedText style={styles.infoText}>{patient.age} años</ThemedText>
+                        </View>
+                      </View>
+                      
+                      <View style={styles.patientFooter}>
+                        <View style={styles.footerInfo}>
+                          <ThemedText style={styles.footerLabel}>Última visita:</ThemedText>
+                          <ThemedText style={styles.footerValue}>
+                            {formatDate(patient.lastVisit)}
+                          </ThemedText>
+                        </View>
+                        {patient.nextAppointment && (
+                          <View style={styles.footerInfo}>
+                            <ThemedText style={styles.footerLabel}>Próxima cita:</ThemedText>
+                            <ThemedText style={[styles.footerValue, { color: Colors.secondary }]}>
+                              {formatDate(patient.nextAppointment)}
+                            </ThemedText>
+                          </View>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                  
-                  <View style={styles.patientActions}>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="chatbubble" size={20} color={Colors.secondary} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="call" size={20} color={Colors.info} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="medical" size={20} color={Colors.success} />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-              ))
-            )}
-          </View>
-        </ScrollView>
-      </ThemedView>
-    </SafeAreaView>
+                    
+                    <View style={styles.patientActions}>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="chatbubble" size={20} color={Colors.secondary} />
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="call" size={20} color={Colors.info} />
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="medical" size={20} color={Colors.success} />
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </View>
+          </ScrollView>
+        </ThemedView>
+      </SafeAreaView>
+    </TabScreenWrapper>
   );
 }
 

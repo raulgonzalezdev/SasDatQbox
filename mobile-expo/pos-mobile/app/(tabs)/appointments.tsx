@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import { TabScreenWrapper } from '@/components/ui/TabScreenWrapper';
 
 export default function AppointmentsScreen() {
   const { user } = useAppStore();
@@ -88,159 +89,161 @@ export default function AppointmentsScreen() {
   };
 
   return (
-    <SafeAreaView style={CommonStyles.safeArea}>
-      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
-      <ThemedView style={CommonStyles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <ThemedText style={styles.headerTitle}>
-              {isDoctor ? 'Citas del Día' : 'Mis Citas'}
-            </ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              {formatDate(selectedDate.toISOString().split('T')[0])}
-            </ThemedText>
-          </View>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/book-appointment')}
-          >
-            <Ionicons name="add" size={24} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Filtros */}
-          <View style={styles.filtersSection}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <TouchableOpacity style={[styles.filterChip, styles.filterChipActive]}>
-                <ThemedText style={[styles.filterChipText, styles.filterChipTextActive]}>
-                  Hoy
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterChip}>
-                <ThemedText style={styles.filterChipText}>
-                  Mañana
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterChip}>
-                <ThemedText style={styles.filterChipText}>
-                  Esta Semana
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterChip}>
-                <ThemedText style={styles.filterChipText}>
-                  Próximo Mes
-                </ThemedText>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-
-          {/* Estadísticas rápidas */}
-          <View style={styles.statsSection}>
-            <View style={styles.statCard}>
-              <Ionicons name="calendar" size={24} color={Colors.primary} />
-              <ThemedText style={styles.statNumber}>{appointments.length}</ThemedText>
-              <ThemedText style={styles.statLabel}>Citas Hoy</ThemedText>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="time" size={24} color={Colors.warning} />
-              <ThemedText style={styles.statNumber}>
-                {appointments.filter(a => a.status === 'pending').length}
+    <TabScreenWrapper>
+      <SafeAreaView style={CommonStyles.safeArea}>
+        <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+        
+        <ThemedView style={CommonStyles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <ThemedText style={styles.headerTitle}>
+                {isDoctor ? 'Citas del Día' : 'Mis Citas'}
               </ThemedText>
-              <ThemedText style={styles.statLabel}>Pendientes</ThemedText>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
-              <ThemedText style={styles.statNumber}>
-                {appointments.filter(a => a.status === 'confirmed').length}
+              <ThemedText style={styles.headerSubtitle}>
+                {formatDate(selectedDate.toISOString().split('T')[0])}
               </ThemedText>
-              <ThemedText style={styles.statLabel}>Confirmadas</ThemedText>
             </View>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => router.push('/book-appointment')}
+            >
+              <Ionicons name="add" size={24} color={Colors.white} />
+            </TouchableOpacity>
           </View>
 
-          {/* Lista de citas */}
-          <View style={styles.appointmentsSection}>
-            <ThemedText style={styles.sectionTitle}>Citas Programadas</ThemedText>
-            
-            {appointments.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="calendar-outline" size={64} color={Colors.darkGray} />
-                <ThemedText style={styles.emptyTitle}>No hay citas programadas</ThemedText>
-                <ThemedText style={styles.emptySubtitle}>
-                  {isDoctor 
-                    ? 'No tienes citas programadas para hoy'
-                    : 'No tienes citas programadas. ¡Agenda una ahora!'
-                  }
-                </ThemedText>
-                <TouchableOpacity 
-                  style={styles.emptyButton}
-                  onPress={() => router.push('/book-appointment')}
-                >
-                  <ThemedText style={styles.emptyButtonText}>
-                    {isDoctor ? 'Ver Calendario' : 'Agendar Cita'}
+          <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
+            {/* Filtros */}
+            <View style={styles.filtersSection}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <TouchableOpacity style={[styles.filterChip, styles.filterChipActive]}>
+                  <ThemedText style={[styles.filterChipText, styles.filterChipTextActive]}>
+                    Hoy
                   </ThemedText>
                 </TouchableOpacity>
-              </View>
-            ) : (
-              appointments.map((appointment) => (
-                <TouchableOpacity
-                  key={appointment.id}
-                  style={styles.appointmentCard}
-                  onPress={() => router.push(`/appointment/${appointment.id}`)}
-                >
-                  <View style={styles.appointmentHeader}>
-                    <View style={styles.appointmentTime}>
-                      <ThemedText style={styles.timeText}>
-                        {formatTime(appointment.time)}
-                      </ThemedText>
-                      <ThemedText style={styles.durationText}>
-                        {appointment.duration} min
-                      </ThemedText>
-                    </View>
-                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(appointment.status) }]}>
-                      <ThemedText style={styles.statusText}>
-                        {getStatusText(appointment.status)}
-                      </ThemedText>
-                    </View>
-                  </View>
-                  
-                  <View style={styles.appointmentContent}>
-                    <ThemedText style={styles.patientName}>
-                      {isDoctor ? appointment.patientName : appointment.doctorName}
-                    </ThemedText>
-                    <ThemedText style={styles.appointmentType}>
-                      {appointment.type}
-                    </ThemedText>
-                    {!isDoctor && (
-                      <ThemedText style={styles.doctorName}>
-                        {appointment.doctorName}
-                      </ThemedText>
-                    )}
-                  </View>
-                  
-                  <View style={styles.appointmentActions}>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="chatbubble" size={20} color={Colors.secondary} />
-                      <ThemedText style={styles.actionText}>Chat</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="call" size={20} color={Colors.info} />
-                      <ThemedText style={styles.actionText}>Llamar</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="videocam" size={20} color={Colors.success} />
-                      <ThemedText style={styles.actionText}>Video</ThemedText>
-                    </TouchableOpacity>
-                  </View>
+                <TouchableOpacity style={styles.filterChip}>
+                  <ThemedText style={styles.filterChipText}>
+                    Mañana
+                  </ThemedText>
                 </TouchableOpacity>
-              ))
-            )}
-          </View>
-        </ScrollView>
-      </ThemedView>
-    </SafeAreaView>
+                <TouchableOpacity style={styles.filterChip}>
+                  <ThemedText style={styles.filterChipText}>
+                    Esta Semana
+                  </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.filterChip}>
+                  <ThemedText style={styles.filterChipText}>
+                    Próximo Mes
+                  </ThemedText>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+
+            {/* Estadísticas rápidas */}
+            <View style={styles.statsSection}>
+              <View style={styles.statCard}>
+                <Ionicons name="calendar" size={24} color={Colors.primary} />
+                <ThemedText style={styles.statNumber}>{appointments.length}</ThemedText>
+                <ThemedText style={styles.statLabel}>Citas Hoy</ThemedText>
+              </View>
+              <View style={styles.statCard}>
+                <Ionicons name="time" size={24} color={Colors.warning} />
+                <ThemedText style={styles.statNumber}>
+                  {appointments.filter(a => a.status === 'pending').length}
+                </ThemedText>
+                <ThemedText style={styles.statLabel}>Pendientes</ThemedText>
+              </View>
+              <View style={styles.statCard}>
+                <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
+                <ThemedText style={styles.statNumber}>
+                  {appointments.filter(a => a.status === 'confirmed').length}
+                </ThemedText>
+                <ThemedText style={styles.statLabel}>Confirmadas</ThemedText>
+              </View>
+            </View>
+
+            {/* Lista de citas */}
+            <View style={styles.appointmentsSection}>
+              <ThemedText style={styles.sectionTitle}>Citas Programadas</ThemedText>
+              
+              {appointments.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Ionicons name="calendar-outline" size={64} color={Colors.darkGray} />
+                  <ThemedText style={styles.emptyTitle}>No hay citas programadas</ThemedText>
+                  <ThemedText style={styles.emptySubtitle}>
+                    {isDoctor 
+                      ? 'No tienes citas programadas para hoy'
+                      : 'No tienes citas programadas. ¡Agenda una ahora!'
+                    }
+                  </ThemedText>
+                  <TouchableOpacity 
+                    style={styles.emptyButton}
+                    onPress={() => router.push('/book-appointment')}
+                  >
+                    <ThemedText style={styles.emptyButtonText}>
+                      {isDoctor ? 'Ver Calendario' : 'Agendar Cita'}
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                appointments.map((appointment) => (
+                  <TouchableOpacity
+                    key={appointment.id}
+                    style={styles.appointmentCard}
+                    onPress={() => router.push(`/appointment/${appointment.id}`)}
+                  >
+                    <View style={styles.appointmentHeader}>
+                      <View style={styles.appointmentTime}>
+                        <ThemedText style={styles.timeText}>
+                          {formatTime(appointment.time)}
+                        </ThemedText>
+                        <ThemedText style={styles.durationText}>
+                          {appointment.duration} min
+                        </ThemedText>
+                      </View>
+                      <View style={[styles.statusBadge, { backgroundColor: getStatusColor(appointment.status) }]}>
+                        <ThemedText style={styles.statusText}>
+                          {getStatusText(appointment.status)}
+                        </ThemedText>
+                      </View>
+                    </View>
+                    
+                    <View style={styles.appointmentContent}>
+                      <ThemedText style={styles.patientName}>
+                        {isDoctor ? appointment.patientName : appointment.doctorName}
+                      </ThemedText>
+                      <ThemedText style={styles.appointmentType}>
+                        {appointment.type}
+                      </ThemedText>
+                      {!isDoctor && (
+                        <ThemedText style={styles.doctorName}>
+                          {appointment.doctorName}
+                        </ThemedText>
+                      )}
+                    </View>
+                    
+                    <View style={styles.appointmentActions}>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="chatbubble" size={20} color={Colors.secondary} />
+                        <ThemedText style={styles.actionText}>Chat</ThemedText>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="call" size={20} color={Colors.info} />
+                        <ThemedText style={styles.actionText}>Llamar</ThemedText>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="videocam" size={20} color={Colors.success} />
+                        <ThemedText style={styles.actionText}>Video</ThemedText>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </View>
+          </ScrollView>
+        </ThemedView>
+      </SafeAreaView>
+    </TabScreenWrapper>
   );
 }
 
