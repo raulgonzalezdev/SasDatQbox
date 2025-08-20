@@ -14,8 +14,8 @@ export interface User {
   phone?: string;
   avatar_url?: string;
   role: 'doctor' | 'patient' | 'admin';
-  businessName?: string;
-  isPremium: boolean;
+  businessName?: string; // Opcional, valor por defecto en el cliente
+  isPremium?: boolean; // Opcional, valor por defecto en el cliente
   created_at: Date;
   updated_at: Date;
 }
@@ -75,7 +75,13 @@ export const removeToken = async (): Promise<void> => {
 // Función para guardar datos del usuario
 export const saveUser = async (user: User): Promise<void> => {
   try {
-    await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+    // Asignar valores por defecto si no están presentes
+    const userWithDefaults = {
+      ...user,
+      businessName: user.businessName || '',
+      isPremium: user.isPremium || false
+    };
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(userWithDefaults));
   } catch (error) {
     console.error('Error saving user:', error);
   }
@@ -85,7 +91,16 @@ export const saveUser = async (user: User): Promise<void> => {
 export const getUser = async (): Promise<User | null> => {
   try {
     const userData = await AsyncStorage.getItem(USER_KEY);
-    return userData ? JSON.parse(userData) : null;
+    if (userData) {
+      const user = JSON.parse(userData);
+      // Asignar valores por defecto si no están presentes
+      return {
+        ...user,
+        businessName: user.businessName || '',
+        isPremium: user.isPremium || false
+      };
+    }
+    return null;
   } catch (error) {
     console.error('Error getting user:', error);
     return null;
@@ -121,11 +136,18 @@ export const register = async (userData: UserRegistrationData): Promise<AuthResp
     // El backend devuelve { token, token_type, user }
     const { user, token } = data;
 
+    // Asignar valores por defecto si no están presentes
+    const userWithDefaults = {
+      ...user,
+      businessName: user.businessName || '',
+      isPremium: user.isPremium || false
+    };
+
     // Guardar token y datos del usuario
     await saveToken(token);
-    await saveUser(user);
+    await saveUser(userWithDefaults);
 
-    return { user, token };
+    return { user: userWithDefaults, token };
   } catch (error) {
     console.error('❌ Error al registrar:', error);
     throw error;
@@ -152,11 +174,18 @@ export const login = async (loginData: UserLoginData): Promise<AuthResponse> => 
     // El backend devuelve { token, token_type, user }
     const { user, token } = data;
 
+    // Asignar valores por defecto si no están presentes
+    const userWithDefaults = {
+      ...user,
+      businessName: user.businessName || '',
+      isPremium: user.isPremium || false
+    };
+
     // Guardar token y datos del usuario
     await saveToken(token);
-    await saveUser(user);
+    await saveUser(userWithDefaults);
 
-    return { user, token };
+    return { user: userWithDefaults, token };
   } catch (error) {
     console.error('❌ Error al iniciar sesión:', error);
     throw error;
@@ -206,10 +235,17 @@ export const checkAuthStatus = async (): Promise<AuthStatus> => {
       const data = await response.json();
       const updatedUser = data.user || user;
       
-      // Actualizar datos del usuario si es necesario
-      await saveUser(updatedUser);
+      // Asignar valores por defecto si no están presentes
+      const userWithDefaults = {
+        ...updatedUser,
+        businessName: updatedUser.businessName || '',
+        isPremium: updatedUser.isPremium || false
+      };
       
-      return { isAuthenticated: true, user: updatedUser };
+      // Actualizar datos del usuario si es necesario
+      await saveUser(userWithDefaults);
+      
+      return { isAuthenticated: true, user: userWithDefaults };
     } else {
       // Token inválido, limpiar datos
       await removeToken();
@@ -276,7 +312,13 @@ export const refreshToken = async (): Promise<string | null> => {
       if (newToken) {
         await saveToken(newToken);
         if (user) {
-          await saveUser(user);
+          // Asignar valores por defecto si no están presentes
+          const userWithDefaults = {
+            ...user,
+            businessName: user.businessName || '',
+            isPremium: user.isPremium || false
+          };
+          await saveUser(userWithDefaults);
         }
         return newToken;
       }

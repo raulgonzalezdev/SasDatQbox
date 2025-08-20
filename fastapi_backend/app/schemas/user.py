@@ -19,8 +19,6 @@ class UserBase(BaseModel):
     last_name: Optional[str] = None
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
-    businessName: Optional[str] = None  # Campo para el nombre del negocio
-    isPremium: Optional[bool] = False  # Campo para indicar si es premium
     billing_address: Optional[dict] = None  # Assuming JSON field maps to dict
     payment_method: Optional[dict] = None  # Assuming JSON field maps to dict
     role: Optional[UserRole] = None # Added role
