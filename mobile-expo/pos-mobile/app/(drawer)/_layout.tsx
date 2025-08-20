@@ -38,11 +38,11 @@ export default function DrawerLayout() {
       />
       
       <Drawer.Screen 
-        name="more" 
+        name="settings" 
         options={{ 
-          title: 'Más Opciones',
+          title: 'Configuración',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />
+          drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />
         }} 
       />
       
