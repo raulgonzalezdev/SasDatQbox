@@ -28,7 +28,7 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 
 # Sitio web
-NEXT_PUBLIC_SITE_URL=https://spaininsideapp.nl
+NEXT_PUBLIC_SITE_URL=https://datqbox.online
 EOL
     echo "Archivo .env de ejemplo creado. Por favor, edítelo con sus credenciales antes de continuar."
     exit 1
@@ -79,7 +79,7 @@ fi
 
 # Añadir NEXT_PUBLIC_SITE_URL si no existe
 if ! grep -q "NEXT_PUBLIC_SITE_URL" .env; then
-  echo "NEXT_PUBLIC_SITE_URL=https://spaininsideapp.nl" >> .env.temp
+  echo "NEXT_PUBLIC_SITE_URL=https://datqbox.online" >> .env.temp
   echo "Variable NEXT_PUBLIC_SITE_URL añadida automáticamente."
 fi
 

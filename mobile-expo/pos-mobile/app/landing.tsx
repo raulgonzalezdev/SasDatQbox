@@ -17,7 +17,7 @@ import AboutSection from '@/components/ui/Landing/AboutSection';
 import SecuritySection from '@/components/ui/Landing/SecuritySection';
 
 export default function LandingPage() {
-  const { hidePromotions } = useAppStore();
+  const { hidePromotions, currentLocale } = useAppStore();
   const [hidePromos] = useState(hidePromotions);
 
   const plans = i18n.t('Pricing.plans', { returnObjects: true }) || [];

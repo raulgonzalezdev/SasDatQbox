@@ -1,6 +1,9 @@
-tunnel: 2b59f68e-27b4-4738-afa9-12894418b128
+tunnel: 8525ce28-9177-4c1e-ad4d-c2ff582f8c28
 credentials-file: /etc/cloudflared/creds.json
+
 ingress:
-  - hostname: datqbox.online
+  - hostname: backend.datqbox.online
+    service: http://fastapi_backend:8000
+  - hostname: boxdoctor.datqbox.online
     service: http://nginx:80
-  - service: http_status:404 
+  - service: http_status:404

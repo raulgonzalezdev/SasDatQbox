@@ -4,13 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import i18n from '@/config/i18n';
 import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
+import { useAppStore } from '@/store/appStore';
 
 const Header = () => {
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [menuModalVisible, setMenuModalVisible] = useState(false);
+  const { currentLocale, setLocale } = useAppStore();
 
   const changeLanguage = (lang) => {
-    i18n.locale = lang;
+    setLocale(lang);
     setLanguageModalVisible(false);
   };
 
@@ -25,7 +27,7 @@ const Header = () => {
       <View style={styles.rightContainer}>
         <TouchableOpacity onPress={() => setLanguageModalVisible(true)} style={styles.iconButton}>
           <Ionicons name="globe-outline" size={24} color={Colors.primary} />
-          <Text style={styles.languageText}>{i18n.locale.toUpperCase()}</Text>
+          <Text style={styles.languageText}>{currentLocale.toUpperCase()}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleLogin} style={styles.iconButton}>
@@ -99,7 +101,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 50,
     resizeMode: 'contain',
-    marginLeft: -15,
+    marginLeft: -25,
   },
   rightContainer: {
     flexDirection: 'row',
