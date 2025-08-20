@@ -75,22 +75,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} />,
         }}
       />
-      {isDoctor && (
-        <Tabs.Screen
-          name="patients"
-          options={{
-            title: 'Pacientes',
-            tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
-          }}
-        />
-      )}
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: 'Más',
-          tabBarIcon: ({ color, size }) => <Ionicons name="menu" size={size} color={color} />,
-        }}
-      />
+      
     </Tabs>
   );
 }

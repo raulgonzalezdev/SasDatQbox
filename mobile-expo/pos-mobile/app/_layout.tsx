@@ -70,13 +70,7 @@ export default function RootLayout() {
             <Stack.Screen name="auth" options={{ animation: 'fade' }} />
             
             {/* App principal - mostrada cuando está autenticado */}
-            <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-            
-            {/* Pantallas de perfil y configuración */}
-            <Stack.Screen name="profile" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="about" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="(drawer)" options={{ animation: 'fade' }} />
             
             {/* Otras pantallas */}
             <Stack.Screen name="+not-found" />
