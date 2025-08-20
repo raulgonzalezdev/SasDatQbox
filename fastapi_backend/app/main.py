@@ -16,14 +16,13 @@ app = FastAPI(
 print(f"CORS Origins: {settings.BACKEND_CORS_ORIGINS}")
 
 # Set all CORS enabled origins
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["http://localhost:3000"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"https://.*datqbox\.online","http://localhost:3000"
+    allow_credentials=True,
+    allow_methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allow_headers=["Authorization","Content-Type","X-Requested-With"],
+)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
@@ -49,6 +48,10 @@ async def integrity_exception_handler(request: Request, exc: IntegrityError):
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
 
 @app.get("/", tags=["Root"])
 async def read_root():

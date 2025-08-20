@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
@@ -15,13 +15,35 @@ from app.models.user import User as DBUser
 
 router = APIRouter()
 
+# Función helper para parsear datos de JSON o form-urlencoded
+async def parse_request_data(request: Request, model_class):
+    """Parse data from JSON or form-urlencoded request"""
+    ct = (request.headers.get("content-type") or "").lower()
+    
+    if ct.startswith("application/x-www-form-urlencoded") or ct.startswith("multipart/form-data"):
+        form = await request.form()
+        # Convert form data to dict
+        data = {}
+        for key, value in form.items():
+            data[key] = value
+        return model_class(**data)
+    else:
+        # Default to JSON
+        data = await request.json()
+        return model_class(**data)
+
 # --- SubscriptionProduct Endpoints ---
 @router.post("/products", response_model=SubscriptionProductResponse, status_code=status.HTTP_201_CREATED)
-def create_subscription_product(
-    product_in: SubscriptionProductCreate,
+async def create_subscription_product(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new subscription product.
+    Accepts JSON or form-urlencoded data.
+    """
+    product_in = await parse_request_data(request, SubscriptionProductCreate)
     service = SubscriptionService(db)
     return service.create_subscription_product(product_in=product_in)
 
@@ -37,11 +59,16 @@ def read_subscription_products(
 
 # --- Price Endpoints ---
 @router.post("/prices", response_model=PriceResponse, status_code=status.HTTP_201_CREATED)
-def create_price(
-    price_in: PriceCreate,
+async def create_price(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new price.
+    Accepts JSON or form-urlencoded data.
+    """
+    price_in = await parse_request_data(request, PriceCreate)
     service = SubscriptionService(db)
     return service.create_price(price_in=price_in)
 
@@ -57,11 +84,16 @@ def read_prices(
 
 # --- Subscription Endpoints ---
 @router.post("/subscriptions", response_model=Subscription, status_code=status.HTTP_201_CREATED)
-def create_subscription(
-    subscription_in: SubscriptionCreate,
+async def create_subscription(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new subscription.
+    Accepts JSON or form-urlencoded data.
+    """
+    subscription_in = await parse_request_data(request, SubscriptionCreate)
     service = SubscriptionService(db)
     return service.create_subscription(subscription_in=subscription_in)
 
@@ -77,12 +109,17 @@ def read_subscriptions(
     return service.get_subscriptions_by_user(user_id=user_id, skip=skip, limit=limit)
 
 @router.put("/subscriptions/{subscription_id}", response_model=Subscription)
-def update_subscription(
+async def update_subscription(
     subscription_id: UUID,
-    subscription_in: SubscriptionUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Update a subscription.
+    Accepts JSON or form-urlencoded data.
+    """
+    subscription_in = await parse_request_data(request, SubscriptionUpdate)
     service = SubscriptionService(db)
     subscription = service.update_subscription(
         subscription_id=subscription_id, 

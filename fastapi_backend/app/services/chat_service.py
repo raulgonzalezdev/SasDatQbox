@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List, Optional
+from datetime import datetime
 
 from app.models.chat import Conversation, Message, ConversationParticipant
 from app.models.user import User
@@ -48,3 +49,30 @@ class ChatService:
 
     def get_messages_for_conversation(self, conversation_id: UUID) -> List[Message]:
         return self.db.query(Message).filter(Message.conversation_id == conversation_id).order_by(Message.created_at.asc()).all()
+
+    def mark_conversation_as_read(self, conversation_id: UUID, user_id: UUID):
+        """Mark all messages in a conversation as read for a specific user"""
+        # Update all unread messages in the conversation for this user
+        messages = self.db.query(Message).filter(
+            Message.conversation_id == conversation_id,
+            Message.sender_id != user_id,
+            Message.read_at.is_(None)
+        ).all()
+        
+        for message in messages:
+            message.read_at = datetime.utcnow()
+        
+        self.db.commit()
+
+    def delete_conversation(self, conversation_id: UUID):
+        """Delete a conversation and all its messages"""
+        # Delete all messages in the conversation
+        self.db.query(Message).filter(Message.conversation_id == conversation_id).delete()
+        
+        # Delete all participants
+        self.db.query(ConversationParticipant).filter(ConversationParticipant.conversation_id == conversation_id).delete()
+        
+        # Delete the conversation
+        self.db.query(Conversation).filter(Conversation.id == conversation_id).delete()
+        
+        self.db.commit()

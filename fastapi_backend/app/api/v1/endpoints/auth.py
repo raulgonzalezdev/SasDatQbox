@@ -1,90 +1,104 @@
 from datetime import timedelta
-from typing import Annotated, Any
-
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from fastapi.security import OAuth2PasswordRequestForm
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user # Corrected import for get_current_user
-from app.schemas.user import UserCreate, User as UserResponse, Token
-from app.services.user_service import UserService # Import the class
-from app.core.security import verify_password, ACCESS_TOKEN_EXPIRE_MINUTES # Removed get_password_hash as it's used in service
-from app.core.auth import create_access_token # This needs to be implemented
+from app.dependencies import get_db, get_current_user
+from app.schemas.user import UserCreate, User as UserResponse, UserUpdate
+from app.schemas.auth import AuthOut
+from app.services.user_service import UserService
+from app.core.security import verify_password, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.core.auth import create_access_token
 
-router = APIRouter(
-    tags=["Auth"],
-    responses={401: {"description": "Unauthorized"}}
-)
+router = APIRouter(tags=["Auth"], responses={401: {"description": "Unauthorized"}})
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def register_user(
-    *,
-    db: Session = Depends(get_db),
-    user_in: UserCreate,
-) -> Any:
-    """
-    Create new user.
-    """
-    print(f"Attempting to register user with data: {user_in.model_dump()}")
-    user_service = UserService(db)
-    user = user_service.get_by_email(db, email=user_in.email)
-    if user:
-        print("User with this email already exists.")
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered",
-        )
-    try:
-        user = user_service.create(db, obj_in=user_in)
-        print(f"User created successfully: {user.email}")
-        return user
-    except Exception as e:
-        print(f"An error occurred during user creation: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="An error occurred during user creation.",
-        )
+@router.post("/register", response_model=AuthOut, status_code=status.HTTP_201_CREATED)
+def register_user(*, db: Session = Depends(get_db), user_in: UserCreate):
+    svc = UserService(db)
+    if svc.get_by_email(db, email=user_in.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-@router.post("/login")
-async def login_for_access_token( 
-    response: Response,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Session = Depends(get_db)
-):
-    user_service = UserService(db)
-    user = user_service.get_by_email(db, email=form_data.username)
-    
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    user = svc.create(db, obj_in=user_in)
+
     access_token = create_access_token(
-        data={"sub": str(user.id)}, 
-        expires_delta=access_token_expires
+        data={"sub": str(user.id)},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    
+    return {"token": access_token, "token_type": "bearer", "user": user}
+
+@router.post("/login", response_model=AuthOut)
+async def login_for_access_token(
+    response: Response,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    # Acepta JSON {email|username,password} o form-urlencoded username/password
+    ct = (request.headers.get("content-type") or "").lower()
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+    if ct.startswith("application/x-www-form-urlencoded") or ct.startswith("multipart/form-data"):
+        form = await request.form()
+        username = (form.get("username") or form.get("email") or "").strip()
+        password = (form.get("password") or "").strip()
+    else:
+        data = await request.json()
+        username = (data.get("username") or data.get("email") or "").strip()
+        password = (data.get("password") or "").strip()
+
+    if not username or not password:
+        raise HTTPException(status_code=422, detail="username/email y password son requeridos")
+
+    svc = UserService(db)
+    user = svc.get_by_email(db, email=username)
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+
+    # Cookie útil para front web (no afecta a móvil)
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
         httponly=True,
-        secure=True, # En producción, asegúrate de que sea True
-        samesite='lax', # o 'strict'
+        secure=True,
+        samesite="none",   # subdominios tras Cloudflare
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        path="/"
+        path="/",
     )
-    
-    return {"message": "Login successful"}
+
+    return {"token": access_token, "token_type": "bearer", "user": user}
+
+@router.post("/refresh", response_model=AuthOut)
+async def refresh_token(current_user: UserResponse = Depends(get_current_user)):
+    # Reemite un token (si el actual sigue siendo válido)
+    token = create_access_token(
+        data={"sub": str(current_user.id)},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return {"token": token, "token_type": "bearer", "user": current_user}
+
+@router.get("/me", response_model=dict)
+async def read_users_me(current_user: UserResponse = Depends(get_current_user)):
+    # Tu app maneja `data.user || user`, devolvemos { user }
+    return {"user": current_user}
+
+@router.put("/profile", response_model=dict)
+async def update_profile(
+    user_update: UserUpdate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Actualizar perfil del usuario autenticado"""
+    svc = UserService(db)
+    updated_user = svc.update(db, db_obj=current_user, obj_in=user_update)
+    return {"user": updated_user}
 
 @router.post("/logout")
 async def logout(response: Response):
+    """Cerrar sesión - elimina la cookie"""
     response.delete_cookie(key="access_token", path="/")
     return {"message": "Logout successful"}
-
-@router.get("/me", response_model=UserResponse)
-async def read_users_me( 
-    current_user: Annotated[UserResponse, Depends(get_current_user)] 
-):
-    return current_user

@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_active_user, get_current_active_admin
@@ -14,12 +14,34 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+# Función helper para parsear datos de JSON o form-urlencoded
+async def parse_request_data(request: Request, model_class):
+    """Parse data from JSON or form-urlencoded request"""
+    ct = (request.headers.get("content-type") or "").lower()
+    
+    if ct.startswith("application/x-www-form-urlencoded") or ct.startswith("multipart/form-data"):
+        form = await request.form()
+        # Convert form data to dict
+        data = {}
+        for key, value in form.items():
+            data[key] = value
+        return model_class(**data)
+    else:
+        # Default to JSON
+        data = await request.json()
+        return model_class(**data)
+
 @router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED)
-def create_customer(
-    customer: CustomerCreate,
+async def create_customer(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_admin) # Only admins can create customers
 ):
+    """
+    Create a new customer.
+    Accepts JSON or form-urlencoded data.
+    """
+    customer = await parse_request_data(request, CustomerCreate)
     customer_service = CustomerService(db)
     # The service/db layer will handle creation logic and potential IntegrityErrors
     return customer_service.create_customer(customer)
@@ -53,12 +75,17 @@ def read_customer(
     return customer
 
 @router.put("/{customer_id}", response_model=Customer)
-def update_customer(
+async def update_customer(
     customer_id: UUID,
-    customer: CustomerUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Update a customer.
+    Accepts JSON or form-urlencoded data.
+    """
+    customer = await parse_request_data(request, CustomerUpdate)
     customer_service = CustomerService(db)
     db_customer = customer_service.get_customer(customer_id)
     if db_customer is None:

@@ -25,6 +25,8 @@ class User(Base):
     last_name = Column(String)
     phone = Column(String)
     avatar_url = Column(String)
+    businessName = Column(String)  # Campo para el nombre del negocio
+    isPremium = Column(Boolean, default=False)  # Campo para indicar si es premium
     billing_address = Column(JSON, nullable=True)
     payment_method = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

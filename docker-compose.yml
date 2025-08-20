@@ -66,10 +66,11 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: always
-    command: tunnel --no-autoupdate run
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
     volumes:
-      - ./creds.json:/etc/cloudflared/creds.json
       - ./config.yml:/etc/cloudflared/config.yml
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiM2Q5Yjk4MjItOWFiYS00YzMyLTkyOGItNzc4MjNjYjE1NjcyIiwicyI6IlpqVTJZV1UwWWpJdFltSXpPQzAwT0RCa0xXRmhNREl0WVdNd1l6Z3lPRGxrTmpabSJ9
     depends_on:
       - fastapi_backend
     networks:

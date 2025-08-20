@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
@@ -13,6 +13,23 @@ router = APIRouter(
     tags=["Inventory"], # Add tag
     responses={404: {"description": "Not found"}},
 )
+
+# Función helper para parsear datos de JSON o form-urlencoded
+async def parse_request_data(request: Request, model_class):
+    """Parse data from JSON or form-urlencoded request"""
+    ct = (request.headers.get("content-type") or "").lower()
+    
+    if ct.startswith("application/x-www-form-urlencoded") or ct.startswith("multipart/form-data"):
+        form = await request.form()
+        # Convert form data to dict
+        data = {}
+        for key, value in form.items():
+            data[key] = value
+        return model_class(**data)
+    else:
+        # Default to JSON
+        data = await request.json()
+        return model_class(**data)
 
 async def get_business_id_from_inventory_item(
     item_id: UUID, db: Session = Depends(get_db)
@@ -30,11 +47,16 @@ async def get_business_id_from_inventory_item(
     return location.business_id
 
 @router.post("/", response_model=Inventory, status_code=status.HTTP_201_CREATED)
-def create_inventory_item(
-    item_in: InventoryCreate,
+async def create_inventory_item(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new inventory item.
+    Accepts JSON or form-urlencoded data.
+    """
+    item_in = await parse_request_data(request, InventoryCreate)
     inventory_service = InventoryService(db)
     business_service = BusinessService(db)
 
@@ -124,11 +146,16 @@ def read_inventory_item_by_location_and_product(
 @router.put("/{item_id}", response_model=Inventory)
 async def update_inventory_item(
     item_id: UUID,
-    item_in: InventoryUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user),
     business_id: UUID = Depends(get_business_id_from_inventory_item) # Make it a dependency
 ):
+    """
+    Update an inventory item.
+    Accepts JSON or form-urlencoded data.
+    """
+    item_in = await parse_request_data(request, InventoryUpdate)
     inventory_service = InventoryService(db)
     business_service = BusinessService(db)
 

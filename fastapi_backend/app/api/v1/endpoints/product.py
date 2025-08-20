@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
@@ -14,12 +14,34 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+# Función helper para parsear datos de JSON o form-urlencoded
+async def parse_request_data(request: Request, model_class):
+    """Parse data from JSON or form-urlencoded request"""
+    ct = (request.headers.get("content-type") or "").lower()
+    
+    if ct.startswith("application/x-www-form-urlencoded") or ct.startswith("multipart/form-data"):
+        form = await request.form()
+        # Convert form data to dict
+        data = {}
+        for key, value in form.items():
+            data[key] = value
+        return model_class(**data)
+    else:
+        # Default to JSON
+        data = await request.json()
+        return model_class(**data)
+
 @router.post("/", response_model=Product, status_code=status.HTTP_201_CREATED)
-def create_product(
-    product_in: ProductCreate,
+async def create_product(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new product.
+    Accepts JSON or form-urlencoded data.
+    """
+    product_in = await parse_request_data(request, ProductCreate)
     product_service = ProductService(db)
     business_service = BusinessService(db)
 
@@ -56,12 +78,17 @@ def read_product(
     return db_product
 
 @router.put("/{product_id}", response_model=Product)
-def update_product(
+async def update_product(
     product_id: UUID,
-    product_in: ProductUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Update a product.
+    Accepts JSON or form-urlencoded data.
+    """
+    product_in = await parse_request_data(request, ProductUpdate)
     product_service = ProductService(db)
     business_service = BusinessService(db)
 

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 from typing import List, Optional
+from datetime import datetime
 
 from app.models.appointment import Appointment, AppointmentDocument
 from app.schemas.appointment import AppointmentCreate, AppointmentUpdate, AppointmentDocumentCreate, AppointmentDocumentUpdate, AppointmentCreateInternal
@@ -46,6 +47,42 @@ class AppointmentService:
             return None
         self.db.delete(db_appointment)
         self.db.commit()
+        return db_appointment
+
+    def confirm_appointment(self, appointment_id: UUID) -> Optional[Appointment]:
+        db_appointment = self.get_appointment(appointment_id)
+        if not db_appointment:
+            return None
+        db_appointment.status = "confirmed"
+        db_appointment.updated_at = datetime.utcnow()
+        self.db.add(db_appointment)
+        self.db.commit()
+        self.db.refresh(db_appointment)
+        return db_appointment
+
+    def cancel_appointment(self, appointment_id: UUID) -> Optional[Appointment]:
+        db_appointment = self.get_appointment(appointment_id)
+        if not db_appointment:
+            return None
+        db_appointment.status = "cancelled"
+        db_appointment.updated_at = datetime.utcnow()
+        self.db.add(db_appointment)
+        self.db.commit()
+        self.db.refresh(db_appointment)
+        return db_appointment
+
+    def reschedule_appointment(self, appointment_id: UUID, appointment_in: AppointmentUpdate) -> Optional[Appointment]:
+        db_appointment = self.get_appointment(appointment_id)
+        if not db_appointment:
+            return None
+        update_data = appointment_in.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_appointment, key, value)
+        db_appointment.status = "rescheduled"
+        db_appointment.updated_at = datetime.utcnow()
+        self.db.add(db_appointment)
+        self.db.commit()
+        self.db.refresh(db_appointment)
         return db_appointment
 
     # Appointment Document methods

@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_active_user
@@ -19,13 +19,35 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+# Función helper para parsear datos de JSON o form-urlencoded
+async def parse_request_data(request: Request, model_class):
+    """Parse data from JSON or form-urlencoded request"""
+    ct = (request.headers.get("content-type") or "").lower()
+    
+    if ct.startswith("application/x-www-form-urlencoded") or ct.startswith("multipart/form-data"):
+        form = await request.form()
+        # Convert form data to dict
+        data = {}
+        for key, value in form.items():
+            data[key] = value
+        return model_class(**data)
+    else:
+        # Default to JSON
+        data = await request.json()
+        return model_class(**data)
+
 # --- Business Endpoints ---
 @router.post("/", response_model=Business, status_code=status.HTTP_201_CREATED)
-def create_business(
-    business: BusinessCreate,
+async def create_business(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new business.
+    Accepts JSON or form-urlencoded data.
+    """
+    business = await parse_request_data(request, BusinessCreate)
     business_service = BusinessService(db)
     # Set the owner_id to the current user's ID
     business.owner_id = current_user.id
@@ -67,12 +89,17 @@ def read_business(
     return business
 
 @router.put("/{business_id}", response_model=Business)
-def update_business(
+async def update_business(
     business_id: UUID,
-    business: BusinessUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Update a business.
+    Accepts JSON or form-urlencoded data.
+    """
+    business = await parse_request_data(request, BusinessUpdate)
     business_service = BusinessService(db)
     db_business = business_service.get_business(business_id)
     if db_business is None:
@@ -105,12 +132,17 @@ def delete_business(
 
 # --- BusinessLocation Endpoints ---
 @router.post("/{business_id}/locations/", response_model=BusinessLocation, status_code=status.HTTP_201_CREATED)
-def create_business_location(
+async def create_business_location(
     business_id: UUID,
-    location: BusinessLocationCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Create a new business location.
+    Accepts JSON or form-urlencoded data.
+    """
+    location = await parse_request_data(request, BusinessLocationCreate)
     business_service = BusinessService(db)
     business = business_service.get_business(business_id)
     if business is None:
@@ -167,12 +199,17 @@ def read_business_location(
     return location
 
 @router.put("/locations/{location_id}", response_model=BusinessLocation)
-def update_business_location(
+async def update_business_location(
     location_id: UUID,
-    location: BusinessLocationUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_active_user)
 ):
+    """
+    Update a business location.
+    Accepts JSON or form-urlencoded data.
+    """
+    location = await parse_request_data(request, BusinessLocationUpdate)
     business_service = BusinessService(db)
     db_location = business_service.get_business_location(location_id)
     if db_location is None:

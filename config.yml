@@ -1,7 +1,7 @@
-tunnel: 8525ce28-9177-4c1e-ad4d-c2ff582f8c28
-credentials-file: /etc/cloudflared/creds.json
+tunnel: 3d9b9822-9aba-4c32-928b-77823cb15672
+
 
 ingress:
-  - hostname: backend.datqbox.online
+  - hostname: apidoctor.datqbox.online
     service: http://fastapi_backend:8000
   - service: http_status:404

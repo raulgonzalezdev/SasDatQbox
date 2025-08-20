@@ -25,6 +25,21 @@ class UserService(CRUDBase[User, UserCreate, UserUpdate]):
         db.refresh(db_obj)
         return db_obj
 
+    def update(self, db: Session, *, db_obj: User, obj_in: UserUpdate) -> User:
+        """Update user with proper password handling"""
+        update_data = obj_in.dict(exclude_unset=True)
+        
+        # Handle password hashing if password is being updated
+        if "password" in update_data and update_data["password"]:
+            update_data["hashed_password"] = get_password_hash(update_data["password"])
+            del update_data["password"]
+        
+        # Remove hashed_password from update_data if it's not being set
+        if "hashed_password" not in update_data:
+            update_data.pop("hashed_password", None)
+        
+        return super().update(db, db_obj=db_obj, obj_in=update_data)
+
     def is_active(self, user: User) -> bool:
         return True # Implement logic for user activation status if needed
 

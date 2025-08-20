@@ -115,9 +115,10 @@ export const register = async (userData: UserRegistrationData): Promise<AuthResp
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Error en el registro');
+      throw new Error(data.detail || data.message || 'Error en el registro');
     }
 
+    // El backend devuelve { token, token_type, user }
     const { user, token } = data;
 
     // Guardar token y datos del usuario
@@ -145,9 +146,10 @@ export const login = async (loginData: UserLoginData): Promise<AuthResponse> => 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Error en el inicio de sesión');
+      throw new Error(data.detail || data.message || 'Error en el inicio de sesión');
     }
 
+    // El backend devuelve { token, token_type, user }
     const { user, token } = data;
 
     // Guardar token y datos del usuario
@@ -267,10 +269,15 @@ export const refreshToken = async (): Promise<string | null> => {
 
     if (response.ok) {
       const data = await response.json();
+      // El backend devuelve { token, token_type, user }
       const newToken = data.token;
+      const user = data.user;
       
       if (newToken) {
         await saveToken(newToken);
+        if (user) {
+          await saveUser(user);
+        }
         return newToken;
       }
     }
