@@ -4,6 +4,4 @@ credentials-file: /etc/cloudflared/creds.json
 ingress:
   - hostname: backend.datqbox.online
     service: http://fastapi_backend:8000
-  - hostname: boxdoctor.datqbox.online
-    service: http://nginx:80
   - service: http_status:404

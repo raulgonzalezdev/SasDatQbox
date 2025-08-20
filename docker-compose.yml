@@ -1,23 +1,23 @@
 # docker-compose.yml
 services:
-  # Servicio del Frontend (Next.js)
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: frontend-production
-      args:
-        # Pasar la URL de la API como argumento en tiempo de construcción
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    restart: always
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-    networks:
-      - app-network
-    depends_on:
-      - fastapi_backend
+  # # Servicio del Frontend (Next.js)
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: frontend-production
+  #     args:
+  #       # Pasar la URL de la API como argumento en tiempo de construcción
+  #       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+  #   restart: always
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+  #     - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - fastapi_backend
 
   # Servicio del Backend (FastAPI)
   fastapi_backend:
@@ -48,19 +48,19 @@ services:
     networks:
       - app-network
 
-  # Nginx como proxy inverso
-  nginx:
-    image: nginx:alpine
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-    depends_on:
-      - app
-      - fastapi_backend
-    networks:
-      - app-network
+  # # Nginx como proxy inverso
+  # nginx:
+  #   image: nginx:alpine
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx/conf.d:/etc/nginx/conf.d
+  #   depends_on:
+  #     - app
+  #     - fastapi_backend
+  #   networks:
+  #     - app-network
 
   # Cloudflare Tunnel
   cloudflared:
@@ -72,7 +72,6 @@ services:
       - ./config.yml:/etc/cloudflared/config.yml
     depends_on:
       - fastapi_backend
-      - nginx
     networks:
       - app-network
 
