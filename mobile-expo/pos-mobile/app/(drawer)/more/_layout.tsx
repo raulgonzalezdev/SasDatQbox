@@ -2,12 +2,8 @@ import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/GlobalStyles';
 import { DrawerToggleButton } from '@react-navigation/drawer';
-import { useAppStore } from '@/store/appStore';
 
 export default function DrawerLayout() {
-  const { user } = useAppStore();
-  const isDoctor = user?.role === 'doctor';
-
   return (
     <Drawer
       screenOptions={{
@@ -34,15 +30,6 @@ export default function DrawerLayout() {
           title: 'Inicio',
           headerShown: false,
           drawerIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />
-        }} 
-      />
-      
-      <Drawer.Screen 
-        name="more" 
-        options={{ 
-          title: 'Más Opciones',
-          headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} />
         }} 
       />
       

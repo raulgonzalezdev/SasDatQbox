@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,112 +10,66 @@ import { useAppStore } from '@/store/appStore';
 
 export default function ChatScreen() {
   const { user } = useAppStore();
-  const isDoctor = user?.role === 'doctor';
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Datos simulados de conversaciones
   const conversations = [
     {
       id: '1',
-      name: 'María González',
-      lastMessage: 'Hola doctor, tengo una pregunta sobre mi medicación',
-      timestamp: '09:30',
+      name: 'Dr. María González',
+      lastMessage: 'Hola, ¿cómo te sientes hoy?',
+      timestamp: '10:30',
       unreadCount: 2,
       avatar: 'MG',
       isOnline: true,
-      type: 'patient',
     },
     {
       id: '2',
-      name: 'Dr. Carlos Rodríguez',
-      lastMessage: 'Perfecto, te envío la receta actualizada',
-      timestamp: 'Ayer',
+      name: 'Dr. Juan Pérez',
+      lastMessage: 'Te envío los resultados del análisis',
+      timestamp: '09:15',
       unreadCount: 0,
-      avatar: 'CR',
+      avatar: 'JP',
       isOnline: false,
-      type: 'doctor',
     },
     {
       id: '3',
-      name: 'Juan Pérez',
-      lastMessage: '¿Cuándo puedo agendar mi próxima cita?',
-      timestamp: '10:15',
-      unreadCount: 1,
-      avatar: 'JP',
-      isOnline: true,
-      type: 'patient',
-    },
-    {
-      id: '4',
       name: 'Soporte Técnico',
-      lastMessage: 'Hemos resuelto el problema con tu cuenta',
-      timestamp: 'Lun',
-      unreadCount: 0,
+      lastMessage: 'Tu consulta ha sido resuelta',
+      timestamp: 'Ayer',
+      unreadCount: 1,
       avatar: 'ST',
       isOnline: true,
-      type: 'support',
     },
   ];
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const getAvatarColor = (type: string) => {
-    switch (type) {
-      case 'doctor':
-        return Colors.secondary;
-      case 'patient':
-        return Colors.primary;
-      case 'support':
-        return Colors.info;
-      default:
-        return Colors.darkGray;
-    }
+  const formatTimestamp = (timestamp: string) => {
+    if (timestamp === 'Ayer') return timestamp;
+    return timestamp;
   };
 
   return (
     <SafeAreaView style={CommonStyles.safeArea}>
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
+
       <ThemedView style={CommonStyles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <ThemedText style={styles.headerTitle}>Chat</ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              {isDoctor ? 'Conversaciones con pacientes' : 'Conversaciones con doctores'}
-            </ThemedText>
-          </View>
-          <TouchableOpacity 
-            style={styles.newChatButton}
-            onPress={() => router.push('/new-chat')}
-          >
-            <Ionicons name="add" size={24} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
-
         <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Barra de búsqueda */}
-          <View style={styles.searchSection}>
-            <View style={styles.searchContainer}>
-              <Ionicons name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar conversaciones..."
-                placeholderTextColor={Colors.darkGray}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color={Colors.darkGray} />
-                </TouchableOpacity>
-              )}
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <ThemedText style={styles.headerTitle}>Chat</ThemedText>
+              <ThemedText style={styles.headerSubtitle}>
+                Comunícate con tu equipo médico
+              </ThemedText>
             </View>
+            <TouchableOpacity 
+              style={styles.newChatButton}
+              onPress={() => router.push('/(drawer)/more/chat')}
+            >
+              <Ionicons name="add" size={24} color={Colors.white} />
+            </TouchableOpacity>
           </View>
 
-          {/* Estadísticas rápidas */}
+          {/* Estadísticas */}
           <View style={styles.statsSection}>
             <View style={styles.statCard}>
               <Ionicons name="chatbubbles" size={24} color={Colors.primary} />
@@ -125,12 +79,12 @@ export default function ChatScreen() {
             <View style={styles.statCard}>
               <Ionicons name="mail-unread" size={24} color={Colors.warning} />
               <ThemedText style={styles.statNumber}>
-                {conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)}
+                {conversations.reduce((total, conv) => total + conv.unreadCount, 0)}
               </ThemedText>
-              <ThemedText style={styles.statLabel}>Mensajes Nuevos</ThemedText>
+              <ThemedText style={styles.statLabel}>Mensajes Sin Leer</ThemedText>
             </View>
             <View style={styles.statCard}>
-              <Ionicons name="radio-button-on" size={24} color={Colors.success} />
+              <Ionicons name="people" size={24} color={Colors.success} />
               <ThemedText style={styles.statNumber}>
                 {conversations.filter(conv => conv.isOnline).length}
               </ThemedText>
@@ -142,86 +96,91 @@ export default function ChatScreen() {
           <View style={styles.conversationsSection}>
             <ThemedText style={styles.sectionTitle}>Conversaciones Recientes</ThemedText>
             
-            {filteredConversations.length === 0 ? (
+            {conversations.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="chatbubbles-outline" size={64} color={Colors.darkGray} />
-                <ThemedText style={styles.emptyTitle}>
-                  {searchQuery ? 'No se encontraron conversaciones' : 'No hay conversaciones'}
-                </ThemedText>
+                <ThemedText style={styles.emptyTitle}>No hay conversaciones</ThemedText>
                 <ThemedText style={styles.emptySubtitle}>
-                  {searchQuery 
-                    ? 'Intenta con otros términos de búsqueda'
-                    : isDoctor 
-                      ? 'Los pacientes podrán iniciar conversaciones contigo'
-                      : 'Inicia una conversación con tu doctor'
-                  }
+                  Inicia una conversación con tu equipo médico
                 </ThemedText>
-                {!searchQuery && (
-                  <TouchableOpacity 
-                    style={styles.emptyButton}
-                    onPress={() => router.push('/new-chat')}
-                  >
-                    <ThemedText style={styles.emptyButtonText}>
-                      {isDoctor ? 'Ver Pacientes' : 'Nueva Conversación'}
-                    </ThemedText>
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity 
+                  style={styles.emptyButton}
+                  onPress={() => router.push('/(drawer)/more/chat')}
+                >
+                  <ThemedText style={styles.emptyButtonText}>
+                    Nuevo Chat
+                  </ThemedText>
+                </TouchableOpacity>
               </View>
             ) : (
-              filteredConversations.map((conversation) => (
+              conversations.map((conversation) => (
                 <TouchableOpacity
                   key={conversation.id}
                   style={styles.conversationCard}
                   onPress={() => router.push(`/chat/${conversation.id}`)}
                 >
-                  <View style={styles.conversationHeader}>
-                    <View style={styles.avatarContainer}>
-                      <View style={[styles.avatar, { backgroundColor: conversation.avatarColor }]}>
-                        <ThemedText style={styles.avatarText}>
-                          {conversation.name.charAt(0).toUpperCase()}
-                        </ThemedText>
-                      </View>
-                      {conversation.isOnline && <View style={styles.onlineIndicator} />}
+                  <View style={styles.avatarContainer}>
+                    <View style={styles.avatar}>
+                      <ThemedText style={styles.avatarText}>{conversation.avatar}</ThemedText>
                     </View>
-                    <View style={styles.conversationInfo}>
-                      <View style={styles.conversationHeaderRow}>
-                        <ThemedText style={styles.conversationName}>{conversation.name}</ThemedText>
-                        <ThemedText style={styles.conversationTime}>{conversation.lastMessageTime}</ThemedText>
-                      </View>
-                      <View style={styles.conversationSubheader}>
-                        <ThemedText style={styles.conversationType}>{conversation.type}</ThemedText>
-                        {conversation.unreadCount > 0 && (
-                          <View style={styles.unreadBadge}>
-                            <ThemedText style={styles.unreadCount}>{conversation.unreadCount}</ThemedText>
-                          </View>
-                        )}
-                      </View>
-                    </View>
+                    {conversation.isOnline && (
+                      <View style={styles.onlineIndicator} />
+                    )}
                   </View>
                   
                   <View style={styles.conversationContent}>
-                    <ThemedText style={styles.lastMessage} numberOfLines={2}>
-                      {conversation.lastMessage}
-                    </ThemedText>
+                    <View style={styles.conversationHeader}>
+                      <ThemedText style={styles.conversationName}>{conversation.name}</ThemedText>
+                      <ThemedText style={styles.timestamp}>
+                        {formatTimestamp(conversation.timestamp)}
+                      </ThemedText>
+                    </View>
+                    
+                    <View style={styles.conversationFooter}>
+                      <ThemedText style={styles.lastMessage} numberOfLines={1}>
+                        {conversation.lastMessage}
+                      </ThemedText>
+                      {conversation.unreadCount > 0 && (
+                        <View style={styles.unreadBadge}>
+                          <ThemedText style={styles.unreadCount}>
+                            {conversation.unreadCount}
+                          </ThemedText>
+                        </View>
+                      )}
+                    </View>
                   </View>
                   
                   <View style={styles.conversationActions}>
                     <TouchableOpacity style={styles.actionButton}>
                       <Ionicons name="call" size={20} color={Colors.info} />
-                      <ThemedText style={styles.actionText}>Llamar</ThemedText>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="videocam" size={20} color={Colors.success} />
-                      <ThemedText style={styles.actionText}>Video</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="ellipsis-vertical" size={20} color={Colors.darkGray} />
-                      <ThemedText style={styles.actionText}>Más</ThemedText>
+                      <Ionicons name="videocam" size={20} color={Colors.secondary} />
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
               ))
             )}
+          </View>
+
+          {/* Acciones rápidas */}
+          <View style={styles.quickActionsSection}>
+            <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
+            <View style={styles.quickActionsGrid}>
+              <TouchableOpacity style={styles.quickActionCard}>
+                <View style={[styles.quickActionIcon, { backgroundColor: Colors.primary }]}>
+                  <Ionicons name="medical" size={24} color={Colors.white} />
+                </View>
+                <ThemedText style={styles.quickActionTitle}>Consulta Médica</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.quickActionCard}>
+                <View style={[styles.quickActionIcon, { backgroundColor: Colors.secondary }]}>
+                  <Ionicons name="help-circle" size={24} color={Colors.white} />
+                </View>
+                <ThemedText style={styles.quickActionTitle}>Soporte</ThemedText>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </ThemedView>
@@ -259,30 +218,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchSection: {
-    marginBottom: Spacing.lg,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    ...BordersAndShadows.shadows.sm,
-  },
-  searchIcon: {
-    marginRight: Spacing.md,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: Typography.fontSizes.md,
-    color: Colors.dark,
-  },
   statsSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   statCard: {
     flex: 1,
@@ -312,6 +252,7 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.bold,
     color: Colors.dark,
     marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
   },
   emptyState: {
     alignItems: 'center',
@@ -344,13 +285,15 @@ const styles = StyleSheet.create({
   },
   conversationCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.white,
     borderRadius: BordersAndShadows.borderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
+    marginHorizontal: Spacing.lg,
     ...BordersAndShadows.shadows.sm,
   },
-  conversationAvatar: {
+  avatarContainer: {
     position: 'relative',
     marginRight: Spacing.md,
   },
@@ -358,6 +301,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -391,8 +335,8 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.bold,
     color: Colors.dark,
   },
-  conversationTime: {
-    fontSize: Typography.fontSizes.xs,
+  timestamp: {
+    fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
   },
   conversationFooter: {
@@ -406,38 +350,44 @@ const styles = StyleSheet.create({
     color: Colors.darkGray,
     marginRight: Spacing.sm,
   },
-  unreadMessage: {
-    color: Colors.dark,
-    fontWeight: Typography.fontWeights.medium,
-  },
   unreadBadge: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.circle,
+    backgroundColor: Colors.warning,
+    borderRadius: 10,
     minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: Spacing.xs,
   },
   unreadCount: {
     color: Colors.white,
     fontSize: Typography.fontSizes.xs,
     fontWeight: Typography.fontWeights.bold,
   },
+  conversationActions: {
+    marginLeft: Spacing.md,
+  },
+  actionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
   quickActionsSection: {
     marginBottom: Spacing.xl,
   },
   quickActionsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
   },
   quickActionCard: {
     width: '48%',
     backgroundColor: Colors.white,
-    padding: Spacing.lg,
     borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
     alignItems: 'center',
     ...BordersAndShadows.shadows.sm,
   },
@@ -447,12 +397,12 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
-  quickActionText: {
+  quickActionTitle: {
     fontSize: Typography.fontSizes.sm,
-    color: Colors.dark,
     fontWeight: Typography.fontWeights.medium,
+    color: Colors.dark,
     textAlign: 'center',
   },
 });

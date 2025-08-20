@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -12,16 +12,6 @@ export default function HomeScreen() {
   const { user } = useAppStore();
   const isDoctor = user?.role === 'doctor';
 
-  const getUserDisplayName = () => {
-    if (!user) return 'Usuario';
-    if (user.first_name && user.last_name) {
-      return `${user.first_name} ${user.last_name}`;
-    }
-    if (user.first_name) return user.first_name;
-    if (user.last_name) return user.last_name;
-    return user.email.split('@')[0];
-  };
-
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Buenos días';
@@ -29,205 +19,131 @@ export default function HomeScreen() {
     return 'Buenas noches';
   };
 
-  const quickActions = isDoctor ? [
+  const summaryCards = [
     {
-      id: 'appointments',
-      title: 'Ver Citas',
-      subtitle: 'Gestionar citas del día',
+      id: 'next_appointment',
+      title: 'Próxima Cita',
+      value: 'Mañana',
       icon: 'calendar',
       color: Colors.primary,
-      onPress: () => router.push('/(tabs)/appointments'),
+      route: '/(drawer)/more/appointments',
     },
     {
-      id: 'patients',
-      title: 'Pacientes',
-      subtitle: 'Gestionar pacientes',
-      icon: 'people',
-      color: Colors.secondary,
-      onPress: () => router.push('/(tabs)/patients'),
-    },
-    {
-      id: 'chat',
-      title: 'Chat',
-      subtitle: 'Mensajes pendientes',
-      icon: 'chatbubbles',
-      color: Colors.info,
-      onPress: () => router.push('/(tabs)/chat'),
-    },
-    {
-      id: 'prescriptions',
-      title: 'Recetas',
-      subtitle: 'Crear prescripciones',
-      icon: 'medical',
-      color: Colors.success,
-      onPress: () => router.push('/prescriptions'),
-    },
-  ] : [
-    {
-      id: 'appointments',
-      title: 'Mis Citas',
-      subtitle: 'Ver próximas citas',
-      icon: 'calendar',
-      color: Colors.primary,
-      onPress: () => router.push('/(tabs)/appointments'),
-    },
-    {
-      id: 'book',
-      title: 'Agendar Cita',
-      subtitle: 'Reservar nueva cita',
-      icon: 'add-circle',
-      color: Colors.secondary,
-      onPress: () => router.push('/book-appointment'),
-    },
-    {
-      id: 'chat',
-      title: 'Chat',
-      subtitle: 'Hablar con mi doctor',
-      icon: 'chatbubbles',
-      color: Colors.info,
-      onPress: () => router.push('/(tabs)/chat'),
-    },
-    {
-      id: 'history',
-      title: 'Historial',
-      subtitle: 'Ver mi historial médico',
-      icon: 'document-text',
-      color: Colors.success,
-      onPress: () => router.push('/medical-history'),
-    },
-  ];
-
-  const stats = isDoctor ? [
-    {
-      id: 'today',
-      title: 'Hoy',
-      value: '5',
-      icon: 'calendar',
-      color: Colors.primary,
-    },
-    {
-      id: 'total',
-      title: 'Total',
-      value: '23',
-      icon: 'checkmark-circle',
-      color: Colors.success,
-    },
-    {
-      id: 'patients',
-      title: 'Pacientes',
-      value: '12',
-      icon: 'people',
-      color: Colors.info,
-    },
-    {
-      id: 'prescriptions',
-      title: 'Recetas',
-      value: '8',
-      icon: 'document-text',
-      color: Colors.warning,
-    },
-  ] : [
-    {
-      id: 'next',
-      title: 'Mañana',
-      value: 'Próxima Cita',
-      icon: 'calendar',
-      color: Colors.primary,
-    },
-    {
-      id: 'total',
+      id: 'total_appointments',
       title: 'Citas Totales',
       value: '15',
       icon: 'checkmark-circle',
       color: Colors.success,
+      route: '/(drawer)/more/appointments',
     },
     {
-      id: 'doctors',
-      title: 'Doctores',
+      id: 'new_patients',
+      title: 'Nuevos Pacientes',
       value: '3',
+      icon: 'person-add',
+      color: Colors.info,
+      route: '/(drawer)/more/patients',
+    },
+    {
+      id: 'unread_messages',
+      title: 'Mensajes Sin Leer',
+      value: '2',
+      icon: 'chatbubbles',
+      color: Colors.warning,
+      route: '/(tabs)/chat',
+    },
+    {
+      id: 'premium_features',
+      title: 'Funciones Premium',
+      value: 'Explorar',
       icon: 'star',
       color: Colors.info,
+      route: '/(drawer)/more/explore',
     },
     {
-      id: 'prescriptions',
-      title: 'Recetas',
-      value: '8',
+      id: 'profile_completion',
+      title: 'Perfil Completo',
+      value: '80%',
       icon: 'document-text',
       color: Colors.warning,
+      route: '/(drawer)/more/profile',
     },
   ];
+
+  const quickActions = [
+    {
+      id: 'my_appointments',
+      title: 'Mis Citas',
+      subtitle: 'Ver próximas citas',
+      icon: 'calendar',
+      color: Colors.primary,
+      route: '/(drawer)/more/appointments',
+    },
+    {
+      id: 'schedule_appointment',
+      title: 'Agendar Cita',
+      subtitle: 'Reservar nueva cita',
+      icon: 'add-circle',
+      color: Colors.info,
+      route: '/(drawer)/more/appointments',
+    },
+  ];
+
+  const handleCardPress = (route: string) => {
+    router.push(route as any);
+  };
 
   return (
     <SafeAreaView style={CommonStyles.safeArea}>
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
+
       <ThemedView style={CommonStyles.container}>
         <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerContent}>
-              <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
-              <ThemedText style={styles.userName}>{getUserDisplayName()}</ThemedText>
-              <ThemedText style={styles.userRole}>
-                {isDoctor ? 'Doctor' : 'Paciente'}
-              </ThemedText>
-            </View>
-            <TouchableOpacity 
-              style={styles.profileButton}
-              onPress={() => router.push('/(tabs)/profile')}
-            >
-              <Ionicons name="person-circle" size={48} color={Colors.secondary} />
-            </TouchableOpacity>
+          {/* Saludo */}
+          <View style={styles.greetingSection}>
+            <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
+            <ThemedText style={styles.userName}>{`${user?.first_name || 'Usuario'} ${user?.last_name || ''}`}</ThemedText>
           </View>
 
-          {/* Estadísticas */}
-          <View style={styles.statsSection}>
-            <ThemedText style={styles.sectionTitle}>
-              {isDoctor ? 'Resumen del Día' : 'Mi Resumen'}
-            </ThemedText>
-            <View style={styles.statsGrid}>
-              {stats.map((stat) => (
-                <View key={stat.id} style={styles.statCard}>
-                  <View style={[styles.statIcon, { backgroundColor: stat.color }]}>
-                    <Ionicons name={stat.icon as any} size={24} color={Colors.white} />
-                  </View>
-                  <ThemedText style={styles.statValue}>{stat.value}</ThemedText>
-                  <ThemedText style={styles.statTitle}>{stat.title}</ThemedText>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Acciones Rápidas */}
-          <View style={styles.actionsSection}>
-            <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
-            <View style={styles.actionsGrid}>
-              {quickActions.map((action) => (
+          {/* Mi Resumen */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Mi Resumen</ThemedText>
+            <View style={styles.summaryGrid}>
+              {summaryCards.map((card) => (
                 <TouchableOpacity
-                  key={action.id}
-                  style={styles.actionCard}
-                  onPress={action.onPress}
+                  key={card.id}
+                  style={styles.summaryCard}
+                  onPress={() => handleCardPress(card.route)}
                 >
-                  <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
-                    <Ionicons name={action.icon as any} size={28} color={Colors.white} />
+                  <View style={[styles.summaryIcon, { backgroundColor: card.color }]}>
+                    <Ionicons name={card.icon as any} size={24} color={Colors.white} />
                   </View>
-                  <ThemedText style={styles.actionTitle}>{action.title}</ThemedText>
-                  <ThemedText style={styles.actionSubtitle}>{action.subtitle}</ThemedText>
+                  <ThemedText style={styles.summaryTitle}>{card.title}</ThemedText>
+                  <ThemedText style={styles.summaryValue}>{card.value}</ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
 
-          {/* Información Adicional */}
-          <View style={styles.infoSection}>
-            <View style={styles.infoCard}>
-              <Ionicons name="shield-checkmark" size={24} color={Colors.success} />
-              <View style={styles.infoContent}>
-                <ThemedText style={styles.infoTitle}>Tu información está segura</ThemedText>
-                <ThemedText style={styles.infoText}>
-                  Todos tus datos médicos están protegidos con encriptación de nivel bancario.
-                </ThemedText>
-              </View>
+          {/* Acciones Rápidas */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
+            <View style={styles.quickActionsGrid}>
+              {quickActions.map((action) => (
+                <TouchableOpacity
+                  key={action.id}
+                  style={styles.quickActionCard}
+                  onPress={() => handleCardPress(action.route)}
+                >
+                  <View style={[styles.quickActionIcon, { backgroundColor: action.color }]}>
+                    <Ionicons name={action.icon as any} size={24} color={Colors.white} />
+                  </View>
+                  <View style={styles.quickActionContent}>
+                    <ThemedText style={styles.quickActionTitle}>{action.title}</ThemedText>
+                    <ThemedText style={styles.quickActionSubtitle}>{action.subtitle}</ThemedText>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         </ScrollView>
@@ -237,140 +153,96 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  headerContent: {
-    flex: 1,
+  greetingSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
   },
   greeting: {
-    fontSize: Typography.fontSizes.md,
-    color: Colors.darkGray,
-    marginBottom: Spacing.xs,
-  },
-  userName: {
-    fontSize: Typography.fontSizes.xxl,
-    fontWeight: Typography.fontWeights.bold,
+    fontSize: Typography.fontSizes.xl,
+    fontWeight: 'bold' as const,
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
-  userRole: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.secondary,
-    fontWeight: Typography.fontWeights.medium,
+  userName: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
   },
-  profileButton: {
-    padding: Spacing.xs,
-  },
-  statsSection: {
+  section: {
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
     fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
+    fontWeight: 'bold' as const,
     color: Colors.dark,
     marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
   },
-  statsGrid: {
+  summaryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
   },
-  statCard: {
+  summaryCard: {
     width: '48%',
     backgroundColor: Colors.white,
-    padding: Spacing.lg,
     borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
     alignItems: 'center',
-    ...BordersAndShadows.shadows.md,
+    ...BordersAndShadows.shadows.sm,
   },
-  statIcon: {
+  summaryIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
-  statValue: {
-    fontSize: Typography.fontSizes.xl,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-    marginBottom: Spacing.xs,
-  },
-  statTitle: {
+  summaryTitle: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
     textAlign: 'center',
-  },
-  actionsSection: {
-    marginBottom: Spacing.xl,
-  },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: Spacing.md,
-  },
-  actionCard: {
-    width: '48%',
-    backgroundColor: Colors.white,
-    padding: Spacing.lg,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    alignItems: 'center',
-    ...BordersAndShadows.shadows.md,
-  },
-  actionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  actionTitle: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-    textAlign: 'center',
     marginBottom: Spacing.xs,
   },
-  actionSubtitle: {
-    fontSize: Typography.fontSizes.xs,
-    color: Colors.darkGray,
+  summaryValue: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: 'bold' as const,
+    color: Colors.dark,
     textAlign: 'center',
-    lineHeight: 14,
   },
-  infoSection: {
-    marginBottom: Spacing.xl,
+  quickActionsGrid: {
+    paddingHorizontal: Spacing.lg,
   },
-  infoCard: {
+  quickActionCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    padding: Spacing.lg,
-    borderRadius: BordersAndShadows.borderRadius.lg,
     alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
     ...BordersAndShadows.shadows.sm,
   },
-  infoContent: {
-    flex: 1,
-    marginLeft: Spacing.md,
+  quickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
   },
-  infoTitle: {
+  quickActionContent: {
+    flex: 1,
+  },
+  quickActionTitle: {
     fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold,
+    fontWeight: 'bold' as const,
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
-  infoText: {
+  quickActionSubtitle: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
-    lineHeight: 18,
   },
 });
-
-

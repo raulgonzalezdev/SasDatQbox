@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,40 +10,32 @@ import { useAppStore } from '@/store/appStore';
 
 export default function AppointmentsScreen() {
   const { user } = useAppStore();
-  const isDoctor = user?.role === 'doctor';
-  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Datos simulados de citas
   const appointments = [
     {
       id: '1',
       patientName: 'María González',
-      doctorName: 'Dr. Carlos Rodríguez',
       date: '2024-01-15',
-      time: '09:00',
+      time: '10:00',
       type: 'Consulta General',
       status: 'confirmed',
-      duration: 30,
     },
     {
       id: '2',
       patientName: 'Juan Pérez',
-      doctorName: 'Dr. Ana Martínez',
       date: '2024-01-15',
-      time: '10:30',
-      type: 'Control',
+      time: '11:30',
+      type: 'Revisión',
       status: 'pending',
-      duration: 45,
     },
     {
       id: '3',
       patientName: 'Laura Silva',
-      doctorName: 'Dr. Carlos Rodríguez',
-      date: '2024-01-15',
-      time: '14:00',
-      type: 'Primera Vez',
+      date: '2024-01-16',
+      time: '09:00',
+      type: 'Consulta General',
       status: 'confirmed',
-      duration: 60,
     },
   ];
 
@@ -83,73 +75,34 @@ export default function AppointmentsScreen() {
     });
   };
 
-  const formatTime = (time: string) => {
-    return time;
-  };
-
   return (
     <SafeAreaView style={CommonStyles.safeArea}>
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
+
       <ThemedView style={CommonStyles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <ThemedText style={styles.headerTitle}>
-              {isDoctor ? 'Citas del Día' : 'Mis Citas'}
-            </ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              {formatDate(selectedDate.toISOString().split('T')[0])}
-            </ThemedText>
-          </View>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/book-appointment')}
-          >
-            <Ionicons name="add" size={24} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
-
         <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Filtros */}
-          <View style={styles.filtersSection}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <TouchableOpacity style={[styles.filterChip, styles.filterChipActive]}>
-                <ThemedText style={[styles.filterChipText, styles.filterChipTextActive]}>
-                  Hoy
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterChip}>
-                <ThemedText style={styles.filterChipText}>
-                  Mañana
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterChip}>
-                <ThemedText style={styles.filterChipText}>
-                  Esta Semana
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.filterChip}>
-                <ThemedText style={styles.filterChipText}>
-                  Próximo Mes
-                </ThemedText>
-              </TouchableOpacity>
-            </ScrollView>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <ThemedText style={styles.headerTitle}>Citas</ThemedText>
+              <ThemedText style={styles.headerSubtitle}>
+                Gestiona tus citas médicas
+              </ThemedText>
+            </View>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => router.push('/(drawer)/more/appointments')}
+            >
+              <Ionicons name="add" size={24} color={Colors.white} />
+            </TouchableOpacity>
           </View>
 
-          {/* Estadísticas rápidas */}
+          {/* Estadísticas */}
           <View style={styles.statsSection}>
             <View style={styles.statCard}>
               <Ionicons name="calendar" size={24} color={Colors.primary} />
               <ThemedText style={styles.statNumber}>{appointments.length}</ThemedText>
-              <ThemedText style={styles.statLabel}>Citas Hoy</ThemedText>
-            </View>
-            <View style={styles.statCard}>
-              <Ionicons name="time" size={24} color={Colors.warning} />
-              <ThemedText style={styles.statNumber}>
-                {appointments.filter(a => a.status === 'pending').length}
-              </ThemedText>
-              <ThemedText style={styles.statLabel}>Pendientes</ThemedText>
+              <ThemedText style={styles.statLabel}>Total Citas</ThemedText>
             </View>
             <View style={styles.statCard}>
               <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
@@ -158,28 +111,32 @@ export default function AppointmentsScreen() {
               </ThemedText>
               <ThemedText style={styles.statLabel}>Confirmadas</ThemedText>
             </View>
+            <View style={styles.statCard}>
+              <Ionicons name="time" size={24} color={Colors.warning} />
+              <ThemedText style={styles.statNumber}>
+                {appointments.filter(a => a.status === 'pending').length}
+              </ThemedText>
+              <ThemedText style={styles.statLabel}>Pendientes</ThemedText>
+            </View>
           </View>
 
           {/* Lista de citas */}
           <View style={styles.appointmentsSection}>
-            <ThemedText style={styles.sectionTitle}>Citas Programadas</ThemedText>
+            <ThemedText style={styles.sectionTitle}>Próximas Citas</ThemedText>
             
             {appointments.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="calendar-outline" size={64} color={Colors.darkGray} />
                 <ThemedText style={styles.emptyTitle}>No hay citas programadas</ThemedText>
                 <ThemedText style={styles.emptySubtitle}>
-                  {isDoctor 
-                    ? 'No tienes citas programadas para hoy'
-                    : 'No tienes citas programadas. ¡Agenda una ahora!'
-                  }
+                  Agenda tu primera cita médica
                 </ThemedText>
                 <TouchableOpacity 
                   style={styles.emptyButton}
-                  onPress={() => router.push('/book-appointment')}
+                  onPress={() => router.push('/(drawer)/more/appointments')}
                 >
                   <ThemedText style={styles.emptyButtonText}>
-                    {isDoctor ? 'Ver Calendario' : 'Agendar Cita'}
+                    Agendar Cita
                   </ThemedText>
                 </TouchableOpacity>
               </View>
@@ -191,13 +148,9 @@ export default function AppointmentsScreen() {
                   onPress={() => router.push(`/appointment/${appointment.id}`)}
                 >
                   <View style={styles.appointmentHeader}>
-                    <View style={styles.appointmentTime}>
-                      <ThemedText style={styles.timeText}>
-                        {formatTime(appointment.time)}
-                      </ThemedText>
-                      <ThemedText style={styles.durationText}>
-                        {appointment.duration} min
-                      </ThemedText>
+                    <View style={styles.appointmentInfo}>
+                      <ThemedText style={styles.patientName}>{appointment.patientName}</ThemedText>
+                      <ThemedText style={styles.appointmentType}>{appointment.type}</ThemedText>
                     </View>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(appointment.status) }]}>
                       <ThemedText style={styles.statusText}>
@@ -206,32 +159,30 @@ export default function AppointmentsScreen() {
                     </View>
                   </View>
                   
-                  <View style={styles.appointmentContent}>
-                    <ThemedText style={styles.patientName}>
-                      {isDoctor ? appointment.patientName : appointment.doctorName}
-                    </ThemedText>
-                    <ThemedText style={styles.appointmentType}>
-                      {appointment.type}
-                    </ThemedText>
-                    {!isDoctor && (
-                      <ThemedText style={styles.doctorName}>
-                        {appointment.doctorName}
+                  <View style={styles.appointmentDetails}>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="calendar-outline" size={16} color={Colors.darkGray} />
+                      <ThemedText style={styles.detailText}>
+                        {formatDate(appointment.date)}
                       </ThemedText>
-                    )}
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="time-outline" size={16} color={Colors.darkGray} />
+                      <ThemedText style={styles.detailText}>
+                        {appointment.time}
+                      </ThemedText>
+                    </View>
                   </View>
                   
                   <View style={styles.appointmentActions}>
                     <TouchableOpacity style={styles.actionButton}>
                       <Ionicons name="chatbubble" size={20} color={Colors.secondary} />
-                      <ThemedText style={styles.actionText}>Chat</ThemedText>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionButton}>
                       <Ionicons name="call" size={20} color={Colors.info} />
-                      <ThemedText style={styles.actionText}>Llamar</ThemedText>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionButton}>
-                      <Ionicons name="videocam" size={20} color={Colors.success} />
-                      <ThemedText style={styles.actionText}>Video</ThemedText>
+                      <Ionicons name="medical" size={20} color={Colors.success} />
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
@@ -274,34 +225,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  filtersSection: {
-    marginBottom: Spacing.lg,
-  },
-  filterChip: {
-    backgroundColor: Colors.white,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-    marginRight: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.lightGray,
-  },
-  filterChipActive: {
-    backgroundColor: Colors.secondary,
-    borderColor: Colors.secondary,
-  },
-  filterChipText: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-    fontWeight: Typography.fontWeights.medium,
-  },
-  filterChipTextActive: {
-    color: Colors.white,
-  },
   statsSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   statCard: {
     flex: 1,
@@ -331,6 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.bold,
     color: Colors.dark,
     marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
   },
   emptyState: {
     alignItems: 'center',
@@ -366,38 +295,17 @@ const styles = StyleSheet.create({
     borderRadius: BordersAndShadows.borderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
-    ...BordersAndShadows.shadows.md,
+    marginHorizontal: Spacing.lg,
+    ...BordersAndShadows.shadows.sm,
   },
   appointmentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
-  appointmentTime: {
-    alignItems: 'flex-start',
-  },
-  timeText: {
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-  },
-  durationText: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-  },
-  statusBadge: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-  },
-  statusText: {
-    fontSize: Typography.fontSizes.xs,
-    color: Colors.white,
-    fontWeight: Typography.fontWeights.bold,
-  },
-  appointmentContent: {
-    marginBottom: Spacing.md,
+  appointmentInfo: {
+    flex: 1,
   },
   patientName: {
     fontSize: Typography.fontSizes.md,
@@ -407,28 +315,44 @@ const styles = StyleSheet.create({
   },
   appointmentType: {
     fontSize: Typography.fontSizes.sm,
-    color: Colors.secondary,
-    fontWeight: Typography.fontWeights.medium,
+    color: Colors.darkGray,
+  },
+  statusBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BordersAndShadows.borderRadius.circle,
+  },
+  statusText: {
+    fontSize: Typography.fontSizes.xs,
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold,
+  },
+  appointmentDetails: {
+    marginBottom: Spacing.sm,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: Spacing.xs,
   },
-  doctorName: {
+  detailText: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
+    marginLeft: Spacing.xs,
   },
   appointmentActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderTopWidth: 1,
     borderTopColor: Colors.lightGray,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.sm,
   },
   actionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: Spacing.sm,
-  },
-  actionText: {
-    fontSize: Typography.fontSizes.xs,
-    color: Colors.darkGray,
-    marginTop: Spacing.xs,
   },
 });
