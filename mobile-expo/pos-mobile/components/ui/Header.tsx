@@ -6,12 +6,12 @@ import i18n from '@/config/i18n';
 import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
 
 const Header = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [menuModalVisible, setMenuModalVisible] = useState(false);
 
   const changeLanguage = (lang) => {
     i18n.locale = lang;
-    setModalVisible(false);
+    setLanguageModalVisible(false);
   };
 
   const handleLogin = () => {
@@ -23,66 +23,62 @@ const Header = () => {
       <Image source={require('@/assets/images/logo-doctorbox.png')} style={styles.logo} />
 
       <View style={styles.rightContainer}>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconButton}>
-          <Ionicons name="language-outline" size={24} color={Colors.primary} />
+        <TouchableOpacity onPress={() => setLanguageModalVisible(true)} style={styles.iconButton}>
+          <Ionicons name="globe-outline" size={24} color={Colors.primary} />
+          <Text style={styles.languageText}>{i18n.locale.toUpperCase()}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleLogin} style={styles.iconButton}>
           <Ionicons name="log-in-outline" size={24} color={Colors.primary} />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconButton}>
+        <TouchableOpacity onPress={() => setMenuModalVisible(true)} style={styles.iconButton}>
           <Ionicons name="menu-outline" size={24} color={Colors.primary} />
         </TouchableOpacity>
       </View>
 
+      {/* Language Dropdown */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={languageModalVisible}
+        onRequestClose={() => setLanguageModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Select Language</Text>
-            <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('en')}>
-              <Text style={styles.languageButtonText}>English</Text>
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setLanguageModalVisible(false)}>
+          <View style={[styles.dropdown, styles.languageDropdown]}>
+            <TouchableOpacity style={styles.dropdownItem} onPress={() => changeLanguage('en')}>
+              <Text style={styles.dropdownItemText}>English</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('es')}>
-              <Text style={styles.languageButtonText}>Español</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
+            <TouchableOpacity style={styles.dropdownItem} onPress={() => changeLanguage('es')}>
+              <Text style={styles.dropdownItemText}>Español</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
 
+      {/* Menu Dropdown */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
-        visible={menuVisible}
-        onRequestClose={() => setMenuVisible(false)}
+        visible={menuModalVisible}
+        onRequestClose={() => setMenuModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#features'); }}>
-              <Text style={styles.menuItemText}>{i18n.t('Navbar.features')}</Text>
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setMenuModalVisible(false)}>
+          <View style={[styles.dropdown, styles.menuDropdown]}>
+            <TouchableOpacity style={styles.dropdownItem} onPress={() => { setMenuModalVisible(false); router.push('/#features'); }}>
+              <Text style={styles.dropdownItemText}>{i18n.t('Navbar.features')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#pricing'); }}>
-              <Text style={styles.menuItemText}>{i18n.t('Navbar.pricing')}</Text>
+            <TouchableOpacity style={styles.dropdownItem} onPress={() => { setMenuModalVisible(false); router.push('/#pricing'); }}>
+              <Text style={styles.dropdownItemText}>{i18n.t('Navbar.pricing')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#blog'); }}>
-              <Text style={styles.menuItemText}>{i18n.t('Navbar.blog')}</Text>
+            <TouchableOpacity style={styles.dropdownItem} onPress={() => { setMenuModalVisible(false); router.push('/#blog'); }}>
+              <Text style={styles.dropdownItemText}>{i18n.t('Navbar.blog')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push('/#help'); }}>
-              <Text style={styles.menuItemText}>{i18n.t('Navbar.help')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setMenuVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
+            <TouchableOpacity style={styles.dropdownItem} onPress={() => { setMenuModalVisible(false); router.push('/#help'); }}>
+              <Text style={styles.dropdownItemText}>{i18n.t('Navbar.help')}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -100,9 +96,10 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.lightGray,
   },
   logo: {
-    width: 120,
-    height: 40,
+    width: 150,
+    height: 50,
     resizeMode: 'contain',
+    marginLeft: -15,
   },
   rightContainer: {
     flexDirection: 'row',
@@ -111,62 +108,37 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  modalContainer: {
+  languageText: {
+    color: Colors.primary,
+    marginLeft: Spacing.xs,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalView: {
-    margin: Spacing.lg,
+  dropdown: {
+    position: 'absolute',
     backgroundColor: 'white',
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.xl,
-    alignItems: 'center',
+    borderRadius: BordersAndShadows.borderRadius.md,
     ...BordersAndShadows.shadows.md,
+    padding: Spacing.sm,
   },
-  modalText: {
-    marginBottom: Spacing.lg,
-    textAlign: 'center',
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
+  languageDropdown: {
+    top: 60, 
+    right: 110,
   },
-  languageButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: BordersAndShadows.borderRadius.md,
+  menuDropdown: {
+    top: 60,
+    right: 20,
+  },
+  dropdownItem: {
     padding: Spacing.md,
-    elevation: 2,
-    marginBottom: Spacing.md,
-    width: 200,
-    alignItems: 'center',
   },
-  languageButtonText: {
-    color: 'white',
-    fontWeight: Typography.fontWeights.bold,
-    textAlign: 'center',
-  },
-  closeButton: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.md,
-    padding: Spacing.md,
-    elevation: 2,
-    marginTop: Spacing.lg,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: Typography.fontWeights.bold,
-    textAlign: 'center',
-  },
-  menuItem: {
-    padding: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
-    width: '100%',
-  },
-  menuItemText: {
+  dropdownItemText: {
     fontSize: Typography.fontSizes.md,
-    textAlign: 'center',
   },
 });
 
