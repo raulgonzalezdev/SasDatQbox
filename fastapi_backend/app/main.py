@@ -18,10 +18,11 @@ print(f"CORS Origins: {settings.BACKEND_CORS_ORIGINS}")
 # Set all CORS enabled origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*datqbox\.online","http://localhost:3000"
+    allow_origins=["http://localhost:3000", "http://localhost:8081"], # Añadimos localhost para desarrollo
+    allow_origin_regex=r"https://.*\.datqbox\.online", # Mantenemos la regex para producción
     allow_credentials=True,
-    allow_methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-    allow_headers=["Authorization","Content-Type","X-Requested-With"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
 
 @app.exception_handler(StarletteHTTPException)
