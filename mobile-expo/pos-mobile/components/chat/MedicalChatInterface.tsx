@@ -42,12 +42,15 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
     incomingCall,
     isTyping,
     drafts,
+    editingMessage,
     setActiveConversation,
     addMessage,
     markMessagesAsRead,
     startCall,
     saveDraft,
     clearDraft,
+    setEditingMessage,
+    editMessage,
   } = useChatStore();
 
   const [isComposerFocused, setIsComposerFocused] = useState(false);
@@ -158,6 +161,13 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
           // Abrir media en pantalla completa
           console.log('📱 Abrir media:', media);
         }}
+        onEditMessage={(message) => {
+          setEditingMessage(message);
+        }}
+        onDeleteMessage={(messageId) => {
+          // Implementar eliminación de mensaje
+          console.log('🗑️ Eliminar mensaje:', messageId);
+        }}
       />
     );
   };
@@ -219,18 +229,20 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.fullScreenContainer}>
       {/* Header de la conversación */}
-      <ConversationHeader
-        conversation={conversation}
-        onBack={onBack}
-        onVideoCall={handleStartVideoCall}
-        onAudioCall={handleStartAudioCall}
-        onPatientInfo={() => {
-          // Navegar a información del paciente
-          console.log('👤 Ver información del paciente');
-        }}
-      />
+      <SafeAreaView style={styles.headerSafeArea}>
+        <ConversationHeader
+          conversation={conversation}
+          onBack={onBack}
+          onVideoCall={handleStartVideoCall}
+          onAudioCall={handleStartAudioCall}
+          onPatientInfo={() => {
+            // Navegar a información del paciente
+            console.log('👤 Ver información del paciente');
+          }}
+        />
+      </SafeAreaView>
 
       {/* Lista de mensajes */}
       <FlatList
@@ -253,6 +265,13 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
         draft={drafts[conversationId] || ''}
         onDraftChange={(content) => saveDraft(conversationId, content)}
         isTyping={isTyping[conversationId]?.includes(user?.id || '') || false}
+        editingMessage={editingMessage}
+        onEditMessage={(messageId, newContent) => {
+          editMessage(messageId, newContent);
+        }}
+        onCancelEdit={() => {
+          setEditingMessage(null);
+        }}
       />
 
       {/* Interfaz de videollamada */}
@@ -327,7 +346,7 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
           </View>
         </Modal>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -335,6 +354,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  fullScreenContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  headerSafeArea: {
+    backgroundColor: Colors.primary,
   },
   emptyState: {
     flex: 1,

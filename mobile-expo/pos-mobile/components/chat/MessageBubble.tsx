@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
@@ -18,6 +19,8 @@ interface MessageBubbleProps {
   isOwnMessage: boolean;
   showTimestamp: boolean;
   onMediaPress?: (media: MediaFile) => void;
+  onEditMessage?: (message: ChatMessage) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -25,6 +28,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   isOwnMessage,
   showTimestamp,
   onMediaPress,
+  onEditMessage,
+  onDeleteMessage,
 }) => {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -183,6 +188,40 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleLongPress = () => {
+    if (!isOwnMessage || message.message_type !== 'text') return;
+    
+    Alert.alert(
+      'Opciones del mensaje',
+      'Selecciona una opción:',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Editar', 
+          onPress: () => onEditMessage?.(message) 
+        },
+        { 
+          text: 'Eliminar', 
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Eliminar mensaje',
+              '¿Estás seguro de que quieres eliminar este mensaje?',
+              [
+                { text: 'Cancelar', style: 'cancel' },
+                { 
+                  text: 'Eliminar', 
+                  style: 'destructive',
+                  onPress: () => onDeleteMessage?.(message.id) 
+                }
+              ]
+            );
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={[styles.container, isOwnMessage && styles.ownMessageContainer]}>
       {showTimestamp && (
@@ -207,11 +246,15 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           </View>
         )}
         
-        <View style={[
-          styles.bubble,
-          isOwnMessage ? styles.ownBubble : styles.otherBubble,
-          message.message_type === 'prescription' && styles.prescriptionBubble,
-        ]}>
+        <TouchableOpacity
+          style={[
+            styles.bubble,
+            isOwnMessage ? styles.ownBubble : styles.otherBubble,
+            message.message_type === 'prescription' && styles.prescriptionBubble,
+          ]}
+          onLongPress={handleLongPress}
+          activeOpacity={0.8}
+        >
           {!isOwnMessage && (
             <Text style={styles.senderName}>
               {message.sender.first_name} {message.sender.last_name}
@@ -221,12 +264,22 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           {renderMessageContent()}
           
           <View style={styles.messageFooter}>
-            <Text style={[
-              styles.timeText,
-              isOwnMessage ? styles.ownTimeText : styles.otherTimeText
-            ]}>
-              {formatTime(message.created_at)}
-            </Text>
+            <View style={styles.timeContainer}>
+              {message.is_edited && (
+                <Text style={[
+                  styles.editedText,
+                  isOwnMessage ? styles.ownTimeText : styles.otherTimeText
+                ]}>
+                  editado • 
+                </Text>
+              )}
+              <Text style={[
+                styles.timeText,
+                isOwnMessage ? styles.ownTimeText : styles.otherTimeText
+              ]}>
+                {formatTime(message.created_at)}
+              </Text>
+            </View>
             
             {isOwnMessage && (
               <Ionicons
@@ -237,7 +290,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               />
             )}
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -330,6 +383,14 @@ const styles = StyleSheet.create({
   },
   readStatus: {
     marginLeft: Spacing.xs,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editedText: {
+    fontSize: Typography.fontSizes.xs - 1,
+    fontStyle: 'italic',
   },
   
   // Voice message styles

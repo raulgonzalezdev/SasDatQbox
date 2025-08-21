@@ -9,7 +9,8 @@ import { useAppStore } from '@/store/appStore';
 export default function TabLayout() {
   const { user } = useAppStore();
   const isDoctor = user?.role === 'doctor';
-  const [drawerVisible, setDrawerVisible] = useState(false); // Estado de visibilidad
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [isInChat, setIsInChat] = useState(false); // Estado de visibilidad
 
   // Opciones para el BottomDrawer
   const businessOptions = [
@@ -50,9 +51,11 @@ export default function TabLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
-        tabBar={(props) => (
-          <CustomTabBar {...props} onCenterPress={() => setDrawerVisible(true)} />
-        )}
+        tabBar={(props) => 
+          !isInChat ? (
+            <CustomTabBar {...props} onCenterPress={() => setDrawerVisible(true)} />
+          ) : null
+        }
         screenOptions={{
           headerShown: false, // Los tabs no mostrarán header individual, usarán el del drawer
         }}>
@@ -92,6 +95,7 @@ export default function TabLayout() {
             title: 'Chat',
             tabBarIconName: 'chatbubbles-outline',
           }}
+          initialParams={{ setIsInChat }}
         />
       </Tabs>
       <BottomDrawer 

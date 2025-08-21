@@ -42,6 +42,8 @@ export interface ChatMessage {
   // Para archivos médicos
   is_confidential?: boolean;
   medical_category?: 'prescription' | 'lab_result' | 'x_ray' | 'report' | 'other';
+  // Para edición
+  is_edited?: boolean;
 }
 
 export interface Conversation {
@@ -92,6 +94,7 @@ interface ChatState {
   // UI Estado
   isTyping: { [conversationId: string]: string[] }; // Array de user IDs que están escribiendo
   drafts: { [conversationId: string]: string }; // Borradores de mensajes
+  editingMessage: ChatMessage | null; // Mensaje que se está editando
   
   // Archivos
   pendingUploads: { [messageId: string]: { progress: number; file: any } };
@@ -124,6 +127,10 @@ interface ChatState {
   saveDraft: (conversationId: string, content: string) => void;
   clearDraft: (conversationId: string) => void;
   
+  // Edición de mensajes
+  setEditingMessage: (message: ChatMessage | null) => void;
+  editMessage: (messageId: string, newContent: string) => void;
+  
   // Conexión
   setConnected: (isConnected: boolean) => void;
   setLoading: (isLoading: boolean) => void;
@@ -143,6 +150,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       incomingCall: null,
       isTyping: {},
       drafts: {},
+      editingMessage: null,
       pendingUploads: {},
       
       // Implementación de acciones
@@ -272,6 +280,46 @@ export const useChatStore = create<ChatState>()((set, get) => ({
         return { drafts: newDrafts };
       }),
       
+      // Edición de mensajes
+      setEditingMessage: (message) => set({ editingMessage: message }),
+      
+      editMessage: (messageId, newContent) => set((state) => {
+        const newMessages = { ...state.messages };
+        Object.keys(newMessages).forEach(conversationId => {
+          newMessages[conversationId] = newMessages[conversationId].map(msg =>
+            msg.id === messageId 
+              ? { 
+                  ...msg, 
+                  content: newContent, 
+                  updated_at: new Date().toISOString(),
+                  is_edited: true 
+                } 
+              : msg
+          );
+        });
+        
+        // También actualizar en conversaciones si es el último mensaje
+        const conversations = state.conversations.map(conv => {
+          if (conv.last_message?.id === messageId) {
+            return {
+              ...conv,
+              last_message: {
+                ...conv.last_message,
+                content: newContent,
+                updated_at: new Date().toISOString(),
+              }
+            };
+          }
+          return conv;
+        });
+        
+        return { 
+          messages: newMessages, 
+          conversations,
+          editingMessage: null 
+        };
+      }),
+      
       // Conexión
       setConnected: (isConnected) => set({ isConnected }),
       setLoading: (isLoading) => set({ isLoading }),
@@ -287,6 +335,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
         incomingCall: null,
         isTyping: {},
         drafts: {},
+        editingMessage: null,
         pendingUploads: {},
       }),
     }));

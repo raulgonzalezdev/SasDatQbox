@@ -6,9 +6,10 @@ import { useAppStore } from '@/store/appStore';
 import { useChatStore, Conversation, getConversationById } from '@/store/chatStore';
 import { Ionicons } from '@expo/vector-icons';
 import MedicalChatInterface from '@/components/chat/MedicalChatInterface';
+import { useLocalSearchParams } from 'expo-router';
 
 // Componente principal del chat médico
-const MedicalChatView = () => {
+const MedicalChatView = ({ setIsInChat }: { setIsInChat?: (inChat: boolean) => void }) => {
     const { user } = useAppStore();
     const { conversations, setConversations, setActiveConversation, setMessages } = useChatStore();
     const [refreshing, setRefreshing] = useState(false);
@@ -203,11 +204,13 @@ const MedicalChatView = () => {
         console.log('🔄 Seleccionando conversación:', conversation.id, conversation.title);
         setSelectedConversationId(conversation.id);
         setActiveConversation(conversation);
+        setIsInChat?.(true); // Ocultar tabs cuando entramos al chat
     };
 
     const handleBackFromChat = () => {
         setSelectedConversationId(null);
         setActiveConversation(null);
+        setIsInChat?.(false); // Mostrar tabs cuando salimos del chat
     };
 
     const getOtherParticipant = (conversation: Conversation) => {
@@ -300,10 +303,12 @@ const MedicalChatView = () => {
 
 export default function ChatScreen() {
     const { user } = useAppStore();
+    const params = useLocalSearchParams();
+    const setIsInChat = params?.setIsInChat as ((inChat: boolean) => void) | undefined;
 
     return (
         <SafeAreaView style={CommonStyles.safeArea}>
-            <MedicalChatView />
+            <MedicalChatView setIsInChat={setIsInChat} />
         </SafeAreaView>
     );
 }

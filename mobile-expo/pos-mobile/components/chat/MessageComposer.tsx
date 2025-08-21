@@ -15,6 +15,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
 import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
+import VoiceRecorder from './VoiceRecorder';
 
 interface MessageComposerProps {
   conversationId: string;
@@ -23,6 +24,9 @@ interface MessageComposerProps {
   draft?: string;
   onDraftChange?: (content: string) => void;
   isTyping?: boolean;
+  editingMessage?: any;
+  onEditMessage?: (messageId: string, newContent: string) => void;
+  onCancelEdit?: () => void;
 }
 
 const MessageComposer: React.FC<MessageComposerProps> = ({
@@ -32,10 +36,12 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   draft = '',
   onDraftChange,
   isTyping = false,
+  editingMessage,
+  onEditMessage,
+  onCancelEdit,
 }) => {
   const [message, setMessage] = useState(draft);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   
@@ -43,12 +49,33 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   const attachmentAnimation = useRef(new Animated.Value(0)).current;
   const recordingAnimation = useRef(new Animated.Value(0)).current;
 
+  // Manejar mensaje en edición
+  React.useEffect(() => {
+    if (editingMessage) {
+      setMessage(editingMessage.content);
+      inputRef.current?.focus();
+    } else {
+      setMessage(draft);
+    }
+  }, [editingMessage, draft]);
+
   const handleSend = () => {
     if (message.trim()) {
-      onSendMessage(message.trim());
+      if (editingMessage) {
+        // Editar mensaje existente
+        onEditMessage?.(editingMessage.id, message.trim());
+      } else {
+        // Enviar nuevo mensaje
+        onSendMessage(message.trim());
+      }
       setMessage('');
       onDraftChange?.('');
     }
+  };
+
+  const handleCancelEdit = () => {
+    onCancelEdit?.();
+    setMessage(draft);
   };
 
   const handleInputChange = (text: string) => {
@@ -219,80 +246,13 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
     );
   };
 
-  const startRecording = async () => {
-    try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permisos', 'Se necesita acceso al micrófono');
-        return;
-      }
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-
-      setRecording(recording);
-      setIsRecording(true);
-
-      // Animación de grabación
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(recordingAnimation, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(recordingAnimation, {
-            toValue: 0,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-
-      console.log('🎤 Grabación iniciada');
-    } catch (error) {
-      console.error('Error al iniciar grabación:', error);
-      Alert.alert('Error', 'No se pudo iniciar la grabación');
-    }
+  const handleVoiceMessage = (audioFile: any) => {
+    onSendMessage('Nota de voz', 'voice', [audioFile]);
+    setShowVoiceRecorder(false);
   };
 
-  const stopRecording = async () => {
-    if (!recording) return;
-
-    try {
-      setIsRecording(false);
-      recordingAnimation.stopAnimation();
-      recordingAnimation.setValue(0);
-      
-      await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-      });
-
-      const uri = recording.getURI();
-      if (uri) {
-        const audioFile = {
-          uri,
-          name: `voice_message_${Date.now()}.m4a`,
-          type: 'audio',
-          mimeType: 'audio/m4a',
-          size: 0, // Se calcularía en una implementación real
-        };
-        
-        onSendMessage('Nota de voz', 'voice', [audioFile]);
-      }
-
-      setRecording(null);
-      console.log('🎤 Grabación detenida');
-    } catch (error) {
-      console.error('Error al detener grabación:', error);
-    }
+  const handleCancelVoice = () => {
+    setShowVoiceRecorder(false);
   };
 
   const renderAttachmentOptions = () => {
@@ -348,6 +308,19 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
       {/* Opciones de adjuntos para Android */}
       {renderAttachmentOptions()}
       
+      {/* Barra de edición */}
+      {editingMessage && (
+        <View style={styles.editingBar}>
+          <View style={styles.editingInfo}>
+            <Ionicons name="create-outline" size={16} color={Colors.primary} />
+            <Text style={styles.editingText}>Editando mensaje</Text>
+          </View>
+          <TouchableOpacity onPress={handleCancelEdit} style={styles.cancelEditButton}>
+            <Ionicons name="close" size={16} color={Colors.darkGray} />
+          </TouchableOpacity>
+        </View>
+      )}
+      
       <View style={[styles.inputContainer, isFocused && styles.inputContainerFocused]}>
         {/* Botón de adjuntos */}
         <TouchableOpacity
@@ -376,44 +349,28 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         {/* Botón de nota de voz o enviar */}
         {message.trim() ? (
           <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-            <Ionicons name="send" size={20} color={Colors.white} />
+            <Ionicons 
+              name={editingMessage ? "checkmark" : "send"} 
+              size={20} 
+              color={Colors.white} 
+            />
           </TouchableOpacity>
-        ) : (
+        ) : !editingMessage ? (
           <TouchableOpacity
-            style={[
-              styles.voiceButton,
-              isRecording && styles.voiceButtonRecording,
-            ]}
-            onPressIn={startRecording}
-            onPressOut={stopRecording}
+            style={styles.voiceButton}
+            onPress={() => setShowVoiceRecorder(true)}
           >
-            <Animated.View
-              style={[
-                styles.voiceButtonInner,
-                {
-                  opacity: recordingAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0.5],
-                  }),
-                }
-              ]}
-            >
-              <Ionicons
-                name={isRecording ? 'stop' : 'mic'}
-                size={20}
-                color={Colors.white}
-              />
-            </Animated.View>
+            <Ionicons name="mic" size={20} color={Colors.white} />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
 
-      {/* Indicador de grabación */}
-      {isRecording && (
-        <View style={styles.recordingIndicator}>
-          <View style={styles.recordingDot} />
-          <Text style={styles.recordingText}>Grabando nota de voz...</Text>
-        </View>
+      {/* Grabador de voz mejorado */}
+      {showVoiceRecorder && (
+        <VoiceRecorder
+          onSendVoiceMessage={handleVoiceMessage}
+          onCancel={handleCancelVoice}
+        />
       )}
     </View>
   );
@@ -475,32 +432,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
     ...BordersAndShadows.shadows.sm,
   },
-  voiceButtonRecording: {
-    backgroundColor: Colors.danger,
-  },
-  voiceButtonInner: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  recordingIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.sm,
-    backgroundColor: Colors.danger,
-  },
-  recordingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.white,
-    marginRight: Spacing.sm,
-  },
-  recordingText: {
-    color: Colors.white,
-    fontSize: Typography.fontSizes.sm,
-    fontWeight: Typography.fontWeights.medium,
-  },
+
   
   // Opciones de adjuntos
   attachmentOptionsContainer: {
@@ -539,6 +471,31 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  
+  // Estilos de edición
+  editingBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.lightGray,
+    borderTopWidth: 1,
+    borderTopColor: Colors.primary,
+  },
+  editingInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editingText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.primary,
+    marginLeft: Spacing.xs,
+    fontWeight: Typography.fontWeights.medium,
+  },
+  cancelEditButton: {
+    padding: Spacing.xs,
   },
 });
 
