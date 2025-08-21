@@ -84,13 +84,6 @@ export default function TabLayout() {
             tabBarIconName: 'people-outline',
           }}
         />
-        <Tabs.Screen
-          name="chat"
-          options={{
-            title: 'Chat',
-            tabBarIconName: 'chatbubbles-outline',
-          }}
-        />
       </Tabs>
       <BottomDrawer 
         visible={drawerVisible}
