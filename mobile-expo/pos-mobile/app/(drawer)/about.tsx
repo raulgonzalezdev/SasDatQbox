@@ -23,24 +23,7 @@ export default function AboutScreen() {
   
   return (
     <>
-      <CustomStatusBar />
-      <Stack.Screen 
-        options={{
-          title: 'Acerca de',
-          headerStyle: {
-            backgroundColor: Colors.primary,
-          },
-          headerTintColor: Colors.dark,
-          headerLeft: () => (
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color={Colors.dark} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
+   
       
       <ScrollView style={styles.container}>
         <View style={styles.header}>

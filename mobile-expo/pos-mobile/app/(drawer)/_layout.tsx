@@ -36,7 +36,30 @@ export default function DrawerLayout() {
           drawerIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />
         }} 
       />
-      
+      <Drawer.Screen 
+        name="explore" 
+        options={{ 
+          title: 'Explorar',
+          headerShown: false,
+          drawerIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />
+        }} 
+      />
+      <Drawer.Screen 
+        name="help" 
+        options={{ 
+          title: 'Ayuda',
+          headerShown: false,
+          drawerIcon: ({ color, size }) => <Ionicons name="help-circle-outline" size={size} color={color} />
+        }} 
+      />
+      <Drawer.Screen 
+        name="profile" 
+        options={{ 
+          title: 'Perfil',
+          headerShown: false,
+          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />
+        }} 
+      />
       <Drawer.Screen 
         name="settings" 
         options={{ 

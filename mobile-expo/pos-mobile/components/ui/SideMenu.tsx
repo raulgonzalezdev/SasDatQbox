@@ -63,16 +63,7 @@ export function SideMenu({ visible, onClose }: SideMenuProps) {
       },
       requiresAuth: false,
     },
-    {
-      id: 'about',
-      title: 'Acerca de',
-      icon: 'information-circle-outline',
-      onPress: () => {
-        onClose();
-        router.push('/about');
-      },
-      requiresAuth: false,
-    },
+   
     {
       id: 'premium',
       title: 'Planes Premium',
