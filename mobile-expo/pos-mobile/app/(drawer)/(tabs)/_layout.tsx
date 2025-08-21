@@ -85,10 +85,10 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="more"
+          name="chat"
           options={{
-            title: 'Más',
-            tabBarIconName: 'ellipsis-horizontal-outline',
+            title: 'Chat',
+            tabBarIconName: 'chatbubbles-outline',
           }}
         />
       </Tabs>

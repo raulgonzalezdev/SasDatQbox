@@ -7,6 +7,8 @@ import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import AppHeader from '@/components/ui/Header'; // Importamos el header
+import { LinearGradient } from 'expo-linear-gradient'; // Importamos el gradiente
 
 export default function HomeScreen() {
   const { user } = useAppStore();
@@ -94,65 +96,73 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={CommonStyles.safeArea}>
-      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
+    <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+      <CustomStatusBar backgroundColor={Colors.primaryDark} barStyle="light-content" />
+      <LinearGradient
+        colors={[Colors.primaryLight, Colors.primaryDark]}
+        style={{ height: 120, paddingTop: 50 }}
+      >
+        <AppHeader />
+      </LinearGradient>
 
-      <ThemedView style={CommonStyles.container}>
-        <ScrollView style={CommonStyles.content} showsVerticalScrollIndicator={false}>
-          {/* Saludo */}
-          <View style={styles.greetingSection}>
-            <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
-            <ThemedText style={styles.userName}>{`${user?.first_name || 'Usuario'} ${user?.last_name || ''}`}</ThemedText>
-          </View>
-
-          {/* Mi Resumen */}
-          <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Mi Resumen</ThemedText>
-            <View style={styles.summaryGrid}>
-              {summaryCards.map((card) => (
-                <TouchableOpacity
-                  key={card.id}
-                  style={styles.summaryCard}
-                  onPress={() => handleCardPress(card.route)}
-                >
-                  <View style={[styles.summaryIcon, { backgroundColor: card.color }]}>
-                    <Ionicons name={card.icon as any} size={24} color={Colors.white} />
-                  </View>
-                  <ThemedText style={styles.summaryTitle}>{card.title}</ThemedText>
-                  <ThemedText style={styles.summaryValue}>{card.value}</ThemedText>
-                </TouchableOpacity>
-              ))}
+      <SafeAreaView style={styles.safeAreaContent}>
+        <ThemedView style={CommonStyles.container}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* El contenido de saludo y tarjetas se mueve aquí adentro */}
+            <View style={styles.greetingSection}>
+              <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
+              <ThemedText style={styles.userName}>{`${user?.first_name || 'Usuario'} ${user?.last_name || ''}`}</ThemedText>
             </View>
-          </View>
-
-          {/* Acciones Rápidas */}
-          <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
-            <View style={styles.quickActionsGrid}>
-              {quickActions.map((action) => (
-                <TouchableOpacity
-                  key={action.id}
-                  style={styles.quickActionCard}
-                  onPress={() => handleCardPress(action.route)}
-                >
-                  <View style={[styles.quickActionIcon, { backgroundColor: action.color }]}>
-                    <Ionicons name={action.icon as any} size={24} color={Colors.white} />
-                  </View>
-                  <View style={styles.quickActionContent}>
-                    <ThemedText style={styles.quickActionTitle}>{action.title}</ThemedText>
-                    <ThemedText style={styles.quickActionSubtitle}>{action.subtitle}</ThemedText>
-                  </View>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Mi Resumen</ThemedText>
+              <View style={styles.summaryGrid}>
+                {summaryCards.map((card) => (
+                  <TouchableOpacity
+                    key={card.id}
+                    style={styles.summaryCard}
+                    onPress={() => handleCardPress(card.route)}
+                  >
+                    <View style={[styles.summaryIcon, { backgroundColor: card.color }]}>
+                      <Ionicons name={card.icon as any} size={24} color={Colors.white} />
+                    </View>
+                    <ThemedText style={styles.summaryTitle}>{card.title}</ThemedText>
+                    <ThemedText style={styles.summaryValue}>{card.value}</ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </ThemedView>
-    </SafeAreaView>
+            <View style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
+              <View style={styles.quickActionsGrid}>
+                {quickActions.map((action) => (
+                  <TouchableOpacity
+                    key={action.id}
+                    style={styles.quickActionCard}
+                    onPress={() => handleCardPress(action.route)}
+                  >
+                    <View style={[styles.quickActionIcon, { backgroundColor: action.color }]}>
+                      <Ionicons name={action.icon as any} size={24} color={Colors.white} />
+                    </View>
+                    <View style={styles.quickActionContent}>
+                      <ThemedText style={styles.quickActionTitle}>{action.title}</ThemedText>
+                      <ThemedText style={styles.quickActionSubtitle}>{action.subtitle}</ThemedText>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </ThemedView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaContent: {
+    flex: 1,
+    backgroundColor: Colors.background, // Fondo claro para el contenido
+  },
   greetingSection: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,

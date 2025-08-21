@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/GlobalStyles';
+import { Colors, BordersAndShadows } from '@/constants/GlobalStyles';
 
 interface DrawerOption {
   icon: string;
@@ -18,19 +18,26 @@ interface BottomDrawerProps {
 export default function BottomDrawer({ visible, onClose, options }: BottomDrawerProps) {
   if (!visible) return null;
   return (
-    <View style={styles.overlay}>
+    <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
       <View style={styles.drawer}>
+        {/* Close Button Handle */}
+        <TouchableOpacity style={styles.closeHandleContainer} onPress={onClose}>
+            <View style={styles.closeHandle} />
+        </TouchableOpacity>
+
+        {/* Title */}
+        <Text style={styles.title}>Acciones Rápidas</Text>
+
+        {/* Options */}
         {options.map((opt, idx) => (
           <TouchableOpacity key={idx} style={styles.option} onPress={opt.onPress}>
-            <Ionicons name={opt.icon} size={24} color={Colors.primary} style={{ marginRight: 16 }} />
+            <Ionicons name={opt.icon as any} size={24} color={Colors.primary} style={{ marginRight: 16 }} />
             <Text style={styles.label}>{opt.label}</Text>
           </TouchableOpacity>
         ))}
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Ionicons name="close" size={28} color={Colors.darkGray} />
-        </TouchableOpacity>
+        {/* The explicit close button is removed in favor of the handle and overlay press */}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -50,8 +57,26 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    paddingBottom: 32,
+    paddingTop: 12, // Reduced padding top for the handle
     minHeight: 320,
+    ...BordersAndShadows.shadows.lg,
+  },
+  closeHandleContainer: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  closeHandle: {
+    width: 40,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: Colors.lightGray,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.dark,
+    textAlign: 'center',
+    marginBottom: 16,
   },
   option: {
     flexDirection: 'row',
@@ -62,8 +87,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.darkGray,
   },
-  closeBtn: {
-    alignSelf: 'center',
-    marginTop: 16,
-  },
+  // closeBtn style is removed
 });
