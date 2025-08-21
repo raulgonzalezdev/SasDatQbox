@@ -100,7 +100,7 @@ export default function HomeScreen() {
       <CustomStatusBar backgroundColor={Colors.primaryDark} barStyle="light-content" />
       <LinearGradient
         colors={[Colors.primaryLight, Colors.primaryDark]}
-        style={{ height: 120, paddingTop: 50 }}
+        style={{ height: 80, paddingTop: 25 }}
       >
         <AppHeader />
       </LinearGradient>

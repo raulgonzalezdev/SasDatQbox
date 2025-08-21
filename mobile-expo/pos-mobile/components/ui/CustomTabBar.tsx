@@ -13,8 +13,8 @@ const CustomTabBar = ({ state, descriptors, navigation, onCenterPress }) => {
         const label = options.tabBarLabel || options.title || route.name;
         const isFocused = state.index === index;
 
-        // Si es el botón central, lo renderizamos de forma especial
-        if (index === Math.floor(state.routes.length / 2)) {
+        // Si es el tab "center" (índice 2), renderizamos el botón central
+        if (route.name === 'center') {
             return (
               <TouchableOpacity
                 key={route.key}
@@ -97,15 +97,19 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.secondary, // Usamos el color naranja de acento
+    backgroundColor: '#FF7A00', // Color naranja como en la imagen
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
     bottom: 25, // Lo elevamos para que sobresalga
+    left: '50%',
+    marginLeft: -30, // Centrado perfecto (mitad del ancho)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 8,
+    zIndex: 10,
   },
 });
 

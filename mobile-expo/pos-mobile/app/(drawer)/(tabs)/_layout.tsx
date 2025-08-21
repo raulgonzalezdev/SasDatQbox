@@ -70,18 +70,28 @@ export default function TabLayout() {
             tabBarIconName: 'calendar-outline',
           }}
         />
+        {/* Tab invisible para el botón central */}
         <Tabs.Screen
-          name="chat"
+          name="center"
           options={{
-            title: 'Chat',
-            tabBarIconName: 'chatbubbles-outline',
+            title: '',
+            tabBarIconName: 'add',
+            tabBarButton: () => null, // Esto hace que el tab no se renderice normalmente
           }}
+          component={() => null} // Componente vacío
         />
         <Tabs.Screen
           name="patients"
           options={{
             title: 'Pacientes',
             tabBarIconName: 'people-outline',
+          }}
+        />
+        <Tabs.Screen
+          name="chat"
+          options={{
+            title: 'Chat',
+            tabBarIconName: 'chatbubbles-outline',
           }}
         />
       </Tabs>

@@ -20,10 +20,16 @@ export default function BottomDrawer({ visible, onClose, options }: BottomDrawer
   return (
     <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
       <View style={styles.drawer}>
-        {/* Close Button Handle */}
-        <TouchableOpacity style={styles.closeHandleContainer} onPress={onClose}>
-            <View style={styles.closeHandle} />
-        </TouchableOpacity>
+        {/* Botón de cierre naranja con flecha hacia abajo */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Ionicons
+              name="chevron-down"
+              size={32}
+              color={Colors.white}
+            />
+          </TouchableOpacity>
+        </View>
 
         {/* Title */}
         <Text style={styles.title}>Acciones Rápidas</Text>
@@ -57,25 +63,38 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    paddingTop: 12, // Reduced padding top for the handle
+    paddingTop: 0, // Sin padding superior para el nuevo botón
     minHeight: 320,
     ...BordersAndShadows.shadows.lg,
   },
-  closeHandleContainer: {
+  headerContainer: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingTop: 15,
+    paddingBottom: 10,
+    position: 'relative',
   },
-  closeHandle: {
-    width: 40,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: Colors.lightGray,
+  closeButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FF7A00', // Mismo color naranja que el botón de apertura
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: -30, // Lo elevamos para que sobresalga del drawer
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 8,
+    zIndex: 10,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.dark,
     textAlign: 'center',
+    marginTop: 30, // Espacio adicional para el botón elevado
     marginBottom: 16,
   },
   option: {

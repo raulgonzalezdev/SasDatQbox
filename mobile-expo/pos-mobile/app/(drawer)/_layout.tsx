@@ -18,7 +18,7 @@ export default function DrawerLayout() {
         header: (props) => (
             <LinearGradient
                 colors={[Colors.primaryLight, Colors.primaryDark]}
-                style={{ height: 100, paddingTop: 30 }} // Ajustar altura y padding
+                style={{ height: 80, paddingTop: 20 }} // Reducida altura de 100 a 80 y padding de 30 a 20
             >
                 <AppHeader 
                     showDrawerButton={true}
