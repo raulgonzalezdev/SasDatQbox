@@ -26,7 +26,7 @@ export default function HomeScreen() {
       value: 'Mañana',
       icon: 'calendar',
       color: Colors.primary,
-      route: '/(drawer)/more/appointments',
+      route: '/(drawer)/(tabs)/appointments',
     },
     {
       id: 'total_appointments',
@@ -34,7 +34,7 @@ export default function HomeScreen() {
       value: '15',
       icon: 'checkmark-circle',
       color: Colors.success,
-      route: '/(drawer)/more/appointments',
+      route: '/(drawer)/(tabs)/appointments',
     },
     {
       id: 'new_patients',
@@ -42,7 +42,7 @@ export default function HomeScreen() {
       value: '3',
       icon: 'person-add',
       color: Colors.info,
-      route: '/(drawer)/more/patients',
+      route: '/(drawer)/(tabs)/patients',
     },
     {
       id: 'unread_messages',
@@ -58,7 +58,7 @@ export default function HomeScreen() {
       value: 'Explorar',
       icon: 'star',
       color: Colors.info,
-      route: '/(drawer)/more/explore',
+      route: '/(drawer)/explore',
     },
     {
       id: 'profile_completion',
@@ -66,7 +66,7 @@ export default function HomeScreen() {
       value: '80%',
       icon: 'document-text',
       color: Colors.warning,
-      route: '/(drawer)/more/profile',
+      route: '/(drawer)/profile',
     },
   ];
 
@@ -77,7 +77,7 @@ export default function HomeScreen() {
       subtitle: 'Ver próximas citas',
       icon: 'calendar',
       color: Colors.primary,
-      route: '/(drawer)/more/appointments',
+      route: '/(drawer)/(tabs)/appointments',
     },
     {
       id: 'schedule_appointment',
@@ -85,7 +85,7 @@ export default function HomeScreen() {
       subtitle: 'Reservar nueva cita',
       icon: 'add-circle',
       color: Colors.info,
-      route: '/(drawer)/more/appointments',
+      route: '/(drawer)/(tabs)/appointments',
     },
   ];
 
