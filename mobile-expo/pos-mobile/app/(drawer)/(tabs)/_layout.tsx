@@ -54,7 +54,7 @@ export default function TabLayout() {
           <CustomTabBar {...props} onCenterPress={() => setDrawerVisible(true)} />
         )}
         screenOptions={{
-          headerShown: false,
+          headerShown: false, // Los tabs no mostrarán header individual, usarán el del drawer
         }}>
         <Tabs.Screen
           name="index"

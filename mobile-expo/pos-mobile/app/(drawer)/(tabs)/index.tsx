@@ -4,11 +4,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
-import AppHeader from '@/components/ui/Header'; // Importamos el header
-import { LinearGradient } from 'expo-linear-gradient'; // Importamos el gradiente
 
 export default function HomeScreen() {
   const { user } = useAppStore();
@@ -96,16 +93,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.primary }}>
-      <CustomStatusBar backgroundColor={Colors.primaryDark} barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.primaryLight, Colors.primaryDark]}
-        style={{ height: 80, paddingTop: 25 }}
-      >
-        <AppHeader />
-      </LinearGradient>
-
-      <SafeAreaView style={styles.safeAreaContent}>
+    <SafeAreaView style={styles.safeAreaContent}>
         <ThemedView style={CommonStyles.container}>
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* El contenido de saludo y tarjetas se mueve aquí adentro */}
@@ -154,7 +142,6 @@ export default function HomeScreen() {
           </ScrollView>
         </ThemedView>
       </SafeAreaView>
-    </View>
   );
 }
 
@@ -196,11 +183,21 @@ const styles = StyleSheet.create({
   summaryCard: {
     width: '48%',
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
+    borderRadius: 20, // Más redondeadas
     padding: Spacing.lg,
     marginBottom: Spacing.md,
     alignItems: 'center',
-    ...BordersAndShadows.shadows.sm,
+    // Efecto 3D mejorado
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   summaryIcon: {
     width: 48,
@@ -229,10 +226,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
+    borderRadius: 20, // Más redondeadas
     padding: Spacing.lg,
     marginBottom: Spacing.md,
-    ...BordersAndShadows.shadows.sm,
+    // Efecto 3D mejorado
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   quickActionIcon: {
     width: 48,

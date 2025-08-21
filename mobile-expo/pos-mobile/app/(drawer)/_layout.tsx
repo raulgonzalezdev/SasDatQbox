@@ -92,42 +92,42 @@ export default function DrawerLayout() {
         name="(tabs)" 
         options={{ 
           title: 'Inicio',
-          headerShown: false,
+          // headerShown heredará true del screenOptions
         }} 
       />
       <Drawer.Screen 
         name="explore" 
         options={{ 
           title: 'Explorar',
-          headerShown: false,
+          // headerShown heredará true del screenOptions
         }} 
       />
       <Drawer.Screen 
         name="help" 
         options={{ 
           title: 'Ayuda',
-          headerShown: false,
+          // headerShown heredará true del screenOptions
         }} 
       />
       <Drawer.Screen 
         name="profile" 
         options={{ 
           title: 'Perfil',
-          headerShown: false,
+          // headerShown heredará true del screenOptions
         }} 
       />
       <Drawer.Screen 
         name="settings" 
         options={{ 
           title: 'Configuración',
-          headerShown: false,
+          // headerShown heredará true del screenOptions
         }} 
       />
       <Drawer.Screen 
         name="about" 
         options={{ 
           title: 'Acerca de',
-          headerShown: false,
+          // headerShown heredará true del screenOptions
         }} 
       />
       

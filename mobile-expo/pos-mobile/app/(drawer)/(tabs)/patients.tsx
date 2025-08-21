@@ -126,14 +126,12 @@ export default function PatientsScreen() {
 
   return (
     <SafeAreaView style={CommonStyles.safeArea}>
-      <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
       <ThemedView style={CommonStyles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <ThemedText style={styles.headerTitle}>Pacientes</ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
+        {/* Sección de título y botón */}
+        <View style={styles.titleSection}>
+          <View style={styles.titleContent}>
+            <ThemedText style={styles.pageTitle}>Pacientes</ThemedText>
+            <ThemedText style={styles.pageSubtitle}>
               Gestiona tu lista de pacientes
             </ThemedText>
           </View>
@@ -282,26 +280,27 @@ export default function PatientsScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
+  titleSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.lg,
+    backgroundColor: 'transparent',
   },
-  headerContent: {
+  titleContent: {
     flex: 1,
   },
-  headerTitle: {
+  pageTitle: {
     fontSize: Typography.fontSizes.xl,
     fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
+    color: Colors.white, // Cambiado a blanco
     marginBottom: Spacing.xs,
   },
-  headerSubtitle: {
+  pageSubtitle: {
     fontSize: Typography.fontSizes.md,
-    color: Colors.darkGray,
+    color: Colors.white, // Cambiado a blanco
+    opacity: 0.9, // Ligera transparencia para jerarquía
   },
   addButton: {
     width: 40,
@@ -318,10 +317,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
+    borderRadius: 20, // Más redondeado
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    ...BordersAndShadows.shadows.sm,
+    // Efecto 3D mejorado
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   searchIcon: {
     marginRight: Spacing.md,
@@ -340,10 +349,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
     padding: Spacing.md,
-    borderRadius: BordersAndShadows.borderRadius.lg,
+    borderRadius: 20, // Más redondeadas
     alignItems: 'center',
     marginHorizontal: Spacing.xs,
-    ...BordersAndShadows.shadows.sm,
+    // Efecto 3D mejorado
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   statNumber: {
     fontSize: Typography.fontSizes.xl,
@@ -397,10 +416,20 @@ const styles = StyleSheet.create({
   patientCard: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
+    borderRadius: 20, // Más redondeadas
     padding: Spacing.lg,
     marginBottom: Spacing.md,
-    ...BordersAndShadows.shadows.sm,
+    // Efecto 3D mejorado
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   patientAvatar: {
     position: 'relative',
