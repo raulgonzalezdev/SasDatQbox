@@ -11,6 +11,7 @@ export default function DrawerLayout() {
   return (
     <Drawer
       screenOptions={{
+        drawerPosition: 'right',
         headerShown: true,
         headerStyle: {
           backgroundColor: Colors.primary,
@@ -25,7 +26,8 @@ export default function DrawerLayout() {
         drawerStyle: {
           backgroundColor: Colors.primary,
         },
-        headerLeft: () => <DrawerToggleButton tintColor={Colors.white} />,
+        headerLeft: () => null,
+        headerRight: () => <DrawerToggleButton tintColor={Colors.white} />,
       }}
     >
       <Drawer.Screen 
