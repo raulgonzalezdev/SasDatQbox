@@ -3,20 +3,32 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/GlobalStyles';
 
-const CustomTabBar = ({ state, descriptors, navigation }) => {
-  const centerRouteName = "chat"; // The route name of the center button
+// Aceptamos la nueva prop 'onCenterPress'
+const CustomTabBar = ({ state, descriptors, navigation, onCenterPress }) => {
 
   return (
     <View style={styles.container}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const label = options.tabBarLabel !== undefined
-          ? options.tabBarLabel
-          : options.title !== undefined
-          ? options.title
-          : route.name;
-
+        const label = options.tabBarLabel || options.title || route.name;
         const isFocused = state.index === index;
+
+        // Si es el botón central, lo renderizamos de forma especial
+        if (index === Math.floor(state.routes.length / 2)) {
+            return (
+              <TouchableOpacity
+                key={route.key}
+                onPress={onCenterPress} // Usamos la nueva prop
+                style={styles.centerButton}
+              >
+                <Ionicons
+                  name="chevron-up"
+                  size={32}
+                  color={Colors.white}
+                />
+              </TouchableOpacity>
+            );
+        }
 
         const onPress = () => {
           const event = navigation.emit({
@@ -37,27 +49,6 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           });
         };
 
-        if (route.name === centerRouteName) {
-          return (
-            <TouchableOpacity
-              key={route.key}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarTestID}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={styles.centerButton}
-            >
-              <Ionicons
-                name={options.tabBarIconName}
-                size={32}
-                color={Colors.white}
-              />
-            </TouchableOpacity>
-          );
-        }
-
         return (
           <TouchableOpacity
             key={route.key}
@@ -70,8 +61,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             style={styles.tabButton}
           >
             <Ionicons
-              name={options.tabBarIconName}
-              size={24}
+              name={options.tabBarIconName || 'ellipse'} // Icono por defecto
+              size={28}
               color={isFocused ? Colors.primary : Colors.darkGray}
             />
           </TouchableOpacity>
@@ -84,7 +75,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.tabBar,
     paddingBottom: 10,
     paddingTop: 10,
     alignItems: 'center',
@@ -94,24 +85,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 10,
   },
   centerButton: {
-    flex: 1,
-    alignItems: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.secondary, // Usamos el color naranja de acento
     justifyContent: 'center',
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    bottom: 25, // Lo elevamos para que sobresalga
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 8,
   },
 });
 

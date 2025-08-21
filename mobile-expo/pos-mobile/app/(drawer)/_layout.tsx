@@ -3,6 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/GlobalStyles';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useAppStore } from '@/store/appStore';
+import { LinearGradient } from 'expo-linear-gradient';
+import AppHeader from '@/components/ui/Header'; // Importamos nuestro nuevo header
 
 export default function DrawerLayout() {
   const { user } = useAppStore();
@@ -13,8 +15,19 @@ export default function DrawerLayout() {
       screenOptions={{
         drawerPosition: 'right',
         headerShown: true,
+        header: (props) => (
+            <LinearGradient
+                colors={[Colors.primaryLight, Colors.primaryDark]}
+                style={{ height: 100, paddingTop: 30 }} // Ajustar altura y padding
+            >
+                <AppHeader 
+                    showDrawerButton={true}
+                    DrawerButton={() => <DrawerToggleButton tintColor={Colors.white} />}
+                />
+            </LinearGradient>
+        ),
         headerStyle: {
-          backgroundColor: Colors.primary,
+          backgroundColor: 'transparent', // Hacemos transparente para que se vea el gradiente
         },
         headerTintColor: Colors.white,
         headerTitleStyle: {
@@ -24,10 +37,8 @@ export default function DrawerLayout() {
         drawerActiveTintColor: Colors.primary,
         drawerActiveBackgroundColor: Colors.white,
         drawerStyle: {
-          backgroundColor: Colors.primary,
+          backgroundColor: Colors.primary, // Mantenemos el fondo del drawer sólido
         },
-        headerLeft: () => null,
-        headerRight: () => <DrawerToggleButton tintColor={Colors.white} />,
       }}
     >
       <Drawer.Screen 

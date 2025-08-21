@@ -1,96 +1,103 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform, View } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { Ionicons } from '@expo/vector-icons';
+import { Tabs, router } from 'expo-router';
+import React, { useState } from 'react'; // Importar useState
+import { View } from 'react-native';
 import { Colors } from '@/constants/GlobalStyles';
+import CustomTabBar from '@/components/ui/CustomTabBar';
+import BottomDrawer from '@/components/ui/BottomDrawer'; // Importar el BottomDrawer
 import { useAppStore } from '@/store/appStore';
 
 export default function TabLayout() {
   const { user } = useAppStore();
   const isDoctor = user?.role === 'doctor';
+  const [drawerVisible, setDrawerVisible] = useState(false); // Estado de visibilidad
+
+  // Opciones para el BottomDrawer
+  const businessOptions = [
+    {
+      icon: 'add-circle-outline',
+      label: 'Nueva Venta',
+      onPress: () => {
+        setDrawerVisible(false);
+        router.push('/sales/new');
+      },
+    },
+    {
+      icon: 'receipt-outline',
+      label: 'Ver Inventario',
+      onPress: () => {
+        setDrawerVisible(false);
+        router.push('/inventory');
+      },
+    },
+    {
+      icon: 'bar-chart-outline',
+      label: 'Reportes',
+      onPress: () => {
+        setDrawerVisible(false);
+        router.push('/reports');
+      },
+    },
+    {
+      icon: 'cash-outline',
+      label: 'Cierre de Caja',
+      onPress: () => {
+        setDrawerVisible(false);
+        console.log('Cierre de caja...');
+      },
+    },
+  ];
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.white,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: () => (
-          <View style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            backgroundColor: Colors.tabBar 
-          }} />
-        ),
-        tabBarStyle: Platform.select({
-          ios: {
-            height: 60,
-            paddingBottom: 5,
-            backgroundColor: Colors.tabBar,
-            borderTopWidth: 0,
-            elevation: 8,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-          },
-          default: {
-            height: 60,
-            paddingBottom: 5,
-            backgroundColor: Colors.tabBar,
-            borderTopWidth: 0,
-            elevation: 8,
-          },
-        }),
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '500',
-          color: Colors.white,
-        },
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Inicio',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-        }}
+    <View style={{ flex: 1 }}>
+      <Tabs
+        tabBar={(props) => (
+          <CustomTabBar {...props} onCenterPress={() => setDrawerVisible(true)} />
+        )}
+        screenOptions={{
+          headerShown: false,
+        }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Inicio',
+            tabBarIconName: 'home-outline',
+          }}
+        />
+        <Tabs.Screen
+          name="appointments"
+          options={{
+            title: 'Citas',
+            tabBarIconName: 'calendar-outline',
+          }}
+        />
+        <Tabs.Screen
+          name="chat"
+          options={{
+            title: 'Chat',
+            tabBarIconName: 'chatbubbles-outline',
+          }}
+        />
+        <Tabs.Screen
+          name="patients"
+          options={{
+            title: 'Pacientes',
+            tabBarIconName: 'people-outline',
+          }}
+        />
+        <Tabs.Screen
+          name="more"
+          options={{
+            title: 'Más',
+            tabBarIconName: 'ellipsis-horizontal-outline',
+          }}
+        />
+      </Tabs>
+      <BottomDrawer 
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        options={businessOptions}
       />
-      <Tabs.Screen
-        name="appointments"
-        options={{
-          title: 'Citas',
-          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
-        }}
-      />
-       <Tabs.Screen
-        name="patients"
-        options={{
-          title: 'Pacientes',
-          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: 'Chat',
-          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} />,
-        }}
-      />
-       <Tabs.Screen
-        name="more"
-        options={{
-          title: 'More',
-          tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" size={size} color={color} />,
-        }}
-      />
-      
-    </Tabs>
+    </View>
   );
 }
 
