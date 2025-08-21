@@ -68,6 +68,14 @@ export default function DrawerLayout() {
           drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />
         }} 
       />
+          <Drawer.Screen 
+        name="about" 
+        options={{ 
+          title: 'Acerca de',
+          headerShown: false,
+          drawerIcon: ({ color, size }) => <Ionicons name="information-circle-outline" size={size} color={color} />
+        }} 
+      />
       
     </Drawer>
   );
