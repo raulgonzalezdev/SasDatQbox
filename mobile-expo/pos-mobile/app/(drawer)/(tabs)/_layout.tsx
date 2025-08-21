@@ -78,7 +78,6 @@ export default function TabLayout() {
             tabBarIconName: 'add',
             tabBarButton: () => null, // Esto hace que el tab no se renderice normalmente
           }}
-          component={() => null} // Componente vacío
         />
         <Tabs.Screen
           name="patients"

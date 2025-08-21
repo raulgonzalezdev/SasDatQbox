@@ -5,6 +5,58 @@ import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useAppStore } from '@/store/appStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppHeader from '@/components/ui/Header'; // Importamos nuestro nuevo header
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
+
+// Componente personalizado para el drawer con gradiente
+const CustomDrawerContent = (props: any) => {
+  const { navigation, state } = props;
+  
+  const drawerItems = [
+    { name: '(tabs)', title: 'Inicio', icon: 'home-outline' },
+    { name: 'explore', title: 'Explorar', icon: 'search-outline' },
+    { name: 'help', title: 'Ayuda', icon: 'help-circle-outline' },
+    { name: 'profile', title: 'Perfil', icon: 'person-outline' },
+    { name: 'settings', title: 'Configuración', icon: 'settings-outline' },
+    { name: 'about', title: 'Acerca de', icon: 'information-circle-outline' },
+  ];
+
+  return (
+    <View style={styles.drawerContainer}>
+      <LinearGradient
+        colors={[Colors.primary, Colors.primaryDark]} // Ajustamos para que coincida mejor con el header
+        style={styles.gradientContainer}
+      >
+        <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
+          <View style={styles.drawerContent}>
+            {drawerItems.map((item, index) => {
+              const isActive = state.index === index;
+              return (
+                <TouchableOpacity
+                  key={item.name}
+                  style={[
+                    styles.drawerItem,
+                    isActive && styles.drawerItemActive
+                  ]}
+                  onPress={() => navigation.navigate(item.name)}
+                >
+                  <Ionicons 
+                    name={item.icon as any} 
+                    size={24} 
+                    color={Colors.white} 
+                    style={styles.drawerIcon}
+                  />
+                  <Text style={styles.drawerLabel}>{item.title}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </DrawerContentScrollView>
+      </LinearGradient>
+    </View>
+  );
+};
 
 export default function DrawerLayout() {
   const { user } = useAppStore();
@@ -12,6 +64,7 @@ export default function DrawerLayout() {
 
   return (
     <Drawer
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerPosition: 'right',
         headerShown: true,
@@ -33,12 +86,6 @@ export default function DrawerLayout() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        drawerInactiveTintColor: Colors.white,
-        drawerActiveTintColor: Colors.primary,
-        drawerActiveBackgroundColor: Colors.white,
-        drawerStyle: {
-          backgroundColor: Colors.primary, // Mantenemos el fondo del drawer sólido
-        },
       }}
     >
       <Drawer.Screen 
@@ -46,7 +93,6 @@ export default function DrawerLayout() {
         options={{ 
           title: 'Inicio',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />
         }} 
       />
       <Drawer.Screen 
@@ -54,7 +100,6 @@ export default function DrawerLayout() {
         options={{ 
           title: 'Explorar',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />
         }} 
       />
       <Drawer.Screen 
@@ -62,7 +107,6 @@ export default function DrawerLayout() {
         options={{ 
           title: 'Ayuda',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="help-circle-outline" size={size} color={color} />
         }} 
       />
       <Drawer.Screen 
@@ -70,7 +114,6 @@ export default function DrawerLayout() {
         options={{ 
           title: 'Perfil',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />
         }} 
       />
       <Drawer.Screen 
@@ -78,7 +121,6 @@ export default function DrawerLayout() {
         options={{ 
           title: 'Configuración',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />
         }} 
       />
       <Drawer.Screen 
@@ -86,10 +128,46 @@ export default function DrawerLayout() {
         options={{ 
           title: 'Acerca de',
           headerShown: false,
-          drawerIcon: ({ color, size }) => <Ionicons name="information-circle-outline" size={size} color={color} />
         }} 
       />
       
     </Drawer>
   );
 }
+
+const styles = StyleSheet.create({
+  drawerContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  gradientContainer: {
+    flex: 1,
+    borderTopLeftRadius: 25, // Esquinas muy redondeadas
+    borderBottomLeftRadius: 25, // Esquinas muy redondeadas
+    overflow: 'hidden', // Para que el gradiente respete las esquinas redondeadas
+  },
+  drawerContent: {
+    flex: 1,
+    paddingTop: 50, // Espacio superior
+    paddingHorizontal: 20,
+  },
+  drawerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 15, // También redondeamos más los items
+    marginVertical: 5,
+  },
+  drawerItemActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)', // Un poco más visible el estado activo
+  },
+  drawerIcon: {
+    marginRight: 15,
+  },
+  drawerLabel: {
+    fontSize: 16,
+    color: Colors.white,
+    fontWeight: '500',
+  },
+});
