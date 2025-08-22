@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { useAppStore, isUserPremium } from '@/store/appStore';
+import RoleSwitcher from '@/components/debug/RoleSwitcher';
 
 export default function SettingsScreen() {
   const { hidePromotions, setHidePromotions } = useAppStore();
@@ -221,6 +222,10 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={24} color={Colors.darkGray} />
           </TouchableOpacity>
         </View>
+        
+        {/* Debug: Cambiador de Roles */}
+        <RoleSwitcher />
+        
       </ScrollView>
     </>
   );

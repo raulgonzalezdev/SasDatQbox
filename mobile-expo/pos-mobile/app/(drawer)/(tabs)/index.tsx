@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -6,10 +6,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import DoctorDashboard from '@/components/dashboard/DoctorDashboard';
+import PatientDashboard from '@/components/dashboard/PatientDashboard';
+import { mockUsers } from '@/data/mockUsers';
 
 export default function HomeScreen() {
-  const { user } = useAppStore();
+  const { user, setUser } = useAppStore();
   const isDoctor = user?.role === 'doctor';
+  const isPatient = user?.role === 'patient';
+
+  // Para testing: establecer usuario mock si no hay uno
+  useEffect(() => {
+    if (!user) {
+      // Por defecto, establecer como doctor para testing
+      // Puedes cambiar esto a mockUsers.patient para probar la vista de paciente
+      setUser(mockUsers.doctor);
+    }
+  }, [user, setUser]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -92,56 +105,52 @@ export default function HomeScreen() {
     router.push(route as any);
   };
 
+  // Mostrar mensaje de carga si no hay usuario
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.safeAreaContent}>
+        <ThemedView style={CommonStyles.container}>
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.loadingText}>Cargando...</ThemedText>
+          </View>
+        </ThemedView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeAreaContent}>
-        <ThemedView style={CommonStyles.container}>
+      <ThemedView style={CommonStyles.container}>
+        {/* Mostrar dashboard específico según el rol */}
+        {isDoctor && <DoctorDashboard user={user} />}
+        {isPatient && <PatientDashboard user={user} />}
+        
+        {/* Fallback para otros roles o admin */}
+        {!isDoctor && !isPatient && (
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* El contenido de saludo y tarjetas se mueve aquí adentro */}
             <View style={styles.greetingSection}>
               <ThemedText style={styles.greeting}>{getGreeting()}</ThemedText>
-              <ThemedText style={styles.userName}>{`${user?.first_name || 'Usuario'} ${user?.last_name || ''}`}</ThemedText>
+              <ThemedText style={styles.userName}>
+                {`${user?.first_name || 'Usuario'} ${user?.last_name || ''}`}
+              </ThemedText>
+              <ThemedText style={styles.roleText}>
+                Rol: {user?.role || 'No definido'}
+              </ThemedText>
             </View>
+            
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Mi Resumen</ThemedText>
-              <View style={styles.summaryGrid}>
-                {summaryCards.map((card) => (
-                  <TouchableOpacity
-                    key={card.id}
-                    style={styles.summaryCard}
-                    onPress={() => handleCardPress(card.route)}
-                  >
-                    <View style={[styles.summaryIcon, { backgroundColor: card.color }]}>
-                      <Ionicons name={card.icon as any} size={24} color={Colors.white} />
-                    </View>
-                    <ThemedText style={styles.summaryTitle}>{card.title}</ThemedText>
-                    <ThemedText style={styles.summaryValue}>{card.value}</ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Acciones Rápidas</ThemedText>
-              <View style={styles.quickActionsGrid}>
-                {quickActions.map((action) => (
-                  <TouchableOpacity
-                    key={action.id}
-                    style={styles.quickActionCard}
-                    onPress={() => handleCardPress(action.route)}
-                  >
-                    <View style={[styles.quickActionIcon, { backgroundColor: action.color }]}>
-                      <Ionicons name={action.icon as any} size={24} color={Colors.white} />
-                    </View>
-                    <View style={styles.quickActionContent}>
-                      <ThemedText style={styles.quickActionTitle}>{action.title}</ThemedText>
-                      <ThemedText style={styles.quickActionSubtitle}>{action.subtitle}</ThemedText>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+              <ThemedText style={styles.sectionTitle}>Panel de Administración</ThemedText>
+              <View style={styles.adminCard}>
+                <Ionicons name="settings" size={48} color={Colors.primary} />
+                <ThemedText style={styles.adminText}>
+                  Panel administrativo en desarrollo
+                </ThemedText>
               </View>
             </View>
           </ScrollView>
-        </ThemedView>
-      </SafeAreaView>
+        )}
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
@@ -261,5 +270,34 @@ const styles = StyleSheet.create({
   quickActionSubtitle: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: Typography.fontSizes.lg,
+    color: Colors.darkGray,
+  },
+  roleText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.white,
+    opacity: 0.8,
+    marginTop: Spacing.xs,
+  },
+  adminCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: Spacing.xl,
+    marginHorizontal: Spacing.lg,
+    alignItems: 'center',
+    ...BordersAndShadows.shadows.md,
+  },
+  adminText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginTop: Spacing.md,
   },
 });

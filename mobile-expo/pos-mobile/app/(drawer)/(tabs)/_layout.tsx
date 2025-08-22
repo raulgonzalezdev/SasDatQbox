@@ -12,41 +12,81 @@ export default function TabLayout() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isInChat, setIsInChat] = useState(false); // Estado de visibilidad
 
-  // Opciones para el BottomDrawer
-  const businessOptions = [
-    {
-      icon: 'add-circle-outline',
-      label: 'Nueva Venta',
-      onPress: () => {
-        setDrawerVisible(false);
-        router.push('/sales/new');
-      },
-    },
-    {
-      icon: 'receipt-outline',
-      label: 'Ver Inventario',
-      onPress: () => {
-        setDrawerVisible(false);
-        router.push('/inventory');
-      },
-    },
-    {
-      icon: 'bar-chart-outline',
-      label: 'Reportes',
-      onPress: () => {
-        setDrawerVisible(false);
-        router.push('/reports');
-      },
-    },
-    {
-      icon: 'cash-outline',
-      label: 'Cierre de Caja',
-      onPress: () => {
-        setDrawerVisible(false);
-        console.log('Cierre de caja...');
-      },
-    },
-  ];
+  // Opciones para el BottomDrawer según el rol
+  const getDynamicOptions = () => {
+    if (isDoctor) {
+      return [
+        {
+          icon: 'add-circle-outline',
+          label: 'Nueva Cita',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/appointments');
+          },
+        },
+        {
+          icon: 'person-add-outline',
+          label: 'Nuevo Paciente',
+          onPress: () => {
+            setDrawerVisible(false);
+            console.log('Nuevo paciente...');
+          },
+        },
+        {
+          icon: 'medical-outline',
+          label: 'Consulta Rápida',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/chat');
+          },
+        },
+        {
+          icon: 'receipt-outline',
+          label: 'Nueva Receta',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/chat');
+          },
+        },
+      ];
+    } else {
+      // Opciones para pacientes
+      return [
+        {
+          icon: 'calendar-outline',
+          label: 'Agendar Cita',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/appointments');
+          },
+        },
+        {
+          icon: 'chatbubble-outline',
+          label: 'Consultar Médico',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/chat');
+          },
+        },
+        {
+          icon: 'document-text-outline',
+          label: 'Mi Historial',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/patients');
+          },
+        },
+        {
+          icon: 'call-outline',
+          label: 'Emergencia',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/chat');
+          },
+        },
+      ];
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -85,8 +125,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="patients"
           options={{
-            title: 'Pacientes',
-            tabBarIconName: 'people-outline',
+            title: isDoctor ? 'Pacientes' : 'Mi Perfil',
+            tabBarIconName: isDoctor ? 'people-outline' : 'person-outline',
           }}
         />
         <Tabs.Screen
@@ -101,7 +141,7 @@ export default function TabLayout() {
       <BottomDrawer 
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
-        options={businessOptions}
+        options={getDynamicOptions()}
       />
     </View>
   );
