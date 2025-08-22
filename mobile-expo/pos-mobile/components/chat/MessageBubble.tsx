@@ -647,6 +647,7 @@ const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({ message, isOwnM
   const [isFinished, setIsFinished] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
   const positionUpdateInterval = useRef<NodeJS.Timeout | null>(null);
+  const hasFinishedRef = useRef(false); // Para evitar múltiples llamadas al finalizar
 
   const formatTime = (milliseconds: number) => {
     const seconds = Math.floor(milliseconds / 1000);
@@ -655,17 +656,52 @@ const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({ message, isOwnM
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleAudioFinished = async () => {
+    if (hasFinishedRef.current) {
+      return; // Ya se procesó el fin del audio
+    }
+    
+    hasFinishedRef.current = true;
+    console.log('🔚 Audio terminó de reproducirse (procesando una sola vez)');
+    
+    setIsPlaying(false);
+    setIsFinished(true);
+    setCurrentPosition(0);
+    stopPositionUpdates();
+    
+    if (soundRef.current) {
+      try {
+        await soundRef.current.setPositionAsync(0);
+      } catch (error) {
+        console.error('Error al resetear posición:', error);
+      }
+    }
+  };
+
   const startPositionUpdates = () => {
     stopPositionUpdates();
+    hasFinishedRef.current = false; // Resetear flag al iniciar
+    
     positionUpdateInterval.current = setInterval(async () => {
-      if (soundRef.current) {
+      if (soundRef.current && isPlaying && !hasFinishedRef.current) {
         try {
           const status = await soundRef.current.getStatusAsync();
           if (status.isLoaded && status.positionMillis !== undefined) {
             setCurrentPosition(status.positionMillis);
+            
+            // Verificar si terminó manualmente (solo si no se ha procesado ya)
+            if (status.durationMillis && status.positionMillis >= status.durationMillis - 100) {
+              handleAudioFinished(); // Usar función centralizada
+            }
+          } else if (!status.isLoaded || status.error) {
+            console.log('⚠️ Audio no está cargado o tiene error, deteniendo actualizaciones');
+            stopPositionUpdates();
+            setIsPlaying(false);
           }
         } catch (error) {
           console.error('Error obteniendo posición:', error);
+          stopPositionUpdates();
+          setIsPlaying(false);
         }
       }
     }, 100);
@@ -703,8 +739,8 @@ const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({ message, isOwnM
         // Obtener la URI real del archivo de audio
         const audioUri = message.media_files?.[0]?.url;
         
-        if (!audioUri) {
-          Alert.alert('Error', 'No se encontró el archivo de audio');
+        if (!audioUri || audioUri.trim() === '' || audioUri === '🎙️ Nota de voz') {
+          Alert.alert('Error', 'No se encontró un archivo de audio válido');
           setIsLoading(false);
           return;
         }
@@ -752,16 +788,11 @@ const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({ message, isOwnM
               if (status.durationMillis && duration === 0) {
                 setDuration(status.durationMillis);
               }
-              if (status.positionMillis !== undefined) {
+              if (status.positionMillis !== undefined && !hasFinishedRef.current) {
                 setCurrentPosition(status.positionMillis);
               }
-              if (status.didJustFinish) {
-                console.log('🔚 Audio terminó de reproducirse');
-                setIsPlaying(false);
-                setIsFinished(true);
-                setCurrentPosition(0);
-                stopPositionUpdates();
-                soundRef.current?.setPositionAsync(0);
+              if (status.didJustFinish && !hasFinishedRef.current) {
+                handleAudioFinished(); // Usar función centralizada
               }
             } else if (status.error) {
               console.error('❌ Error en el estado del audio:', status.error);
@@ -785,6 +816,7 @@ const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({ message, isOwnM
           await soundRef.current.setPositionAsync(0);
           setCurrentPosition(0);
           setIsFinished(false);
+          hasFinishedRef.current = false; // Resetear flag para nueva reproducción
         }
         
         await soundRef.current.playAsync();

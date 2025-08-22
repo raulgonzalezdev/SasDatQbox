@@ -119,9 +119,16 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
 
   const startRecording = async () => {
     try {
+      // Actualizar estado inmediatamente para evitar doble botón
+      setIsRecording(true);
+      setRecordingDuration(0);
+      setWaveformData([]);
+      setCanSend(false);
+      
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permisos', 'Se necesita acceso al micrófono');
+        setIsRecording(false); // Revertir si no hay permisos
         return;
       }
 
@@ -136,15 +143,12 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       );
 
       setRecording(recording);
-      setIsRecording(true);
-      setRecordingDuration(0);
-      setWaveformData([]);
-      setCanSend(false);
-      
-      console.log('🎤 Grabación iniciada');
+      console.log('🎤 Grabación iniciada exitosamente');
     } catch (error) {
       console.error('Error al iniciar grabación:', error);
       Alert.alert('Error', 'No se pudo iniciar la grabación');
+      setIsRecording(false); // Revertir en caso de error
+      setRecording(null);
     }
   };
 
@@ -222,20 +226,27 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   };
 
   const handleCancelRecording = async () => {
+    console.log('🗑️ Cancelando grabación...');
+    
+    // Limpiar estado inmediatamente
+    setIsRecording(false);
+    setCanSend(false);
+    setRecordingDuration(0);
+    setRecordingTime('00:00');
+    setWaveformData([]);
+    
     if (recording) {
       try {
         await recording.stopAndUnloadAsync();
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+        });
       } catch (error) {
         console.error('Error al cancelar grabación:', error);
       }
     }
     
     setRecording(null);
-    setIsRecording(false);
-    setRecordingDuration(0);
-    setRecordingTime('00:00');
-    setWaveformData([]);
-    setCanSend(false);
     onCancel();
   };
 
@@ -296,7 +307,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     return (
       <TouchableOpacity
         style={styles.recordButton}
-        onPressIn={startRecording}
+        onPress={startRecording}
         activeOpacity={0.8}
       >
         <Ionicons name="mic" size={24} color={Colors.white} />

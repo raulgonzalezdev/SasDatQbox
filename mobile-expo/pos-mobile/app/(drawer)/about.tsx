@@ -28,57 +28,73 @@ export default function AboutScreen() {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Ionicons name="storefront" size={60} color={Colors.secondary} />
+            <Ionicons name="medical" size={60} color={Colors.primary} />
           </View>
-          <ThemedText style={styles.appName}>DatqboxPos</ThemedText>
+          <ThemedText style={styles.appName}>DoctorBox</ThemedText>
           <ThemedText style={styles.appVersion}>Versión {appVersion}</ThemedText>
           <ThemedText style={styles.appDescription}>
-            La solución completa para la gestión de tu negocio
+            Plataforma integral para la gestión médica moderna
           </ThemedText>
         </View>
         
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Acerca de nosotros</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Nuestra Misión</ThemedText>
           <ThemedText style={styles.sectionText}>
-            DatqboxPos es una aplicación diseñada para ayudar a pequeños y medianos negocios a gestionar sus ventas, inventario, gastos y reportes de manera sencilla y eficiente.
+            DoctorBox es una plataforma médica diseñada para revolucionar la atención sanitaria mediante tecnología avanzada, facilitando la comunicación entre médicos y pacientes, optimizando la gestión de citas y mejorando la calidad de la atención médica.
           </ThemedText>
           <ThemedText style={styles.sectionText}>
-            Nuestro objetivo es proporcionar herramientas accesibles que permitan a los emprendedores y dueños de negocios tomar mejores decisiones basadas en datos reales y actualizados.
+            Creemos en un futuro donde la tecnología médica sea accesible, segura y centrada en el paciente. Nuestra misión es empoderar a los profesionales de la salud con herramientas innovadoras que mejoren los resultados médicos y la experiencia del paciente.
           </ThemedText>
         </View>
         
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Características principales</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Funcionalidades Médicas</ThemedText>
           
           <View style={styles.featureItem}>
-            <Ionicons name="cart" size={24} color={Colors.secondary} style={styles.featureIcon} />
+            <Ionicons name="calendar" size={24} color={Colors.primary} style={styles.featureIcon} />
             <View>
-              <ThemedText style={styles.featureTitle}>Gestión de ventas</ThemedText>
-              <ThemedText style={styles.featureDescription}>Registra y gestiona tus ventas diarias</ThemedText>
+              <ThemedText style={styles.featureTitle}>Gestión de Citas</ThemedText>
+              <ThemedText style={styles.featureDescription}>Programa y administra citas médicas de forma eficiente</ThemedText>
             </View>
           </View>
           
           <View style={styles.featureItem}>
-            <Ionicons name="cube" size={24} color={Colors.secondary} style={styles.featureIcon} />
+            <Ionicons name="chatbubbles" size={24} color={Colors.primary} style={styles.featureIcon} />
             <View>
-              <ThemedText style={styles.featureTitle}>Control de inventario</ThemedText>
-              <ThemedText style={styles.featureDescription}>Administra tu stock de productos</ThemedText>
+              <ThemedText style={styles.featureTitle}>Chat Médico Seguro</ThemedText>
+              <ThemedText style={styles.featureDescription}>Comunicación directa con notas de voz y videollamadas</ThemedText>
             </View>
           </View>
           
           <View style={styles.featureItem}>
-            <Ionicons name="cash" size={24} color={Colors.secondary} style={styles.featureIcon} />
+            <Ionicons name="people" size={24} color={Colors.primary} style={styles.featureIcon} />
             <View>
-              <ThemedText style={styles.featureTitle}>Registro de gastos</ThemedText>
-              <ThemedText style={styles.featureDescription}>Controla los gastos de tu negocio</ThemedText>
+              <ThemedText style={styles.featureTitle}>Gestión de Pacientes</ThemedText>
+              <ThemedText style={styles.featureDescription}>Historiales médicos digitales y seguimiento personalizado</ThemedText>
             </View>
           </View>
           
           <View style={styles.featureItem}>
-            <Ionicons name="bar-chart" size={24} color={Colors.secondary} style={styles.featureIcon} />
+            <Ionicons name="document-text" size={24} color={Colors.primary} style={styles.featureIcon} />
             <View>
-              <ThemedText style={styles.featureTitle}>Reportes detallados</ThemedText>
-              <ThemedText style={styles.featureDescription}>Visualiza el rendimiento de tu negocio</ThemedText>
+              <ThemedText style={styles.featureTitle}>Recetas Digitales</ThemedText>
+              <ThemedText style={styles.featureDescription}>Prescripciones electrónicas y seguimiento de medicamentos</ThemedText>
+            </View>
+          </View>
+          
+          <View style={styles.featureItem}>
+            <Ionicons name="shield-checkmark" size={24} color={Colors.primary} style={styles.featureIcon} />
+            <View>
+              <ThemedText style={styles.featureTitle}>Seguridad HIPAA</ThemedText>
+              <ThemedText style={styles.featureDescription}>Protección de datos médicos con estándares internacionales</ThemedText>
+            </View>
+          </View>
+          
+          <View style={styles.featureItem}>
+            <Ionicons name="analytics" size={24} color={Colors.primary} style={styles.featureIcon} />
+            <View>
+              <ThemedText style={styles.featureTitle}>Análisis Médico</ThemedText>
+              <ThemedText style={styles.featureDescription}>Reportes de salud y estadísticas de tratamientos</ThemedText>
             </View>
           </View>
         </View>
@@ -110,13 +126,13 @@ export default function AboutScreen() {
           
           <View style={styles.contactInfo}>
             <Ionicons name="mail-outline" size={20} color={Colors.dark} style={styles.contactIcon} />
-            <ThemedText style={styles.contactText}>soporte@datqbox.com</ThemedText>
+            <ThemedText style={styles.contactText}>soporte@doctorbox.com</ThemedText>
           </View>
           
           <View style={styles.contactInfo}>
             <Ionicons name="globe-outline" size={20} color={Colors.dark} style={styles.contactIcon} />
             <TouchableOpacity onPress={handleOpenWebsite}>
-              <ThemedText style={[styles.contactText, styles.contactLink]}>www.datqbox.com</ThemedText>
+              <ThemedText style={[styles.contactText, styles.contactLink]}>www.doctorbox.com</ThemedText>
             </TouchableOpacity>
           </View>
           
@@ -137,7 +153,7 @@ export default function AboutScreen() {
         
         <View style={styles.footer}>
           <ThemedText style={styles.copyright}>
-            © {new Date().getFullYear()} DatqboxPos. Todos los derechos reservados.
+            © {new Date().getFullYear()} DoctorBox. Todos los derechos reservados.
           </ThemedText>
         </View>
       </ScrollView>
@@ -172,7 +188,7 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: Typography.fontSizes.xxl,
-    fontWeight: Typography.fontWeights.bold,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
@@ -195,7 +211,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
     marginBottom: Spacing.md,
   },
@@ -215,7 +231,7 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.medium,
+    fontWeight: Typography.fontWeights.medium as any,
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
@@ -245,7 +261,7 @@ const styles = StyleSheet.create({
   },
   contactTitle: {
     fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
     marginBottom: Spacing.lg,
     textAlign: 'center',

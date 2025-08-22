@@ -11,13 +11,13 @@ export default function TabLayout() {
   const isDoctor = user?.role === 'doctor';
   const [drawerVisible, setDrawerVisible] = useState(false);
 
-  // Opciones para el BottomDrawer según el rol
-  const getDynamicOptions = () => {
+    // Opciones para el BottomDrawer según el rol
+const getDynamicOptions = () => {
     if (isDoctor) {
       return [
         {
-          icon: 'add-circle-outline',
-          label: 'Nueva Cita',
+          icon: 'calendar-outline',
+          label: 'Agendar Cita Médica',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/appointments');
@@ -25,23 +25,39 @@ export default function TabLayout() {
         },
         {
           icon: 'person-add-outline',
-          label: 'Nuevo Paciente',
+          label: 'Registrar Paciente',
           onPress: () => {
             setDrawerVisible(false);
-            console.log('Nuevo paciente...');
+            router.push('/(drawer)/(tabs)/patients');
           },
         },
         {
-          icon: 'medical-outline',
-          label: 'Consulta Rápida',
+          icon: 'chatbubbles-outline',
+          label: 'Consulta Virtual',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/chat');
           },
         },
         {
-          icon: 'receipt-outline',
-          label: 'Nueva Receta',
+          icon: 'document-text-outline',
+          label: 'Recetar Medicamento',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/chat');
+          },
+        },
+        {
+          icon: 'analytics-outline',
+          label: 'Herramientas Médicas',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/explore');
+          },
+        },
+        {
+          icon: 'alert-circle-outline',
+          label: 'Caso de Emergencia',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/chat');
@@ -53,23 +69,39 @@ export default function TabLayout() {
       return [
         {
           icon: 'calendar-outline',
-          label: 'Agendar Cita',
+          label: 'Solicitar Cita',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/appointments');
           },
         },
         {
-          icon: 'chatbubble-outline',
-          label: 'Consultar Médico',
+          icon: 'chatbubbles-outline',
+          label: 'Consultar Doctor',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/chat');
           },
         },
         {
-          icon: 'document-text-outline',
-          label: 'Mi Historial',
+          icon: 'person-outline',
+          label: 'Mi Ficha Médica',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/patients');
+          },
+        },
+        {
+          icon: 'medical-outline',
+          label: 'Mis Medicamentos',
+          onPress: () => {
+            setDrawerVisible(false);
+            router.push('/(drawer)/(tabs)/patients');
+          },
+        },
+        {
+          icon: 'fitness-outline',
+          label: 'Signos Vitales',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/patients');
@@ -77,7 +109,7 @@ export default function TabLayout() {
         },
         {
           icon: 'call-outline',
-          label: 'Emergencia',
+          label: 'Emergencia Médica',
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/chat');

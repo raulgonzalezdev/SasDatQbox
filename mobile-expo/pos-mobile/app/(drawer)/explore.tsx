@@ -16,24 +16,32 @@ export default function ExploreScreen() {
   const showPromotions = shouldShowPromotions();
   const user = getCurrentUser();
   
-  // Datos simulados
-  const featuresData = [
-    { id: 1, title: 'Gestión de inventario', icon: 'cube-outline', color: Colors.success, premium: false },
-    { id: 2, title: 'Reportes avanzados', icon: 'bar-chart-outline', color: Colors.info, premium: true },
-    { id: 3, title: 'Gestión de mesas', icon: 'grid-outline', color: Colors.warning, premium: true },
-    { id: 4, title: 'Fidelización de clientes', icon: 'people-outline', color: Colors.secondary, premium: true },
-    { id: 5, title: 'Integración con impresoras', icon: 'print-outline', color: Colors.darkGray, premium: true },
-    { id: 6, title: 'Múltiples métodos de pago', icon: 'card-outline', color: Colors.danger, premium: true },
+  // Recursos médicos útiles
+  const medicalResources = [
+    { id: 1, title: 'Calculadora de IMC', icon: 'calculator-outline', color: Colors.primary, premium: false, route: null },
+    { id: 2, title: 'Conversión de Unidades', icon: 'swap-horizontal-outline', color: Colors.info, premium: false, route: null },
+    { id: 3, title: 'Guías de Diagnóstico', icon: 'book-outline', color: Colors.success, premium: true, route: null },
+    { id: 4, title: 'Calculadora de Dosis', icon: 'medical-outline', color: Colors.warning, premium: true, route: null },
+    { id: 5, title: 'Atlas Médico', icon: 'body-outline', color: Colors.danger, premium: true, route: null },
+    { id: 6, title: 'Referencia de Medicamentos', icon: 'library-outline', color: Colors.secondary, premium: true, route: null },
   ];
 
-  const handleFeaturePress = (feature) => {
-    if (feature.premium && !isPremium) {
-      // Si la característica es premium y el usuario no es premium, redirigir a la página de planes
+  const handleResourcePress = (resource) => {
+    if (resource.premium && !isPremium) {
+      // Si es premium y el usuario no es premium, redirigir a planes
       router.push('/landing');
     } else {
-      // Aquí iría la lógica para mostrar más detalles sobre la característica
-      // Por ahora, solo mostramos un mensaje
-      alert(`Característica: ${feature.title}`);
+      // Implementar funcionalidades médicas útiles
+      switch (resource.id) {
+        case 1: // Calculadora de IMC
+          alert('Calculadora de IMC - Funcionalidad en desarrollo');
+          break;
+        case 2: // Conversión de Unidades
+          alert('Conversión de Unidades Médicas - Funcionalidad en desarrollo');
+          break;
+        default:
+          alert(`${resource.title} - Funcionalidad en desarrollo`);
+      }
     }
   };
 
@@ -46,8 +54,8 @@ export default function ExploreScreen() {
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
       
       <Header 
-        title={user?.businessName || "Varas Grill"}
-        subtitle={user?.role || "Propietario"}
+        title="Centro de Recursos"
+        subtitle="Herramientas médicas profesionales"
         showHelp={false}
       />
 
@@ -56,41 +64,41 @@ export default function ExploreScreen() {
           {/* Banner principal */}
           <View style={styles.mainBanner}>
             <ThemedText style={styles.mainBannerTitle}>
-              {isPremium ? 'Todas las funciones desbloqueadas' : 'Explora todas las funciones'}
+              {isPremium ? 'Recursos médicos completos' : 'Herramientas médicas esenciales'}
           </ThemedText>
             <ThemedText style={styles.mainBannerSubtitle}>
               {isPremium 
-                ? 'Gracias por ser un usuario premium. Disfruta de todas las funcionalidades.' 
-                : 'Descubre todo lo que puedes hacer con nuestra aplicación'}
+                ? 'Accede a calculadoras, guías y referencias médicas profesionales.' 
+                : 'Utiliza nuestras herramientas básicas y descubre las funciones premium'}
             </ThemedText>
             
             {isPremium && (
               <View style={styles.premiumBadge}>
-                <Ionicons name="star" size={16} color={Colors.white} />
-                <ThemedText style={styles.premiumBadgeText}>Premium</ThemedText>
+                <Ionicons name="medical" size={16} color={Colors.white} />
+                <ThemedText style={styles.premiumBadgeText}>Médico Pro</ThemedText>
               </View>
             )}
           </View>
 
-          {/* Características */}
+          {/* Recursos médicos */}
           <View style={CommonStyles.section}>
-            <ThemedText style={CommonStyles.sectionTitle}>Características disponibles</ThemedText>
+            <ThemedText style={CommonStyles.sectionTitle}>Herramientas médicas</ThemedText>
             <View style={styles.featuresGrid}>
-              {featuresData.map(feature => (
+              {medicalResources.map(resource => (
                 <TouchableOpacity 
-                  key={feature.id} 
+                  key={resource.id} 
                   style={[
                     styles.featureItem,
-                    feature.premium && !isPremium && styles.premiumFeatureItem
+                    resource.premium && !isPremium && styles.premiumFeatureItem
                   ]}
-                  onPress={() => handleFeaturePress(feature)}
+                  onPress={() => handleResourcePress(resource)}
                 >
-                  <View style={[styles.featureIconContainer, { backgroundColor: feature.color }]}>
-                    <Ionicons name={feature.icon} size={24} color={Colors.white} />
+                  <View style={[styles.featureIconContainer, { backgroundColor: resource.color }]}>
+                    <Ionicons name={resource.icon} size={24} color={Colors.white} />
                   </View>
-                  <ThemedText style={styles.featureTitle}>{feature.title}</ThemedText>
+                  <ThemedText style={styles.featureTitle}>{resource.title}</ThemedText>
                   
-                  {feature.premium && !isPremium && (
+                  {resource.premium && !isPremium && (
                     <View style={styles.featurePremiumBadge}>
                       <Ionicons name="lock-closed" size={12} color={Colors.white} />
                     </View>
@@ -104,19 +112,19 @@ export default function ExploreScreen() {
           {!isPremium && showPromotions && (
             <View style={styles.subscriptionBanner}>
               <View style={styles.subscriptionContent}>
-                <ThemedText style={styles.subscriptionTitle}>Plan Premium</ThemedText>
+                <ThemedText style={styles.subscriptionTitle}>DoctorBox Pro</ThemedText>
                 <ThemedText style={styles.subscriptionText}>
-                  Accede a todas las funciones avanzadas y mejora tu negocio
+                  Desbloquea herramientas médicas avanzadas y mejora tu práctica profesional
                 </ThemedText>
                 <TouchableOpacity 
                   style={styles.subscriptionButton}
                   onPress={handleSubscriptionPress}
                 >
-                  <ThemedText style={styles.subscriptionButtonText}>Ver planes</ThemedText>
+                  <ThemedText style={styles.subscriptionButtonText}>Ser Premium</ThemedText>
                 </TouchableOpacity>
               </View>
               <View style={styles.subscriptionImageContainer}>
-                <Ionicons name="star" size={60} color={Colors.primary} />
+                <Ionicons name="medical" size={60} color={Colors.primary} />
               </View>
             </View>
           )}
@@ -130,9 +138,9 @@ export default function ExploreScreen() {
             >
               <Ionicons name="chatbubble-ellipses-outline" size={24} color={Colors.secondary} />
               <View style={styles.supportItemContent}>
-                <ThemedText style={styles.supportItemTitle}>Contacta con soporte</ThemedText>
+                <ThemedText style={styles.supportItemTitle}>Soporte médico especializado</ThemedText>
                 <ThemedText style={styles.supportItemText}>
-                  Nuestro equipo está disponible para ayudarte
+                  Nuestro equipo médico-técnico está disponible 24/7
                 </ThemedText>
               </View>
               <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />

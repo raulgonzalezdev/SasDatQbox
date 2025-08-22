@@ -17,32 +17,38 @@ export default function HelpScreen() {
   const [faqs, setFaqs] = useState<FAQItem[]>([
     {
       id: '1',
-      question: '¿Cómo puedo registrar una venta?',
-      answer: 'Para registrar una venta, ve a la sección "Ventas" desde el menú principal. Luego, pulsa el botón "+" para añadir una nueva venta. Completa los detalles del producto, cantidad y precio, y finaliza pulsando "Guardar".',
+      question: '¿Cómo programar una cita médica?',
+      answer: 'Para programar una cita, ve a la sección "Citas" desde el menú principal. Pulsa el botón "+" para crear una nueva cita. Selecciona el paciente, fecha, hora y tipo de consulta. Puedes enviar recordatorios automáticos al paciente.',
       expanded: false,
     },
     {
       id: '2',
-      question: '¿Cómo puedo añadir un nuevo producto al inventario?',
-      answer: 'Para añadir un nuevo producto, ve a la sección "Inventario" desde el menú principal. Pulsa el botón "+" para añadir un nuevo producto. Completa los detalles como nombre, descripción, precio y cantidad, y finaliza pulsando "Guardar".',
+      question: '¿Cómo comunicarme con mis pacientes de forma segura?',
+      answer: 'Utiliza nuestro chat médico seguro desde la sección "Chat". Puedes enviar mensajes de texto, notas de voz y realizar videollamadas. Toda la comunicación está encriptada y cumple con los estándares de privacidad médica.',
       expanded: false,
     },
     {
       id: '3',
-      question: '¿Cómo puedo ver mis reportes de ventas?',
-      answer: 'Para ver tus reportes de ventas, ve a la sección "Reportes" desde el menú principal. Allí podrás ver diferentes tipos de informes como ventas diarias, semanales o mensuales. También puedes filtrar por fechas específicas.',
+      question: '¿Cómo gestionar el historial médico de un paciente?',
+      answer: 'En la sección "Pacientes", selecciona el paciente deseado. Allí podrás ver y actualizar su historial médico, alergias, medicamentos actuales, y agregar nuevas notas médicas. Todo se sincroniza automáticamente.',
       expanded: false,
     },
     {
       id: '4',
-      question: '¿Cómo puedo registrar un gasto?',
-      answer: 'Para registrar un gasto, ve a la sección "Gastos" desde el menú principal. Pulsa el botón "+" para añadir un nuevo gasto. Completa los detalles como concepto, monto y fecha, y finaliza pulsando "Guardar".',
+      question: '¿Cómo crear y enviar recetas digitales?',
+      answer: 'Durante una consulta o desde el chat, puedes crear recetas digitales. Selecciona los medicamentos, dosis y frecuencia. La receta se enviará automáticamente al paciente y se guardará en su historial.',
       expanded: false,
     },
     {
       id: '5',
-      question: '¿Cómo puedo cambiar mi contraseña?',
-      answer: 'Para cambiar tu contraseña, ve a la sección "Mi Perfil" desde el menú lateral. Luego, pulsa en "Cambiar contraseña" en la sección de Seguridad. Ingresa tu contraseña actual y la nueva contraseña, y finaliza pulsando "Guardar".',
+      question: '¿La app cumple con las regulaciones de privacidad médica?',
+      answer: 'Sí, DoctorBox cumple con los estándares HIPAA y GDPR. Todos los datos están encriptados, tenemos auditorías de seguridad regulares y solo el personal autorizado puede acceder a la información médica.',
+      expanded: false,
+    },
+    {
+      id: '6',
+      question: '¿Cómo usar las videollamadas médicas?',
+      answer: 'Desde el chat con un paciente, pulsa el icono de videollamada. El paciente recibirá una notificación para unirse. Puedes compartir pantalla, tomar capturas para el expediente y grabar la consulta si es necesario.',
       expanded: false,
     },
   ]);
@@ -54,7 +60,7 @@ export default function HelpScreen() {
   };
   
   const handleContactSupport = () => {
-    Linking.openURL('mailto:soporte@tuapp.com?subject=Soporte%20Técnico');
+    Linking.openURL('mailto:soporte@doctorbox.com?subject=Soporte%20Médico%20DoctorBox');
   };
   
   return (
@@ -116,28 +122,37 @@ export default function HelpScreen() {
           <ThemedText style={styles.sectionTitle}>Guías rápidas</ThemedText>
           
           <TouchableOpacity style={styles.guideItem}>
-            <Ionicons name="document-text-outline" size={24} color={Colors.secondary} style={styles.guideIcon} />
+            <Ionicons name="medical-outline" size={24} color={Colors.primary} style={styles.guideIcon} />
             <View style={styles.guideInfo}>
-              <ThemedText style={styles.guideTitle}>Guía de inicio rápido</ThemedText>
-              <ThemedText style={styles.guideDescription}>Aprende lo básico para comenzar a usar la aplicación</ThemedText>
+              <ThemedText style={styles.guideTitle}>Guía médica inicial</ThemedText>
+              <ThemedText style={styles.guideDescription}>Configuración inicial para profesionales de la salud</ThemedText>
             </View>
             <Ionicons name="chevron-forward" size={24} color={Colors.darkGray} />
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.guideItem}>
-            <Ionicons name="cart-outline" size={24} color={Colors.secondary} style={styles.guideIcon} />
+            <Ionicons name="people-outline" size={24} color={Colors.primary} style={styles.guideIcon} />
             <View style={styles.guideInfo}>
-              <ThemedText style={styles.guideTitle}>Gestión de ventas</ThemedText>
-              <ThemedText style={styles.guideDescription}>Cómo registrar y gestionar tus ventas</ThemedText>
+              <ThemedText style={styles.guideTitle}>Gestión de pacientes</ThemedText>
+              <ThemedText style={styles.guideDescription}>Cómo administrar historiales y seguimientos</ThemedText>
             </View>
             <Ionicons name="chevron-forward" size={24} color={Colors.darkGray} />
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.guideItem}>
-            <Ionicons name="cube-outline" size={24} color={Colors.secondary} style={styles.guideIcon} />
+            <Ionicons name="chatbubbles-outline" size={24} color={Colors.primary} style={styles.guideIcon} />
             <View style={styles.guideInfo}>
-              <ThemedText style={styles.guideTitle}>Gestión de inventario</ThemedText>
-              <ThemedText style={styles.guideDescription}>Cómo administrar tu inventario de productos</ThemedText>
+              <ThemedText style={styles.guideTitle}>Comunicación segura</ThemedText>
+              <ThemedText style={styles.guideDescription}>Chat médico y videollamadas profesionales</ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={Colors.darkGray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.guideItem}>
+            <Ionicons name="document-text-outline" size={24} color={Colors.primary} style={styles.guideIcon} />
+            <View style={styles.guideInfo}>
+              <ThemedText style={styles.guideTitle}>Recetas digitales</ThemedText>
+              <ThemedText style={styles.guideDescription}>Creación y gestión de prescripciones electrónicas</ThemedText>
             </View>
             <Ionicons name="chevron-forward" size={24} color={Colors.darkGray} />
           </TouchableOpacity>
