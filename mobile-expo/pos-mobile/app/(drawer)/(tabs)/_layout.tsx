@@ -4,12 +4,14 @@ import { View } from 'react-native';
 import { Colors } from '@/constants/GlobalStyles';
 import CustomTabBar from '@/components/ui/CustomTabBar';
 import BottomDrawer from '@/components/ui/BottomDrawer'; // Importar el BottomDrawer
+import PaymentValidationPanel from '@/components/payments/PaymentValidationPanel';
 import { useAppStore } from '@/store/appStore';
 // Usando directamente el store sin contexto
 export default function TabLayout() {
   const { user, isInChat } = useAppStore(); // Directamente del store
   const isDoctor = user?.role === 'doctor';
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [showPaymentValidation, setShowPaymentValidation] = useState(false);
 
     // Opciones para el BottomDrawer según el rol
 const getDynamicOptions = () => {
@@ -61,6 +63,14 @@ const getDynamicOptions = () => {
           onPress: () => {
             setDrawerVisible(false);
             router.push('/(drawer)/(tabs)/chat');
+          },
+        },
+        {
+          icon: 'card-outline',
+          label: 'Validar Pagos',
+          onPress: () => {
+            setDrawerVisible(false);
+            setShowPaymentValidation(true);
           },
         },
       ];
@@ -173,6 +183,13 @@ const getDynamicOptions = () => {
         onClose={() => setDrawerVisible(false)}
         options={getDynamicOptions()}
       />
+      
+      {isDoctor && (
+        <PaymentValidationPanel
+          visible={showPaymentValidation}
+          onClose={() => setShowPaymentValidation(false)}
+        />
+      )}
     </View>
   );
 }

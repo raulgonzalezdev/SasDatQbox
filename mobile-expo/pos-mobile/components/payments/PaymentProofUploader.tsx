@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useMedicalStore, PaymentMethod } from '@/store/medicalStore';
+import { useNotificationStore } from '@/store/notificationStore';
+import { useAppStore } from '@/store/appStore';
 import * as ImagePicker from 'expo-image-picker';
 
 interface PaymentProofUploaderProps {
@@ -28,16 +30,32 @@ const PaymentProofUploader: React.FC<PaymentProofUploaderProps> = ({
   appointmentId,
   amount,
 }) => {
-  const { paymentMethods, submitPaymentProof, addPaymentMethod } = useMedicalStore();
+  const { user } = useAppStore();
+  const { paymentMethods, submitPaymentProof, addPaymentMethod, appointments } = useMedicalStore();
+  const { notifyPaymentSubmitted } = useNotificationStore();
   
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [proofImage, setProofImage] = useState<string | null>(null);
-  const [senderBank, setSenderBank] = useState('');
-  const [receiverBank, setReceiverBank] = useState('');
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [transactionDate, setTransactionDate] = useState(new Date());
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Campos específicos para pago móvil
+  const [mobilePayment, setMobilePayment] = useState({
+    senderBank: '',
+    senderPhone: '',
+    senderDocument: '', // cédula o RIF
+    referenceNumber: '',
+    transactionDate: new Date(),
+    amount: amount,
+  });
+  
+  // Campos específicos para transferencia bancaria
+  const [bankTransfer, setBankTransfer] = useState({
+    destinationAccount: '',
+    referenceNumber: '',
+    amount: amount,
+    transactionDate: new Date(),
+  });
 
   // Inicializar métodos de pago por defecto si no existen
   React.useEffect(() => {
@@ -132,14 +150,34 @@ const PaymentProofUploader: React.FC<PaymentProofUploaderProps> = ({
       return false;
     }
     
-    if (!referenceNumber.trim()) {
-      Alert.alert('Error', 'Ingresa el número de referencia');
-      return false;
+    if (selectedPaymentMethod.type === 'mobile_payment') {
+      if (!mobilePayment.senderBank.trim()) {
+        Alert.alert('Error', 'Selecciona el banco de origen');
+        return false;
+      }
+      if (!mobilePayment.senderPhone.trim()) {
+        Alert.alert('Error', 'Ingresa el teléfono');
+        return false;
+      }
+      if (!mobilePayment.senderDocument.trim()) {
+        Alert.alert('Error', 'Ingresa la cédula o RIF');
+        return false;
+      }
+      if (!mobilePayment.referenceNumber.trim()) {
+        Alert.alert('Error', 'Ingresa el número de comprobante');
+        return false;
+      }
     }
     
-    if (selectedPaymentMethod.type === 'bank_transfer' && !senderBank.trim()) {
-      Alert.alert('Error', 'Ingresa el banco emisor');
-      return false;
+    if (selectedPaymentMethod.type === 'bank_transfer') {
+      if (!bankTransfer.destinationAccount.trim()) {
+        Alert.alert('Error', 'Ingresa la cuenta destino');
+        return false;
+      }
+      if (!bankTransfer.referenceNumber.trim()) {
+        Alert.alert('Error', 'Ingresa el número de referencia');
+        return false;
+      }
     }
     
     return true;
@@ -151,24 +189,48 @@ const PaymentProofUploader: React.FC<PaymentProofUploaderProps> = ({
     setIsSubmitting(true);
     
     try {
-      const paymentProof = {
+      let paymentData: any = {
         payment_method_id: selectedPaymentMethod!.id,
         amount,
         currency: 'USD',
-        sender_bank: senderBank,
-        receiver_bank: selectedPaymentMethod!.details.bank_name || '',
-        reference_number: referenceNumber,
-        transaction_date: transactionDate,
         proof_image_url: proofImage!,
         status: 'pending' as const,
         notes,
       };
+
+      if (selectedPaymentMethod!.type === 'mobile_payment') {
+        paymentData = {
+          ...paymentData,
+          sender_bank: mobilePayment.senderBank,
+          sender_phone: mobilePayment.senderPhone,
+          sender_document: mobilePayment.senderDocument,
+          reference_number: mobilePayment.referenceNumber,
+          transaction_date: mobilePayment.transactionDate,
+          receiver_bank: selectedPaymentMethod!.details.bank_name || 'Banco Receptor',
+        };
+      } else if (selectedPaymentMethod!.type === 'bank_transfer') {
+        paymentData = {
+          ...paymentData,
+          destination_account: bankTransfer.destinationAccount,
+          reference_number: bankTransfer.referenceNumber,
+          transaction_date: bankTransfer.transactionDate,
+          sender_bank: 'Banco Emisor', // Se puede agregar selector después
+          receiver_bank: selectedPaymentMethod!.details.bank_name || 'Banco Receptor',
+        };
+      }
       
-      submitPaymentProof(paymentProof);
+      submitPaymentProof(paymentData);
+      
+      // Buscar la cita para obtener el doctor
+      const appointment = appointments.find(apt => apt.id === appointmentId);
+      if (appointment && user) {
+        // Generar notificaciones
+        notifyPaymentSubmitted(user.id, appointment.doctor_id, appointmentId, amount);
+      }
       
       Alert.alert(
         'Comprobante Enviado',
-        'Tu comprobante ha sido enviado para verificación. Te notificaremos cuando sea aprobado.',
+        'Tu comprobante ha sido enviado para verificación. El doctor revisará tu pago y te notificaremos cuando sea aprobado.',
         [{ text: 'OK', onPress: onClose }]
       );
     } catch (error) {
@@ -220,40 +282,53 @@ const PaymentProofUploader: React.FC<PaymentProofUploaderProps> = ({
     </View>
   );
 
-  const renderPaymentDetails = () => (
+  const renderMobilePaymentForm = () => (
     <View style={styles.section}>
-      <ThemedText style={styles.sectionTitle}>Detalles del Pago</ThemedText>
+      <ThemedText style={styles.sectionTitle}>Datos del Pago Móvil</ThemedText>
       
       <View style={styles.inputGroup}>
-        <ThemedText style={styles.inputLabel}>Número de Referencia *</ThemedText>
+        <ThemedText style={styles.inputLabel}>Banco de Origen *</ThemedText>
         <TextInput
           style={styles.textInput}
-          value={referenceNumber}
-          onChangeText={setReferenceNumber}
-          placeholder="Ej: 123456789"
+          value={mobilePayment.senderBank}
+          onChangeText={(value) => setMobilePayment(prev => ({...prev, senderBank: value}))}
+          placeholder="Ej: Banco de Venezuela"
           placeholderTextColor={Colors.darkGray}
         />
       </View>
 
-      {selectedPaymentMethod?.type === 'bank_transfer' && (
-        <View style={styles.inputGroup}>
-          <ThemedText style={styles.inputLabel}>Banco Emisor *</ThemedText>
-          <TextInput
-            style={styles.textInput}
-            value={senderBank}
-            onChangeText={setSenderBank}
-            placeholder="Ej: Banco Mercantil"
-            placeholderTextColor={Colors.darkGray}
-          />
-        </View>
-      )}
+      <View style={styles.inputGroup}>
+        <ThemedText style={styles.inputLabel}>Teléfono *</ThemedText>
+        <TextInput
+          style={styles.textInput}
+          value={mobilePayment.senderPhone}
+          onChangeText={(value) => setMobilePayment(prev => ({...prev, senderPhone: value}))}
+          placeholder="Ej: 0414-1234567"
+          placeholderTextColor={Colors.darkGray}
+          keyboardType="phone-pad"
+        />
+      </View>
 
       <View style={styles.inputGroup}>
-        <ThemedText style={styles.inputLabel}>Banco Receptor</ThemedText>
+        <ThemedText style={styles.inputLabel}>Cédula o RIF *</ThemedText>
         <TextInput
-          style={[styles.textInput, styles.readOnlyInput]}
-          value={selectedPaymentMethod?.details.bank_name || 'N/A'}
-          editable={false}
+          style={styles.textInput}
+          value={mobilePayment.senderDocument}
+          onChangeText={(value) => setMobilePayment(prev => ({...prev, senderDocument: value}))}
+          placeholder="Ej: V-12345678"
+          placeholderTextColor={Colors.darkGray}
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <ThemedText style={styles.inputLabel}>Número de Comprobante *</ThemedText>
+        <TextInput
+          style={styles.textInput}
+          value={mobilePayment.referenceNumber}
+          onChangeText={(value) => setMobilePayment(prev => ({...prev, referenceNumber: value}))}
+          placeholder="Ej: 123456789"
+          placeholderTextColor={Colors.darkGray}
+          keyboardType="numeric"
         />
       </View>
 
@@ -272,7 +347,58 @@ const PaymentProofUploader: React.FC<PaymentProofUploaderProps> = ({
           style={[styles.textInput, styles.textArea]}
           value={notes}
           onChangeText={setNotes}
-          placeholder="Agrega comentarios adicionales..."
+          placeholder="Comentarios adicionales..."
+          placeholderTextColor={Colors.darkGray}
+          multiline
+          numberOfLines={3}
+        />
+      </View>
+    </View>
+  );
+
+  const renderBankTransferForm = () => (
+    <View style={styles.section}>
+      <ThemedText style={styles.sectionTitle}>Datos de la Transferencia</ThemedText>
+      
+      <View style={styles.inputGroup}>
+        <ThemedText style={styles.inputLabel}>Cuenta Destino *</ThemedText>
+        <TextInput
+          style={styles.textInput}
+          value={bankTransfer.destinationAccount}
+          onChangeText={(value) => setBankTransfer(prev => ({...prev, destinationAccount: value}))}
+          placeholder="Ej: 0102-1234-56-7890123456"
+          placeholderTextColor={Colors.darkGray}
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <ThemedText style={styles.inputLabel}>Número de Referencia *</ThemedText>
+        <TextInput
+          style={styles.textInput}
+          value={bankTransfer.referenceNumber}
+          onChangeText={(value) => setBankTransfer(prev => ({...prev, referenceNumber: value}))}
+          placeholder="Ej: 987654321"
+          placeholderTextColor={Colors.darkGray}
+          keyboardType="numeric"
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <ThemedText style={styles.inputLabel}>Monto Transferido</ThemedText>
+        <TextInput
+          style={[styles.textInput, styles.readOnlyInput]}
+          value={`$${amount.toFixed(2)}`}
+          editable={false}
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <ThemedText style={styles.inputLabel}>Notas (Opcional)</ThemedText>
+        <TextInput
+          style={[styles.textInput, styles.textArea]}
+          value={notes}
+          onChangeText={setNotes}
+          placeholder="Comentarios adicionales..."
           placeholderTextColor={Colors.darkGray}
           multiline
           numberOfLines={3}
@@ -331,7 +457,8 @@ const PaymentProofUploader: React.FC<PaymentProofUploaderProps> = ({
           </View>
 
           {renderPaymentMethodSelection()}
-          {selectedPaymentMethod && renderPaymentDetails()}
+          {selectedPaymentMethod?.type === 'mobile_payment' && renderMobilePaymentForm()}
+          {selectedPaymentMethod?.type === 'bank_transfer' && renderBankTransferForm()}
           {selectedPaymentMethod && renderImageUpload()}
         </ScrollView>
 

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Image, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import NotificationBell from '@/components/notifications/NotificationBell';
+import NotificationPanel from '@/components/notifications/NotificationPanel';
 
 interface AppHeaderProps {
   showDrawerButton?: boolean;
@@ -12,6 +14,7 @@ interface AppHeaderProps {
 
 const AppHeader: React.FC<AppHeaderProps> = ({ showDrawerButton, DrawerButton }) => {
   const { logout } = useAppStore();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -19,8 +22,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showDrawerButton, DrawerButton })
   };
 
   const handleNotifications = () => {
-    // Lógica para navegar a la pantalla de notificaciones
-    console.log('Abriendo notificaciones...');
+    setShowNotifications(true);
   };
 
   return (
@@ -32,9 +34,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showDrawerButton, DrawerButton })
 
       {/* Lado derecho: Iconos */}
       <View style={styles.rightContainer}>
-        <TouchableOpacity onPress={handleNotifications} style={styles.iconButton}>
-          <Ionicons name="notifications-outline" size={26} color={Colors.white} />
-        </TouchableOpacity>
+        <NotificationBell onPress={handleNotifications} />
 
         <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
           <Ionicons name="log-out-outline" size={28} color={Colors.white} />
@@ -44,6 +44,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showDrawerButton, DrawerButton })
           <DrawerButton />
         )}
       </View>
+
+      <NotificationPanel 
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </View>
   );
 };
