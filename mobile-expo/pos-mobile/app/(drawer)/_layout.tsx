@@ -8,6 +8,7 @@ import AppHeader from '@/components/ui/Header'; // Importamos nuestro nuevo head
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
+// NavigationProvider ya no es necesario - usando Zustand store
 
 // Componente personalizado para el drawer con gradiente
 const CustomDrawerContent = (props: any) => {
@@ -58,8 +59,9 @@ const CustomDrawerContent = (props: any) => {
   );
 };
 
+// Componente principal usando directamente el store
 export default function DrawerLayout() {
-  const { user } = useAppStore();
+  const { user, isInChat } = useAppStore(); // Directamente del store
   const isDoctor = user?.role === 'doctor';
 
   return (
@@ -67,7 +69,7 @@ export default function DrawerLayout() {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerPosition: 'right',
-        headerShown: true,
+        headerShown: !isInChat, // Ocultar header cuando estamos en chat
         header: (props) => (
             <LinearGradient
                 colors={[Colors.primaryLight, Colors.primaryDark]}

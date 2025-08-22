@@ -27,6 +27,10 @@ interface AppState {
   hidePromotions: boolean;
   currentLocale: 'es' | 'en';
   
+  // Estado de navegación
+  isInChat: boolean;
+  currentChatId: string | null;
+  
   // Acciones
   setUser: (user: User | null) => void;
   updateUser: (userData: Partial<User>) => void;
@@ -34,6 +38,11 @@ interface AppState {
   setDemo: (isDemo: boolean) => void;
   setHidePromotions: (hidePromotions: boolean) => void;
   setLocale: (locale: 'es' | 'en') => void;
+  
+  // Acciones de navegación
+  enterChat: (chatId: string) => void;
+  exitChat: () => void;
+  
   logout: () => void;
 }
 
@@ -48,6 +57,10 @@ export const useAppStore = create<AppState>()(
       hidePromotions: false,
       currentLocale: 'es',
       
+      // Estado de navegación inicial
+      isInChat: false,
+      currentChatId: null,
+      
       // Acciones
       setUser: (user) => set({ user }),
       updateUser: (userData) => set((state) => ({
@@ -57,10 +70,23 @@ export const useAppStore = create<AppState>()(
       setDemo: (isDemo) => set({ isDemo }),
       setHidePromotions: (hidePromotions) => set({ hidePromotions }),
       setLocale: (currentLocale) => set({ currentLocale }),
+      
+      // Acciones de navegación optimizadas
+      enterChat: (chatId) => set({ 
+        isInChat: true, 
+        currentChatId: chatId 
+      }),
+      exitChat: () => set({ 
+        isInChat: false, 
+        currentChatId: null 
+      }),
+      
       logout: () => set({ 
         isAuthenticated: false, 
         user: null,
-        currentLocale: 'es'
+        currentLocale: 'es',
+        isInChat: false,
+        currentChatId: null,
       }),
     }),
     {

@@ -6,21 +6,26 @@ import { useAppStore } from '@/store/appStore';
 import { useChatStore, Conversation, getConversationById } from '@/store/chatStore';
 import { Ionicons } from '@expo/vector-icons';
 import MedicalChatInterface from '@/components/chat/MedicalChatInterface';
-import { useNavigation } from '@/contexts/NavigationContext';
 
 // Componente principal del chat médico
 const MedicalChatView = () => {
-    const { user } = useAppStore();
+    const { user, isInChat, currentChatId, enterChat, exitChat } = useAppStore();
     const { conversations, setConversations, setActiveConversation, setMessages } = useChatStore();
-    const { setIsInChat } = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
-    const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
-    // Inicializar datos de prueba al cargar
+    // Inicializar datos de prueba al cargar (solo una vez)
     useEffect(() => {
         console.log('🚀 Inicializando datos del chat...');
         initializeMockData();
-    }, []);
+        
+        // Cleanup al desmontar: salir del chat si estamos en uno
+        return () => {
+            if (isInChat) {
+                exitChat();
+                setActiveConversation(null);
+            }
+        };
+    }, []); // Solo se ejecuta una vez
 
     const initializeMockData = () => {
         // Datos simulados más realistas para el sistema médico
@@ -201,17 +206,20 @@ const MedicalChatView = () => {
         ]);
     };
 
+    // Función optimizada usando store - no useEffect
     const handleConversationPress = (conversation: Conversation) => {
         console.log('🔄 Seleccionando conversación:', conversation.id, conversation.title);
-        setSelectedConversationId(conversation.id);
         setActiveConversation(conversation);
-        setIsInChat(true); // Ocultar tabs cuando entramos al chat
+        enterChat(conversation.id); // Una sola llamada al store
+        console.log('🔄 Estado actualizado en store');
     };
 
+    // Función optimizada usando store - no useEffect
     const handleBackFromChat = () => {
-        setSelectedConversationId(null);
+        console.log('🔙 Saliendo del chat, restaurando tabs...');
         setActiveConversation(null);
-        setIsInChat(false); // Mostrar tabs cuando salimos del chat
+        exitChat(); // Una sola llamada al store
+        console.log('🔄 Estado limpiado en store');
     };
 
     const getOtherParticipant = (conversation: Conversation) => {
@@ -271,11 +279,11 @@ const MedicalChatView = () => {
         );
     };
 
-    // Si hay una conversación seleccionada, mostrar el chat
-    if (selectedConversationId) {
+    // Si hay una conversación seleccionada en el store, mostrar el chat
+    if (currentChatId && isInChat) {
         return (
             <MedicalChatInterface
-                conversationId={selectedConversationId}
+                conversationId={currentChatId}
                 onBack={handleBackFromChat}
             />
         );
@@ -304,13 +312,17 @@ const MedicalChatView = () => {
 
 export default function ChatScreen() {
     return (
-        <SafeAreaView style={CommonStyles.safeArea}>
+        <SafeAreaView style={styles.safeArea}>
             <MedicalChatView />
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: Colors.background,
+    },
     container: {
         flex: 1,
         backgroundColor: Colors.background,

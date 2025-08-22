@@ -166,7 +166,10 @@ export const useChatStore = create<ChatState>()((set, get) => ({
         ),
       })),
       
-      setActiveConversation: (conversation) => set({ activeConversation: conversation }),
+      // Optimizado: usar callback para evitar re-renders innecesarios
+      setActiveConversation: (conversation) => set((state) => 
+        state.activeConversation?.id === conversation?.id ? state : { activeConversation: conversation }
+      ),
       
       setMessages: (conversationId, messages) => set((state) => ({
         messages: { ...state.messages, [conversationId]: messages },

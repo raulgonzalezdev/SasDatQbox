@@ -5,13 +5,11 @@ import { Colors } from '@/constants/GlobalStyles';
 import CustomTabBar from '@/components/ui/CustomTabBar';
 import BottomDrawer from '@/components/ui/BottomDrawer'; // Importar el BottomDrawer
 import { useAppStore } from '@/store/appStore';
-import { NavigationProvider, useNavigation } from '@/contexts/NavigationContext';
-
-const TabLayoutContent = () => {
-  const { user } = useAppStore();
+// Usando directamente el store sin contexto
+export default function TabLayout() {
+  const { user, isInChat } = useAppStore(); // Directamente del store
   const isDoctor = user?.role === 'doctor';
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const { isInChat } = useNavigation();
 
   // Opciones para el BottomDrawer según el rol
   const getDynamicOptions = () => {
@@ -144,14 +142,6 @@ const TabLayoutContent = () => {
         options={getDynamicOptions()}
       />
     </View>
-  );
-};
-
-export default function TabLayout() {
-  return (
-    <NavigationProvider>
-      <TabLayoutContent />
-    </NavigationProvider>
   );
 }
 
