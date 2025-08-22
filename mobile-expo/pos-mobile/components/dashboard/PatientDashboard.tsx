@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
+import { useMedicalStore, getMockDoctors } from '@/store/medicalStore';
 import { mockPatientMedicalData } from '@/data/mockUsers';
 
 interface PatientDashboardProps {
@@ -12,9 +13,41 @@ interface PatientDashboardProps {
 }
 
 const PatientDashboard: React.FC<PatientDashboardProps> = ({ user }) => {
+  const { 
+    patientDoctors, 
+    addDoctorToPatient, 
+    getUnpaidAppointments,
+    scheduleAppointment 
+  } = useMedicalStore();
+
+  // Inicializar doctores de ejemplo si no hay ninguno
+  useEffect(() => {
+    if (patientDoctors.length === 0) {
+      const mockDoctors = getMockDoctors();
+      // Agregar el primer doctor como primario
+      addDoctorToPatient(mockDoctors[0], true);
+    }
+  }, [patientDoctors.length, addDoctorToPatient]);
+
   const handleCardPress = (route: string) => {
     router.push(route as any);
   };
+
+  const handleScheduleAppointment = () => {
+    if (patientDoctors.length === 0) {
+      Alert.alert('Sin doctores', 'Primero debe agregar un doctor a su lista.');
+      return;
+    }
+    router.push('/(drawer)/(tabs)/appointments');
+  };
+
+  const handleViewDoctors = () => {
+    // TODO: Navegar a página de mis doctores
+    router.push('/(drawer)/(tabs)/patients');
+  };
+
+  // Obtener doctor primario
+  const primaryDoctor = patientDoctors.find(pd => pd.is_primary)?.doctor;
 
   // Tarjetas específicas para pacientes
   const patientSummaryCards = [
@@ -28,11 +61,11 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ user }) => {
     },
     {
       id: 'my_doctor',
-      title: 'Mi Doctor',
-      value: 'Dr. González',
+      title: patientDoctors.length > 1 ? 'Mis Doctores' : 'Mi Doctor',
+      value: primaryDoctor ? `Dr. ${primaryDoctor.last_name}` : 'Sin asignar',
       icon: 'medical',
       color: Colors.success,
-      route: '/(drawer)/(tabs)/chat', // Ir al chat con el doctor
+      route: '/(drawer)/(tabs)/patients', // Ir a ver doctores
     },
     {
       id: 'medications',
@@ -140,6 +173,54 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ user }) => {
               <ThemedText style={styles.summaryValue}>{card.value}</ThemedText>
             </TouchableOpacity>
           ))}
+        </View>
+      </View>
+
+      {/* Mis Doctores */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <ThemedText style={styles.sectionTitle}>Mis Doctores</ThemedText>
+          <TouchableOpacity onPress={handleViewDoctors}>
+            <ThemedText style={styles.seeAllText}>Ver todos</ThemedText>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.doctorsContainer}>
+          {patientDoctors.slice(0, 2).map((patientDoctor) => (
+            <View key={patientDoctor.doctor_id} style={styles.doctorCard}>
+              <View style={styles.doctorAvatar}>
+                <Ionicons name="person" size={24} color={Colors.white} />
+              </View>
+              <View style={styles.doctorContent}>
+                <ThemedText style={styles.doctorName}>
+                  Dr. {patientDoctor.doctor.first_name} {patientDoctor.doctor.last_name}
+                </ThemedText>
+                <ThemedText style={styles.doctorSpecialty}>
+                  {patientDoctor.doctor.specialty}
+                </ThemedText>
+                {patientDoctor.is_primary && (
+                  <View style={styles.primaryBadge}>
+                    <ThemedText style={styles.primaryText}>Principal</ThemedText>
+                  </View>
+                )}
+              </View>
+              <TouchableOpacity 
+                style={styles.chatButton}
+                onPress={() => router.push('/(drawer)/(tabs)/chat')}
+              >
+                <Ionicons name="chatbubbles" size={20} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
+          ))}
+          
+          {patientDoctors.length === 0 && (
+            <View style={styles.emptyDoctors}>
+              <Ionicons name="medical" size={48} color={Colors.lightGray} />
+              <ThemedText style={styles.emptyText}>
+                No tienes doctores asignados
+              </ThemedText>
+            </View>
+          )}
         </View>
       </View>
 
@@ -291,9 +372,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   healthStatusCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.white,
     borderRadius: 15,
     padding: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
   },
   healthIndicator: {
     flexDirection: 'row',
@@ -307,14 +389,14 @@ const styles = StyleSheet.create({
     marginRight: Spacing.sm,
   },
   healthStatusText: {
-    color: Colors.white,
+    color: Colors.dark,
     fontSize: Typography.fontSizes.sm,
-    fontWeight: Typography.fontWeights.medium,
+    fontWeight: Typography.fontWeights.medium as any,
   },
   lastCheckup: {
-    color: Colors.white,
+    color: Colors.darkGray,
     fontSize: Typography.fontSizes.xs,
-    opacity: 0.8,
+    opacity: 0.9,
   },
   section: {
     marginBottom: Spacing.xl,
@@ -512,6 +594,76 @@ const styles = StyleSheet.create({
   alertText: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
+  },
+  // Estilos para sección de doctores
+  doctorsContainer: {
+    paddingHorizontal: Spacing.lg,
+  },
+  doctorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 15,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
+  },
+  doctorAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+  },
+  doctorContent: {
+    flex: 1,
+  },
+  doctorName: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.dark,
+    marginBottom: Spacing.xs,
+  },
+  doctorSpecialty: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    marginBottom: Spacing.xs,
+  },
+  primaryBadge: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+  },
+  primaryText: {
+    fontSize: Typography.fontSizes.xs,
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  chatButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyDoctors: {
+    alignItems: 'center',
+    padding: Spacing.xl,
+    backgroundColor: Colors.white,
+    borderRadius: 15,
+    marginHorizontal: Spacing.lg,
+    ...BordersAndShadows.shadows.sm,
+  },
+  emptyText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginTop: Spacing.md,
   },
 });
 
