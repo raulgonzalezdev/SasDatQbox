@@ -278,77 +278,80 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   }
 
   return (
-    <View style={styles.recordingContainer}>
-      {/* Indicador de deslizar para cancelar */}
-      <View style={styles.slideIndicator}>
-        <Ionicons name="chevron-back" size={16} color={Colors.darkGray} />
-        <Text style={styles.slideText}>Desliza para cancelar</Text>
-      </View>
-
-      {/* Área de grabación */}
-      <View style={styles.recordingContent}>
-        {/* Tiempo de grabación */}
-        <Text style={styles.recordingTime}>{recordingTime}</Text>
-        
-        {/* Forma de onda */}
-        {renderWaveform()}
-        
-        {/* Controles de grabación */}
-        <View style={styles.recordingControls}>
-          {/* Botón de cancelar */}
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={handleCancelRecording}
-          >
-            <Ionicons name="close" size={24} color={Colors.danger} />
-          </TouchableOpacity>
-          
-          {/* Botón de grabación (con gesto de deslizar) */}
-          <PanGestureHandler
-            onGestureEvent={handleGestureEvent}
-            onHandlerStateChange={handleGestureStateChange}
-          >
-            <Animated.View
-              style={[
-                styles.recordingButton,
-                {
-                  transform: [
-                    { translateX: slideAnimation },
-                    { scale: Animated.multiply(scaleAnimation, pulseAnimation) },
-                  ],
-                },
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.recordingButtonInner}
-                onPress={canSend ? handleSendRecording : undefined}
-                disabled={!canSend}
-              >
-                <Ionicons
-                  name={canSend ? "send" : "mic"}
-                  size={24}
-                  color={Colors.white}
-                />
-              </TouchableOpacity>
-            </Animated.View>
-          </PanGestureHandler>
-          
-          {/* Botón de enviar (alternativo para cuando se puede enviar) */}
-          {canSend && (
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={handleSendRecording}
-            >
-              <Ionicons name="send" size={24} color={Colors.primary} />
-            </TouchableOpacity>
-          )}
+    <View style={styles.recordingOverlay}>
+      {/* Área principal de grabación estilo WhatsApp */}
+      <View style={styles.recordingBar}>
+        {/* Icono del micrófono */}
+        <View style={styles.microphoneIcon}>
+          <Ionicons name="mic" size={20} color={Colors.danger} />
         </View>
+        
+        {/* Forma de onda compacta */}
+        <View style={styles.compactWaveform}>
+          {renderWaveform()}
+        </View>
+        
+        {/* Tiempo de grabación */}
+        <View style={styles.timeContainer}>
+          <Text style={styles.recordingTimeCompact}>{recordingTime}</Text>
+        </View>
+        
+        {/* Botón de cancelar */}
+        <TouchableOpacity
+          style={styles.cancelButtonCompact}
+          onPress={handleCancelRecording}
+        >
+          <Ionicons name="close" size={20} color={Colors.darkGray} />
+        </TouchableOpacity>
       </View>
       
-      {/* Instrucciones */}
-      <Text style={styles.instructionsText}>
-        {canSend ? 'Toca para enviar' : 'Mantén presionado para grabar'}
-      </Text>
+      {/* Texto de instrucción arriba */}
+      <View style={styles.instructionContainer}>
+        <Text style={styles.instructionText}>
+          <Ionicons name="chevron-up" size={14} color={Colors.lightGray} /> Desliza hacia arriba para cancelar
+        </Text>
+      </View>
+      
+      {/* Área de botones de acción */}
+      <View style={styles.actionArea}>
+        {/* Botón de grabación principal (grande como WhatsApp) */}
+        <PanGestureHandler
+          onGestureEvent={handleGestureEvent}
+          onHandlerStateChange={handleGestureStateChange}
+        >
+          <Animated.View
+            style={[
+              styles.mainRecordButton,
+              {
+                transform: [
+                  { translateX: slideAnimation },
+                  { scale: Animated.multiply(scaleAnimation, pulseAnimation) },
+                ],
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.mainRecordButtonInner}
+              onPress={canSend ? handleSendRecording : undefined}
+              disabled={!canSend}
+            >
+              <Ionicons
+                name={canSend ? "send" : "mic"}
+                size={28}
+                color={Colors.white}
+              />
+            </TouchableOpacity>
+          </Animated.View>
+        </PanGestureHandler>
+        
+        {/* Indicador de deslizar para enviar */}
+        {canSend && (
+          <View style={styles.sendIndicator}>
+            <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
+            <Text style={styles.sendText}>Desliza para enviar</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -363,87 +366,152 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: Spacing.sm,
   },
-  recordingContainer: {
+  
+  // Nueva interfaz estilo WhatsApp
+  recordingOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
-  slideIndicator: {
+  
+  recordingBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 25,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    marginTop: 60, // Dar espacio al header
+    ...BordersAndShadows.shadows.lg,
   },
-  slideText: {
-    color: Colors.darkGray,
-    fontSize: Typography.fontSizes.sm,
-    marginLeft: Spacing.xs,
-  },
-  recordingContent: {
+  
+  microphoneIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
+    marginRight: Spacing.md,
   },
-  recordingTime: {
-    fontSize: Typography.fontSizes.xl,
-    color: Colors.white,
-    fontWeight: Typography.fontWeights.bold,
-    marginBottom: Spacing.lg,
+  
+  compactWaveform: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 30,
+    marginHorizontal: Spacing.md,
   },
+  
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 60,
-    marginBottom: Spacing.xl,
-    paddingHorizontal: Spacing.lg,
+    height: 30,
   },
+  
   waveformBar: {
-    width: 3,
+    width: 2.5,
     backgroundColor: Colors.primary,
-    marginHorizontal: 1,
-    borderRadius: 1.5,
+    marginHorizontal: 0.5,
+    borderRadius: 1.25,
+    minHeight: 8,
   },
-  recordingControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    maxWidth: 200,
+  
+  timeContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 12,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    marginRight: Spacing.md,
   },
-  cancelButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  
+  recordingTimeCompact: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold,
+    fontFamily: 'monospace',
+  },
+  
+  cancelButtonCompact: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  recordingButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+  
+  instructionContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.xl,
+  },
+  
+  instructionText: {
+    color: Colors.lightGray,
+    fontSize: Typography.fontSizes.sm,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 15,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  
+  actionArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 100, // Dar espacio al teclado
+  },
+  
+  mainRecordButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: Colors.danger,
     justifyContent: 'center',
     alignItems: 'center',
+    ...BordersAndShadows.shadows.lg,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  recordingButtonInner: {
+  
+  mainRecordButtonInner: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sendButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
+  
+  sendIndicator: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginTop: Spacing.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  
+  sendText: {
+    color: Colors.primary,
+    fontSize: Typography.fontSizes.sm,
+    fontWeight: Typography.fontWeights.medium,
+    marginLeft: Spacing.xs,
+  },
+  
+  // Estilos deprecados mantenidos para compatibilidad
+  recordingTime: {
+    fontSize: Typography.fontSizes.xl,
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold,
+    marginBottom: Spacing.lg,
   },
   instructionsText: {
     color: Colors.lightGray,

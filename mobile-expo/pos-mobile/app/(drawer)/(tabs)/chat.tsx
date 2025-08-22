@@ -6,12 +6,13 @@ import { useAppStore } from '@/store/appStore';
 import { useChatStore, Conversation, getConversationById } from '@/store/chatStore';
 import { Ionicons } from '@expo/vector-icons';
 import MedicalChatInterface from '@/components/chat/MedicalChatInterface';
-import { useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 // Componente principal del chat médico
-const MedicalChatView = ({ setIsInChat }: { setIsInChat?: (inChat: boolean) => void }) => {
+const MedicalChatView = () => {
     const { user } = useAppStore();
     const { conversations, setConversations, setActiveConversation, setMessages } = useChatStore();
+    const { setIsInChat } = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
@@ -204,13 +205,13 @@ const MedicalChatView = ({ setIsInChat }: { setIsInChat?: (inChat: boolean) => v
         console.log('🔄 Seleccionando conversación:', conversation.id, conversation.title);
         setSelectedConversationId(conversation.id);
         setActiveConversation(conversation);
-        setIsInChat?.(true); // Ocultar tabs cuando entramos al chat
+        setIsInChat(true); // Ocultar tabs cuando entramos al chat
     };
 
     const handleBackFromChat = () => {
         setSelectedConversationId(null);
         setActiveConversation(null);
-        setIsInChat?.(false); // Mostrar tabs cuando salimos del chat
+        setIsInChat(false); // Mostrar tabs cuando salimos del chat
     };
 
     const getOtherParticipant = (conversation: Conversation) => {
@@ -231,22 +232,22 @@ const MedicalChatView = ({ setIsInChat }: { setIsInChat?: (inChat: boolean) => v
 
     const renderConversationItem = ({ item }: { item: Conversation }) => {
         const otherParticipant = getOtherParticipant(item);
-        
-        return (
+
+    return (
             <TouchableOpacity 
                 style={styles.chatItem} 
                 onPress={() => handleConversationPress(item)}
             >
                 <View style={styles.avatarContainer}>
-                    <View style={styles.avatar}>
+                        <View style={styles.avatar}>
                         <Text style={styles.avatarText}>
                             {otherParticipant?.first_name?.charAt(0) || 'U'}
                         </Text>
                         {otherParticipant?.is_online && <View style={styles.onlineIndicator} />}
                     </View>
-                </View>
+                        </View>
                 
-                <View style={styles.chatContent}>
+                        <View style={styles.chatContent}>
                     <View style={styles.chatHeader}>
                         <Text style={styles.chatName} numberOfLines={1}>
                             {otherParticipant?.first_name} {otherParticipant?.last_name}
@@ -254,19 +255,19 @@ const MedicalChatView = ({ setIsInChat }: { setIsInChat?: (inChat: boolean) => v
                         <Text style={styles.chatTime}>
                             {formatLastMessageTime(item.updated_at)}
                         </Text>
-                    </View>
+                        </View>
                     
                     <Text style={styles.chatMessage} numberOfLines={1}>
                         {item.last_message?.content || 'Nueva conversación'}
                     </Text>
                     
                     {item.unread_count > 0 && (
-                        <View style={styles.unreadBadge}>
+                            <View style={styles.unreadBadge}>
                             <Text style={styles.unreadText}>{item.unread_count}</Text>
-                        </View>
-                    )}
+                            </View>
+                        )}
                 </View>
-            </TouchableOpacity>
+                    </TouchableOpacity>
         );
     };
 
@@ -302,13 +303,9 @@ const MedicalChatView = ({ setIsInChat }: { setIsInChat?: (inChat: boolean) => v
 };
 
 export default function ChatScreen() {
-    const { user } = useAppStore();
-    const params = useLocalSearchParams();
-    const setIsInChat = params?.setIsInChat as ((inChat: boolean) => void) | undefined;
-
     return (
         <SafeAreaView style={CommonStyles.safeArea}>
-            <MedicalChatView setIsInChat={setIsInChat} />
+            <MedicalChatView />
         </SafeAreaView>
     );
 }

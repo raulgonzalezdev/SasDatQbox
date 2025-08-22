@@ -5,12 +5,13 @@ import { Colors } from '@/constants/GlobalStyles';
 import CustomTabBar from '@/components/ui/CustomTabBar';
 import BottomDrawer from '@/components/ui/BottomDrawer'; // Importar el BottomDrawer
 import { useAppStore } from '@/store/appStore';
+import { NavigationProvider, useNavigation } from '@/contexts/NavigationContext';
 
-export default function TabLayout() {
+const TabLayoutContent = () => {
   const { user } = useAppStore();
   const isDoctor = user?.role === 'doctor';
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [isInChat, setIsInChat] = useState(false); // Estado de visibilidad
+  const { isInChat } = useNavigation();
 
   // Opciones para el BottomDrawer según el rol
   const getDynamicOptions = () => {
@@ -135,7 +136,6 @@ export default function TabLayout() {
             title: 'Chat',
             tabBarIconName: 'chatbubbles-outline',
           }}
-          initialParams={{ setIsInChat }}
         />
       </Tabs>
       <BottomDrawer 
@@ -144,6 +144,14 @@ export default function TabLayout() {
         options={getDynamicOptions()}
       />
     </View>
+  );
+};
+
+export default function TabLayout() {
+  return (
+    <NavigationProvider>
+      <TabLayoutContent />
+    </NavigationProvider>
   );
 }
 

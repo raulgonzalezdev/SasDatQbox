@@ -255,6 +255,40 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
     setShowVoiceRecorder(false);
   };
 
+  const handleTakePhoto = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (permissionResult.granted === false) {
+        Alert.alert('Permisos', 'Se necesita acceso a la cámara');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const imageFile = {
+          uri: asset.uri,
+          name: `photo_${Date.now()}.jpg`,
+          type: 'image',
+          mimeType: 'image/jpeg',
+          size: asset.fileSize || 0,
+        };
+        
+        onSendMessage('📷 Foto', 'image', [imageFile]);
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo tomar la foto');
+    }
+  };
+
   const renderAttachmentOptions = () => {
     if (!showAttachmentOptions) return null;
 
@@ -322,47 +356,77 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
       )}
       
       <View style={[styles.inputContainer, isFocused && styles.inputContainerFocused]}>
-        {/* Botón de adjuntos */}
-        <TouchableOpacity
-          style={styles.attachButton}
-          onPress={showAttachmentSheet}
-        >
-          <Ionicons name="add" size={24} color={Colors.primary} />
-        </TouchableOpacity>
-
-        {/* Input de texto */}
-        <TextInput
-          ref={inputRef}
-          style={styles.textInput}
-          placeholder="Escribe un mensaje..."
-          placeholderTextColor={Colors.darkGray}
-          value={message}
-          onChangeText={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          multiline
-          maxLength={1000}
-          returnKeyType="send"
-          onSubmitEditing={message.trim() ? handleSend : undefined}
-        />
-
-        {/* Botón de nota de voz o enviar */}
-        {message.trim() ? (
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-            <Ionicons 
-              name={editingMessage ? "checkmark" : "send"} 
-              size={20} 
-              color={Colors.white} 
-            />
-          </TouchableOpacity>
-        ) : !editingMessage ? (
+        {/* Sección izquierda - Emoticonos */}
+        <View style={styles.leftActions}>
           <TouchableOpacity
-            style={styles.voiceButton}
-            onPress={() => setShowVoiceRecorder(true)}
+            style={styles.emojiButton}
+            onPress={() => {
+              // TODO: Implementar selector de emoticonos
+              console.log('😊 Abrir selector de emoticonos');
+            }}
           >
-            <Ionicons name="mic" size={20} color={Colors.white} />
+            <Ionicons name="happy-outline" size={22} color={Colors.darkGray} />
           </TouchableOpacity>
-        ) : null}
+        </View>
+
+        {/* Campo de entrada de texto */}
+        <View style={styles.textInputContainer}>
+          <TextInput
+            ref={inputRef}
+            style={styles.textInput}
+            placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
+            placeholderTextColor={Colors.darkGray}
+            value={message}
+            onChangeText={handleInputChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            multiline
+            maxLength={1000}
+            returnKeyType="send"
+            onSubmitEditing={message.trim() ? handleSend : undefined}
+          />
+        </View>
+
+        {/* Sección derecha - Botones de acción */}
+        <View style={styles.rightActions}>
+          {!message.trim() && !editingMessage && (
+            <>
+              {/* Botón de cámara */}
+              <TouchableOpacity
+                style={styles.cameraButton}
+                onPress={handleTakePhoto}
+              >
+                <Ionicons name="camera" size={20} color={Colors.darkGray} />
+              </TouchableOpacity>
+              
+              {/* Botón de adjuntos */}
+              <TouchableOpacity
+                style={styles.attachButton}
+                onPress={showAttachmentSheet}
+              >
+                <Ionicons name="attach" size={20} color={Colors.darkGray} />
+              </TouchableOpacity>
+            </>
+          )}
+          
+          {/* Botón de nota de voz o enviar */}
+          {message.trim() ? (
+            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+              <Ionicons 
+                name={editingMessage ? "checkmark" : "send"} 
+                size={20} 
+                color={Colors.white} 
+              />
+            </TouchableOpacity>
+          ) : !editingMessage ? (
+            <TouchableOpacity
+              style={styles.voiceButton}
+              onPress={() => setShowVoiceRecorder(true)}
+            >
+              <Ionicons name="mic" size={20} color={Colors.white} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       {/* Grabador de voz mejorado */}
@@ -385,32 +449,72 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
     minHeight: 60,
   },
   inputContainerFocused: {
     borderTopColor: Colors.primary,
   },
+  
+  leftActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  
+  emojiButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  textInputContainer: {
+    flex: 1,
+    backgroundColor: Colors.lightGray,
+    borderRadius: 20,
+    marginHorizontal: Spacing.sm,
+  },
+  
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.sm,
+  },
+  
+  cameraButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  
   attachButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: Colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.sm,
   },
   textInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: Colors.lightGray,
-    borderRadius: 20,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
     fontSize: Typography.fontSizes.md,
     color: Colors.dark,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     maxHeight: 100,
+    textAlignVertical: 'top',
+    minHeight: 40,
   },
   sendButton: {
     width: 36,
