@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Image, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/GlobalStyles';
-import { useAppStore } from '@/store/appStore';
+import { useLogout } from '@/hooks/useLogout';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
 
@@ -13,13 +12,8 @@ interface AppHeaderProps {
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({ showDrawerButton, DrawerButton }) => {
-  const { logout } = useAppStore();
+  const { handleLogout } = useLogout();
   const [showNotifications, setShowNotifications] = useState(false);
-
-  const handleLogout = () => {
-    logout();
-    router.replace('/landing'); // Redirige a la página de inicio
-  };
 
   const handleNotifications = () => {
     setShowNotifications(true);

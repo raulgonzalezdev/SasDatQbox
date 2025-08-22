@@ -23,6 +23,13 @@ export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCustomSplash, setShowCustomSplash] = useState(true);
   
+  console.log('🔄 RootLayout - Estado actual:', {
+    isAuthenticated,
+    isLoading,
+    showCustomSplash,
+    loaded: false // Se actualizará abajo
+  });
+  
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -30,39 +37,60 @@ export default function RootLayout() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        console.log('🚀 Inicializando app...');
+        
         // Verificar el estado de autenticación al cargar la app
+        console.log('🔍 Verificando estado de autenticación...');
         const authStatus = await checkAuthStatus();
+        
+        console.log('📋 Estado de autenticación obtenido:', authStatus);
+        
         if (authStatus.isAuthenticated && authStatus.user) {
+          console.log('✅ Usuario autenticado, configurando estado...');
           setAuthenticated(true);
           setUser({
             ...authStatus.user,
             isPremium: authStatus.user.isPremium || false
           });
+        } else {
+          console.log('❌ Usuario no autenticado');
+          setAuthenticated(false);
+          setUser(null);
         }
       } catch (error) {
-        console.log('Error checking auth status:', error);
+        console.error('❌ Error checking auth status:', error);
+        // En caso de error, asegurar que no esté autenticado
+        setAuthenticated(false);
+        setUser(null);
       } finally {
+        console.log('🏁 Finalizando inicialización...');
         setIsLoading(false);
       }
     };
 
     if (loaded) {
+      console.log('📚 Fuentes cargadas, iniciando app...');
       initializeApp();
       SplashScreen.hideAsync();
     }
   }, [loaded, setAuthenticated, setUser]);
 
   const handleSplashFinish = () => {
+    console.log('🎬 Splash terminado, ocultando...');
     setShowCustomSplash(false);
   };
 
   if (!loaded || isLoading) {
+    console.log('⏳ Esperando carga:', { loaded, isLoading });
     return null;
   }
 
   if (showCustomSplash) {
+    console.log('🎬 Mostrando custom splash...');
     return <CustomSplashScreen onFinish={handleSplashFinish} />;
   }
+
+  console.log('🏠 Renderizando Stack principal...');
 
   return (
     <SafeAreaProvider>

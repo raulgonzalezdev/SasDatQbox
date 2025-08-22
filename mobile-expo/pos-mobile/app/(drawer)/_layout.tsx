@@ -5,6 +5,7 @@ import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useAppStore } from '@/store/appStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppHeader from '@/components/ui/Header'; // Importamos nuestro nuevo header
+import AuthGuard from '@/components/auth/AuthGuard';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
@@ -65,7 +66,8 @@ export default function DrawerLayout() {
   const isDoctor = user?.role === 'doctor';
 
   return (
-    <Drawer
+    <AuthGuard requireAuth={true}>
+      <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerPosition: 'right',
@@ -134,6 +136,7 @@ export default function DrawerLayout() {
       />
       
     </Drawer>
+    </AuthGuard>
   );
 }
 

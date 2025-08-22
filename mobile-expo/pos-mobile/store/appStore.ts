@@ -26,6 +26,7 @@ interface AppState {
   isDemo: boolean;
   hidePromotions: boolean;
   currentLocale: 'es' | 'en';
+  forceLanding: boolean; // Flag para forzar landing después de logout
   
   // Estado de navegación
   isInChat: boolean;
@@ -38,6 +39,7 @@ interface AppState {
   setDemo: (isDemo: boolean) => void;
   setHidePromotions: (hidePromotions: boolean) => void;
   setLocale: (locale: 'es' | 'en') => void;
+  setForceLanding: (force: boolean) => void;
   
   // Acciones de navegación
   enterChat: (chatId: string) => void;
@@ -56,6 +58,7 @@ export const useAppStore = create<AppState>()(
       isDemo: false, // Cambiado a false para app médica
       hidePromotions: false,
       currentLocale: 'es',
+      forceLanding: false,
       
       // Estado de navegación inicial
       isInChat: false,
@@ -70,6 +73,7 @@ export const useAppStore = create<AppState>()(
       setDemo: (isDemo) => set({ isDemo }),
       setHidePromotions: (hidePromotions) => set({ hidePromotions }),
       setLocale: (currentLocale) => set({ currentLocale }),
+      setForceLanding: (forceLanding) => set({ forceLanding }),
       
       // Acciones de navegación optimizadas
       enterChat: (chatId) => set({ 
@@ -81,13 +85,16 @@ export const useAppStore = create<AppState>()(
         currentChatId: null 
       }),
       
-      logout: () => set({ 
+      logout: () => set(() => ({ 
         isAuthenticated: false, 
         user: null,
+        isDemo: false,
+        hidePromotions: false,
         currentLocale: 'es',
+        forceLanding: true, // Forzar landing después de logout
         isInChat: false,
         currentChatId: null,
-      }),
+      })),
     }),
     {
       name: 'medical-app-storage', // Nombre actualizado para la app médica
