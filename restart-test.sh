@@ -27,7 +27,7 @@ echo -e "${YELLOW}Iniciando Nginx para prueba...${NC}"
 docker compose up -d app nginx
 
 echo -e "${GREEN}=== Prueba iniciada correctamente ===${NC}"
-echo -e "La aplicación de prueba ahora debería estar disponible en: http://spaininsideapp.nl"
+echo -e "La aplicación de prueba ahora debería estar disponible en: http://datqbox.online"
 echo ""
 echo -e "${YELLOW}Para verificar el estado:${NC} docker compose ps"
 echo -e "${YELLOW}Para ver logs:${NC} docker compose logs -f nginx"
@@ -41,6 +41,6 @@ if [[ $iniciar_tunel == "s" || $iniciar_tunel == "S" ]]; then
   echo -e "${YELLOW}Iniciando túnel Cloudflare...${NC}"
   docker compose up -d cloudflared
   echo -e "${GREEN}Túnel Cloudflare iniciado.${NC}"
-  echo -e "El sitio ahora debería estar disponible en: https://spaininsideapp.nl"
+  echo -e "El sitio ahora debería estar disponible en: https://datqbox.online"
   echo -e "${YELLOW}Para ver logs del túnel:${NC} docker compose logs -f cloudflared"
 fi 

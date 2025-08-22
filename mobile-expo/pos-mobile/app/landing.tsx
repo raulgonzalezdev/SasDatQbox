@@ -1,584 +1,625 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image, Linking, Switch, Alert } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors, CommonStyles, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
-import { useAppStore, isUserPremium, getCurrentUser } from '@/store/appStore';
+import { useAppStore } from '@/store/appStore';
+import { forceAppReset, debugStorage } from '@/utils/debugUtils';
 
-export default function LandingPage() {
-  const { hidePromotions, setHidePromotions } = useAppStore();
-  const isPremium = isUserPremium();
-  const user = getCurrentUser();
-  const [hidePromos, setHidePromos] = useState(hidePromotions);
+export default function SimpleLandingPage() {
+  console.log('🏠 Landing Simple cargando...');
   
-  // Planes disponibles
-  const plans = [
-    {
-      id: 1,
-      name: 'Gratuito',
-      price: '$0',
-      period: 'mes',
-      features: [
-        'Gestión de inventario básica',
-        'Registro de ventas',
-        'Reportes básicos',
-        'Soporte por email',
-      ],
-      recommended: false,
-      color: Colors.darkGray,
-      isPremium: false,
-    },
-    {
-      id: 2,
-      name: 'Básico',
-      price: '$9.99',
-      period: 'mes',
-      features: [
-        'Gestión de inventario avanzada',
-        'Registro de ventas ilimitado',
-        'Reportes básicos',
-        'Soporte por email',
-      ],
-      recommended: false,
-      color: Colors.info,
-      isPremium: true,
-    },
-    {
-      id: 3,
-      name: 'Premium',
-      price: '$19.99',
-      period: 'mes',
-      features: [
-        'Gestión de inventario avanzada',
-        'Registro de ventas ilimitado',
-        'Reportes avanzados y exportación',
-        'Impresión de tickets',
-        'Gestión de clientes',
-        'Soporte prioritario',
-      ],
-      recommended: true,
-      color: Colors.primary,
-      isPremium: true,
-    },
-    {
-      id: 4,
-      name: 'Empresarial',
-      price: '$39.99',
-      period: 'mes',
-      features: [
-        'Múltiples sucursales',
-        'Usuarios ilimitados',
-        'Todas las funciones premium',
-        'API para integraciones',
-        'Soporte 24/7',
-        'Capacitación personalizada',
-      ],
-      recommended: false,
-      color: Colors.secondary,
-      isPremium: true,
-    },
-  ];
+  const { hidePromotions } = useAppStore();
+  const [hidePromos] = useState(hidePromotions);
 
-  const handleRegister = (planId: number) => {
-    // Si el usuario ya es premium, mostrar un mensaje
-    if (isPremium) {
-      Alert.alert(
-        'Ya tienes acceso premium',
-        'Ya tienes acceso a todas las funcionalidades premium. No es necesario cambiar de plan.',
-        [{ text: 'Entendido' }]
-      );
-      return;
-    }
-    
-    // Si el usuario no está autenticado, redirigir a la pantalla de registro
-    if (!user) {
-      router.push('/auth/register');
-      return;
-    }
-    
-    // Si el usuario está autenticado pero no es premium, simular la actualización a premium
-    const plan = plans.find(p => p.id === planId);
-    if (plan && plan.isPremium) {
-      Alert.alert(
-        'Actualizar a plan premium',
-        `¿Estás seguro de que deseas actualizar al plan ${plan.name} por ${plan.price}/${plan.period}?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Actualizar', 
-            onPress: () => {
-              // Simular la actualización a premium
-              const { updateUser, setHidePromotions } = useAppStore.getState();
-              updateUser({
-                ...user,
-                isPremium: true
-              });
-              setHidePromotions(true);
-              
-              Alert.alert(
-                'Plan actualizado',
-                `Tu plan ha sido actualizado a ${plan.name}. Ahora tienes acceso a todas las funcionalidades premium.`,
-                [
-                  { 
-                    text: 'Continuar', 
-                    onPress: () => router.replace('/(tabs)') 
-                  }
-                ]
-              );
-            }
-          }
-        ]
-      );
-    }
+  const handleDebugStorage = () => {
+    debugStorage();
+    console.log('📋 Debug storage ejecutado - revisa la consola');
   };
-  
-  const toggleHidePromotions = () => {
-    const newValue = !hidePromos;
-    setHidePromos(newValue);
-    setHidePromotions(newValue);
-    
-    if (newValue) {
-      Alert.alert(
-        'Promociones ocultas',
-        'Las promociones y mensajes sobre características premium han sido ocultados. Puedes cambiar esta configuración en cualquier momento desde la pantalla de Configuración.',
-        [{ text: 'Entendido' }]
-      );
-    }
+
+  const handleDownloadApp = () => {
+    console.log('📱 Descarga de app solicitada');
+    // Aquí podría ir lógica de descarga real
   };
 
   return (
     <SafeAreaView style={CommonStyles.safeArea}>
       <CustomStatusBar backgroundColor={Colors.primary} barStyle="dark-content" />
-      
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={Colors.dark} />
-        </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Planes y Precios</ThemedText>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ThemedView style={CommonStyles.container}>
-        <ScrollView style={CommonStyles.content}>
-          {/* Banner principal */}
-          <View style={styles.heroBanner}>
-            {isPremium ? (
-              <>
-                <View style={styles.premiumBadge}>
-                  <Ionicons name="star" size={24} color={Colors.white} />
-                  <ThemedText style={styles.premiumBadgeText}>Premium</ThemedText>
-                </View>
-                <ThemedText style={styles.heroTitle}>¡Gracias por tu apoyo!</ThemedText>
-                <ThemedText style={styles.heroSubtitle}>
-                  Estás disfrutando de todas las funcionalidades premium de DatqboxPos
-                </ThemedText>
-              </>
-            ) : (
-              <>
-                <ThemedText style={styles.heroTitle}>Potencia tu Negocio</ThemedText>
-                <ThemedText style={styles.heroSubtitle}>
-                  Elige el plan perfecto para tu restaurante y lleva tu gestión al siguiente nivel
-                </ThemedText>
-              </>
-            )}
-            <View style={styles.heroIconContainer}>
-              <Ionicons name={isPremium ? "checkmark-circle" : "rocket"} size={60} color={Colors.white} />
-            </View>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        
+        {/* Header Simple */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Ionicons name="medical" size={40} color={Colors.white} />
+            <ThemedText style={styles.logoText}>DoctorBox</ThemedText>
           </View>
+        </View>
 
-          {/* Opción para ocultar promociones - Solo se muestra si el usuario no es premium */}
-          {!isPremium && (
-            <View style={styles.hidePromosContainer}>
-              <View style={styles.hidePromosContent}>
-                <Ionicons name="eye-off-outline" size={24} color={Colors.darkGray} style={styles.hidePromosIcon} />
-                <View style={styles.hidePromosTextContainer}>
-                  <ThemedText style={styles.hidePromosTitle}>No estoy interesado</ThemedText>
-                  <ThemedText style={styles.hidePromosSubtitle}>Ocultar mensajes promocionales</ThemedText>
-                </View>
-              </View>
-              <Switch
-                value={hidePromos}
-                onValueChange={toggleHidePromotions}
-                trackColor={{ false: Colors.lightGray, true: Colors.secondaryLight }}
-                thumbColor={hidePromos ? Colors.secondary : Colors.white}
-              />
-            </View>
-          )}
-
-          {/* Planes */}
-          <View style={CommonStyles.section}>
-            <ThemedText style={CommonStyles.sectionTitle}>
-              {isPremium ? 'Tu plan actual' : 'Planes Disponibles'}
-            </ThemedText>
-            
-            {plans.map(plan => (
-              // Si el usuario es premium, solo mostrar planes premium
-              (!isPremium || plan.isPremium) && (
-                <View 
-                  key={plan.id} 
-                  style={[
-                    styles.planCard,
-                    plan.recommended && styles.recommendedPlan,
-                    isPremium && plan.id === 3 && styles.currentPlan, // Asumimos que el usuario premium tiene el plan Premium (id: 3)
-                  ]}
-                >
-                  {plan.recommended && !isPremium && (
-                    <View style={styles.recommendedBadge}>
-                      <ThemedText style={styles.recommendedText}>Recomendado</ThemedText>
-                    </View>
-                  )}
-                  
-                  {isPremium && plan.id === 3 && (
-                    <View style={[styles.recommendedBadge, { backgroundColor: Colors.success }]}>
-                      <ThemedText style={styles.recommendedText}>Tu Plan</ThemedText>
-                    </View>
-                  )}
-                  
-                  <View style={styles.planHeader}>
-                    <ThemedText style={styles.planName}>{plan.name}</ThemedText>
-                    <View style={[styles.planIconContainer, { backgroundColor: plan.color }]}>
-                      <Ionicons 
-                        name={plan.id === 1 ? 'gift-outline' : plan.id === 2 ? 'cafe' : plan.id === 3 ? 'restaurant' : 'business'} 
-                        size={24} 
-                        color={Colors.white} 
-                      />
-                    </View>
-                  </View>
-                  
-                  <View style={styles.planPriceContainer}>
-                    <ThemedText style={styles.planPrice}>{plan.price}</ThemedText>
-                    <ThemedText style={styles.planPeriod}>/{plan.period}</ThemedText>
-                  </View>
-                  
-                  <View style={styles.planFeatures}>
-                    {plan.features.map((feature, index) => (
-                      <View key={index} style={styles.featureItem}>
-                        <Ionicons name="checkmark-circle" size={16} color={plan.color} />
-                        <ThemedText style={styles.featureText}>{feature}</ThemedText>
-                      </View>
-                    ))}
-                  </View>
-                  
-                  {!isPremium && (
-                    <TouchableOpacity 
-                      style={[styles.planButton, { backgroundColor: plan.color }]}
-                      onPress={() => handleRegister(plan.id)}
-                    >
-                      <ThemedText style={styles.planButtonText}>
-                        {plan.isPremium ? 'Elegir Plan' : 'Plan Actual'}
-                      </ThemedText>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )
-            ))}
-          </View>
-
-          {/* Testimonios - Solo se muestran si el usuario no es premium */}
-          {!isPremium && (
-            <View style={CommonStyles.section}>
-              <ThemedText style={CommonStyles.sectionTitle}>Lo que dicen nuestros clientes</ThemedText>
-              
-              <View style={styles.testimonialCard}>
-                <View style={styles.testimonialHeader}>
-                  <View style={styles.testimonialAvatar}>
-                    <ThemedText style={styles.testimonialInitials}>JR</ThemedText>
-                  </View>
-                  <View>
-                    <ThemedText style={styles.testimonialName}>Juan Rodríguez</ThemedText>
-                    <ThemedText style={styles.testimonialBusiness}>Restaurante El Sabor</ThemedText>
-                  </View>
-                </View>
-                <ThemedText style={styles.testimonialText}>
-                  "Desde que empecé a usar esta aplicación, la gestión de mi restaurante es mucho más eficiente. 
-                  Los reportes me ayudan a tomar mejores decisiones y la impresión de tickets ha mejorado la 
-                  experiencia de mis clientes."
-                </ThemedText>
-              </View>
-            </View>
-          )}
-
-          {/* Contacto */}
-          <View style={[CommonStyles.section, styles.contactSection]}>
-            <ThemedText style={styles.contactTitle}>
-              {isPremium ? '¿Necesitas ayuda con tu plan?' : '¿Necesitas ayuda para elegir?'}
-            </ThemedText>
-            <ThemedText style={styles.contactText}>
-              {isPremium 
-                ? 'Nuestro equipo de soporte está disponible para ayudarte con cualquier duda sobre tu plan premium.'
-                : 'Nuestro equipo está disponible para ayudarte a encontrar el plan perfecto para tu negocio.'
-              }
-            </ThemedText>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <ThemedText style={styles.heroTitle}>Conectamos Salud</ThemedText>
+          <ThemedText style={styles.heroSubtitle}>
+            La plataforma que une pacientes con profesionales de la salud cerca de ti
+          </ThemedText>
+          <ThemedText style={styles.heroDescription}>
+            🏥 Encuentra doctores • 📱 Consultas fáciles • 💳 Paga en cuotas • ⭐ Construye tu reputación
+          </ThemedText>
+          
+          <View style={styles.heroButtons}>
             <TouchableOpacity 
-              style={styles.contactButton}
-              onPress={() => Linking.openURL('mailto:soporte@datqbox.com')}
+              style={styles.primaryButton} 
+              onPress={() => {
+                console.log('🔄 Navegando a registro como paciente...');
+                router.push('/auth/register');
+              }}
             >
-              <Ionicons name="mail" size={20} color={Colors.white} />
-              <ThemedText style={styles.contactButtonText}>Contáctanos</ThemedText>
+              <Ionicons name="person" size={20} color={Colors.white} />
+              <ThemedText style={styles.primaryButtonText}>Soy Paciente</ThemedText>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.secondaryButton}
+              onPress={() => {
+                console.log('🔄 Navegando a registro como doctor...');
+                router.push('/auth/register');
+              }}
+            >
+              <Ionicons name="medical" size={20} color={Colors.primary} />
+              <ThemedText style={styles.secondaryButtonText}>Soy Doctor</ThemedText>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </ThemedView>
+
+          <TouchableOpacity 
+            style={styles.loginLink}
+            onPress={() => {
+              console.log('🔄 Navegando a login...');
+              router.push('/auth/login');
+            }}
+          >
+            <ThemedText style={styles.loginLinkText}>¿Ya tienes cuenta? Inicia sesión</ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        {/* How It Works Section */}
+        <View style={styles.featuresSection}>
+          <ThemedText style={styles.sectionTitle}>¿Cómo Funciona?</ThemedText>
+          <ThemedText style={styles.sectionSubtitle}>
+            Conectamos pacientes y doctores en 3 simples pasos
+          </ThemedText>
+          
+          <View style={styles.featuresList}>
+            <View style={styles.featureItem}>
+              <View style={styles.stepNumber}>
+                <ThemedText style={styles.stepText}>1</ThemedText>
+              </View>
+              <View style={styles.featureContent}>
+                <ThemedText style={styles.featureTitle}>Encuentra tu Doctor</ThemedText>
+                <ThemedText style={styles.featureText}>Busca profesionales cerca de ti según tu ubicación y especialidad</ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.featureItem}>
+              <View style={styles.stepNumber}>
+                <ThemedText style={styles.stepText}>2</ThemedText>
+              </View>
+              <View style={styles.featureContent}>
+                <ThemedText style={styles.featureTitle}>Elige tu Paquete</ThemedText>
+                <ThemedText style={styles.featureText}>Selecciona consultas individuales o paquetes con financiamiento</ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.featureItem}>
+              <View style={styles.stepNumber}>
+                <ThemedText style={styles.stepText}>3</ThemedText>
+              </View>
+              <View style={styles.featureContent}>
+                <ThemedText style={styles.featureTitle}>Consulta y Califica</ThemedText>
+                <ThemedText style={styles.featureText}>Recibe atención médica y construye tu reputación como paciente</ThemedText>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Benefits Section */}
+        <View style={styles.benefitsSection}>
+          <ThemedText style={styles.sectionTitle}>Beneficios para Todos</ThemedText>
+          
+          <View style={styles.benefitsContainer}>
+            {/* Para Pacientes */}
+            <View style={styles.benefitCard}>
+              <View style={styles.benefitHeader}>
+                <Ionicons name="person-circle" size={32} color={Colors.success} />
+                <ThemedText style={styles.benefitTitle}>Para Pacientes</ThemedText>
+              </View>
+              <View style={styles.benefitList}>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="location" size={16} color={Colors.success} />
+                  <ThemedText style={styles.benefitText}>Doctores cerca de ti</ThemedText>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="card" size={16} color={Colors.success} />
+                  <ThemedText style={styles.benefitText}>Pago en cuotas</ThemedText>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="star" size={16} color={Colors.success} />
+                  <ThemedText style={styles.benefitText}>Sistema de reputación</ThemedText>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="document-text" size={16} color={Colors.success} />
+                  <ThemedText style={styles.benefitText}>Historial médico digital</ThemedText>
+                </View>
+              </View>
+            </View>
+
+            {/* Para Doctores */}
+            <View style={styles.benefitCard}>
+              <View style={styles.benefitHeader}>
+                <Ionicons name="medical" size={32} color={Colors.primary} />
+                <ThemedText style={styles.benefitTitle}>Para Doctores</ThemedText>
+              </View>
+              <View style={styles.benefitList}>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="people" size={16} color={Colors.primary} />
+                  <ThemedText style={styles.benefitText}>Más pacientes</ThemedText>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="cash" size={16} color={Colors.primary} />
+                  <ThemedText style={styles.benefitText}>Pagos garantizados</ThemedText>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="time" size={16} color={Colors.primary} />
+                  <ThemedText style={styles.benefitText}>Gestión simplificada</ThemedText>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Ionicons name="trending-up" size={16} color={Colors.primary} />
+                  <ThemedText style={styles.benefitText}>Crecimiento profesional</ThemedText>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Value Proposition Section */}
+        <View style={styles.valueSection}>
+          <ThemedText style={styles.sectionTitle}>¿Por Qué Elegirnos?</ThemedText>
+          <ThemedText style={styles.sectionSubtitle}>
+            Somos el puente entre pacientes y profesionales de la salud
+          </ThemedText>
+          
+          <View style={styles.valueContainer}>
+            <View style={styles.valueCard}>
+              <Ionicons name="globe" size={48} color={Colors.primary} />
+              <ThemedText style={styles.valueTitle}>Cobertura Nacional</ThemedText>
+              <ThemedText style={styles.valueText}>
+                Encuentra doctores en toda Venezuela, desde Caracas hasta Maracaibo
+              </ThemedText>
+            </View>
+
+            <View style={styles.valueCard}>
+              <Ionicons name="shield-checkmark" size={48} color={Colors.success} />
+              <ThemedText style={styles.valueTitle}>Pagos Seguros</ThemedText>
+              <ThemedText style={styles.valueText}>
+                Sistema de pagos protegido con garantía para doctores y pacientes
+              </ThemedText>
+            </View>
+
+            <View style={styles.valueCard}>
+              <Ionicons name="trending-up" size={48} color={Colors.warning} />
+              <ThemedText style={styles.valueTitle}>Crecimiento Mutuo</ThemedText>
+              <ThemedText style={styles.valueText}>
+                A mayor reputación, mejores beneficios y acceso a financiamiento
+              </ThemedText>
+            </View>
+          </View>
+
+          <View style={styles.commissionInfo}>
+            <View style={styles.commissionCard}>
+              <Ionicons name="handshake" size={32} color={Colors.primary} />
+              <View style={styles.commissionContent}>
+                <ThemedText style={styles.commissionTitle}>Modelo Win-Win</ThemedText>
+                <ThemedText style={styles.commissionText}>
+                  Solo cobramos una pequeña comisión por transacciones exitosas. 
+                  Si no hay consultas, no hay costos.
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Debug Section - Solo en desarrollo */}
+        {__DEV__ && (
+          <View style={styles.debugSection}>
+            <ThemedText style={styles.debugTitle}>🔧 Herramientas de Debug</ThemedText>
+            <View style={styles.debugButtons}>
+              <TouchableOpacity style={styles.debugButton} onPress={handleDebugStorage}>
+                <ThemedText style={styles.debugButtonText}>Ver Storage</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.debugButton} onPress={forceAppReset}>
+                <ThemedText style={styles.debugButtonText}>Reset App</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <ThemedText style={styles.footerText}>
+            © {new Date().getFullYear()} DoctorBox. Todos los derechos reservados.
+          </ThemedText>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.xl,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.primary,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: Typography.fontSizes.xl,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-  },
-  heroBanner: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.xl,
-    marginBottom: Spacing.xl,
-    alignItems: 'center',
-    position: 'relative',
-  },
-  premiumBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: Colors.primary,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+  logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.md,
   },
-  premiumBadgeText: {
+  logoText: {
+    fontSize: Typography.fontSizes.xxl,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.white,
-    fontSize: Typography.fontSizes.sm,
-    fontWeight: Typography.fontWeights.bold,
-    marginLeft: Spacing.xs,
+  },
+  heroSection: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+    backgroundColor: Colors.white,
   },
   heroTitle: {
     fontSize: Typography.fontSizes.xxxl,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.white,
-    marginBottom: Spacing.sm,
-    textAlign: 'center',
-  },
-  heroSubtitle: {
-    fontSize: Typography.fontSizes.md,
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'center',
-    marginBottom: Spacing.lg,
-  },
-  heroIconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  hidePromosContainer: {
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    ...BordersAndShadows.shadows.sm,
-  },
-  hidePromosContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  hidePromosIcon: {
-    marginRight: Spacing.md,
-  },
-  hidePromosTextContainer: {
-    flex: 1,
-  },
-  hidePromosTitle: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.medium,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
-  },
-  hidePromosSubtitle: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-  },
-  planCard: {
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...BordersAndShadows.shadows.md,
-  },
-  recommendedPlan: {
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  currentPlan: {
-    borderWidth: 2,
-    borderColor: Colors.success,
-  },
-  recommendedBadge: {
-    position: 'absolute',
-    top: -10,
-    right: 10,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-  },
-  recommendedText: {
-    color: Colors.white,
-    fontSize: Typography.fontSizes.sm,
-    fontWeight: Typography.fontWeights.bold,
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    textAlign: 'center',
     marginBottom: Spacing.md,
   },
-  planName: {
-    fontSize: Typography.fontSizes.xl,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
+  heroSubtitle: {
+    fontSize: Typography.fontSizes.lg,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+    lineHeight: 24,
   },
-  planIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  heroButtons: {
+    width: '100%',
+    gap: Spacing.md,
   },
-  planPriceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: Spacing.lg,
-  },
-  planPrice: {
-    fontSize: Typography.fontSizes.xxl,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.dark,
-  },
-  planPeriod: {
+  heroDescription: {
     fontSize: Typography.fontSizes.md,
     color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+    lineHeight: 20,
+    paddingHorizontal: Spacing.md,
   },
-  planFeatures: {
-    marginBottom: Spacing.lg,
+  primaryButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    ...BordersAndShadows.shadows.md,
+  },
+  primaryButtonText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  secondaryButton: {
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+  },
+  secondaryButtonText: {
+    color: Colors.primary,
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  loginLink: {
+    marginTop: Spacing.lg,
+  },
+  loginLinkText: {
+    color: Colors.darkGray,
+    fontSize: Typography.fontSizes.md,
+    textAlign: 'center',
+  },
+  featuresSection: {
+    padding: Spacing.xl,
+    backgroundColor: Colors.background,
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSizes.xxl,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.dark,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+  },
+  featuresList: {
+    gap: Spacing.lg,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    backgroundColor: Colors.white,
+    padding: Spacing.lg,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    ...BordersAndShadows.shadows.sm,
+  },
+  featureContent: {
+    marginLeft: Spacing.lg,
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.dark,
+    marginBottom: Spacing.xs,
   },
   featureText: {
     fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+  },
+  debugSection: {
+    backgroundColor: Colors.lightGray,
+    padding: Spacing.lg,
+    margin: Spacing.lg,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    borderWidth: 2,
+    borderColor: Colors.danger,
+  },
+  debugTitle: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.danger,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  debugButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    justifyContent: 'center',
+  },
+  debugButton: {
+    backgroundColor: Colors.danger,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BordersAndShadows.borderRadius.sm,
+  },
+  debugButtonText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  footer: {
+    backgroundColor: Colors.dark,
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.sm,
+    textAlign: 'center',
+  },
+  // Pricing Section Styles
+  pricingSection: {
+    padding: Spacing.xl,
+    backgroundColor: Colors.background,
+  },
+  sectionSubtitle: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+    lineHeight: 22,
+  },
+  plansContainer: {
+    gap: Spacing.lg,
+  },
+  planCard: {
+    backgroundColor: Colors.white,
+    padding: Spacing.xl,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    ...BordersAndShadows.shadows.md,
+    borderWidth: 2,
+    borderColor: Colors.lightGray,
+  },
+  recommendedPlan: {
+    borderColor: Colors.primary,
+    transform: [{ scale: 1.02 }],
+  },
+  recommendedBadge: {
+    position: 'absolute',
+    top: -10,
+    left: 20,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BordersAndShadows.borderRadius.sm,
+  },
+  recommendedText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.sm,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  planName: {
+    fontSize: Typography.fontSizes.xl,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
-    marginLeft: Spacing.sm,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  planPrice: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'baseline',
+    marginBottom: Spacing.lg,
+  },
+  planPriceAmount: {
+    fontSize: Typography.fontSizes.xxxl,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.primary,
+  },
+  planPricePeriod: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    marginLeft: Spacing.xs,
+  },
+  planDescription: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+    lineHeight: 20,
   },
   planButton: {
-    borderRadius: BordersAndShadows.borderRadius.circle,
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: Colors.primary,
     paddingVertical: Spacing.md,
+    borderRadius: BordersAndShadows.borderRadius.md,
     alignItems: 'center',
   },
   planButtonText: {
-    color: Colors.white,
-    fontWeight: Typography.fontWeights.bold,
+    color: Colors.primary,
     fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold as any,
   },
-  testimonialCard: {
+  primaryPlanButton: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  primaryPlanButtonText: {
+    color: Colors.white,
+  },
+  // New Styles for Marketplace Design
+  stepNumber: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  stepText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  benefitsSection: {
+    padding: Spacing.xl,
     backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    ...BordersAndShadows.shadows.md,
   },
-  testimonialHeader: {
+  benefitsContainer: {
+    gap: Spacing.lg,
+  },
+  benefitCard: {
+    backgroundColor: Colors.background,
+    padding: Spacing.lg,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    ...BordersAndShadows.shadows.sm,
+  },
+  benefitHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.md,
+    gap: Spacing.md,
   },
-  testimonialAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-  },
-  testimonialInitials: {
+  benefitTitle: {
     fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold,
-    color: Colors.white,
-  },
-  testimonialName: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
   },
-  testimonialBusiness: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
+  benefitList: {
+    gap: Spacing.sm,
   },
-  testimonialText: {
-    fontSize: Typography.fontSizes.md,
-    color: Colors.dark,
-    fontStyle: 'italic',
-    lineHeight: 22,
-  },
-  contactSection: {
+  benefitItem: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.sm,
   },
-  contactTitle: {
-    fontSize: Typography.fontSizes.xl,
-    fontWeight: Typography.fontWeights.bold,
+  benefitText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+    flex: 1,
+  },
+  valueSection: {
+    padding: Spacing.xl,
+    backgroundColor: Colors.background,
+  },
+  valueContainer: {
+    gap: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  valueCard: {
+    backgroundColor: Colors.white,
+    padding: Spacing.xl,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    alignItems: 'center',
+    ...BordersAndShadows.shadows.md,
+  },
+  valueTitle: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
+    marginTop: Spacing.md,
     marginBottom: Spacing.sm,
     textAlign: 'center',
   },
-  contactText: {
+  valueText: {
     fontSize: Typography.fontSizes.md,
     color: Colors.darkGray,
     textAlign: 'center',
-    marginBottom: Spacing.lg,
+    lineHeight: 20,
   },
-  contactButton: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BordersAndShadows.borderRadius.circle,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
+  commissionInfo: {
+    marginTop: Spacing.lg,
+  },
+  commissionCard: {
+    backgroundColor: Colors.primary,
+    padding: Spacing.lg,
+    borderRadius: BordersAndShadows.borderRadius.lg,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.md,
+    ...BordersAndShadows.shadows.lg,
   },
-  contactButtonText: {
+  commissionContent: {
+    flex: 1,
+  },
+  commissionTitle: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.white,
-    fontWeight: Typography.fontWeights.bold,
-    fontSize: Typography.fontSizes.md,
-    marginLeft: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
-}); 
+  commissionText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.white,
+    lineHeight: 18,
+  },
+});

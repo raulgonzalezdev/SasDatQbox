@@ -1,5 +1,5 @@
 @echo off
-echo === Generador de certificados SSL para spaininsideapp.nl ===
+echo === Generador de certificados SSL para datqbox.online ===
 
 REM Verificar si Docker está instalado
 where docker >nul 2>nul
@@ -39,7 +39,7 @@ echo -----END DH PARAMETERS----- >> certbot\conf\ssl-dhparams.pem
 REM Crear nginx-http.conf para solicitar certificado
 echo server { > nginx\conf.d\nginx-http.conf
 echo     listen 80; >> nginx\conf.d\nginx-http.conf
-echo     server_name spaininsideapp.nl www.spaininsideapp.nl; >> nginx\conf.d\nginx-http.conf
+echo     server_name datqbox.online www.datqbox.online; >> nginx\conf.d\nginx-http.conf
 echo     location ^~ /.well-known/acme-challenge/ { >> nginx\conf.d\nginx-http.conf
 echo         root /var/www/certbot; >> nginx\conf.d\nginx-http.conf
 echo     } >> nginx\conf.d\nginx-http.conf
@@ -57,24 +57,24 @@ timeout /t 5 /nobreak > nul
 
 REM Solicitar certificado con Certbot
 echo Solicitando certificado SSL con Certbot...
-docker run --rm -v %cd%\certbot\conf:/etc/letsencrypt -v %cd%\certbot\www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot --email gq.raul@gmail.com --agree-tos --no-eff-email -d spaininsideapp.nl -d www.spaininsideapp.nl
+docker run --rm -v %cd%\certbot\conf:/etc/letsencrypt -v %cd%\certbot\www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot --email gq.raul@gmail.com --agree-tos --no-eff-email -d datqbox.online -d www.datqbox.online
 
 REM Detener Nginx
 echo Deteniendo Nginx temporal...
 docker stop nginx-ssl
 
 REM Verificar si se generaron los certificados
-if exist certbot\conf\live\spaininsideapp.nl\fullchain.pem (
+if exist certbot\conf\live\datqbox.online\fullchain.pem (
     echo.
     echo ¡Certificados generados con éxito!
-    echo Los certificados están en la carpeta certbot\conf\live\spaininsideapp.nl\
+    echo Los certificados están en la carpeta certbot\conf\live\datqbox.online\
     echo.
     echo Para completar la configuración, ejecuta:
     echo docker compose up -d
 ) else (
     echo.
     echo ERROR: No se pudieron generar los certificados SSL.
-    echo Verifica que el dominio spaininsideapp.nl apunte a esta máquina
+    echo Verifica que el dominio datqbox.online apunte a esta máquina
     echo y que el puerto 80 esté abierto en el firewall.
 )
 
@@ -82,7 +82,7 @@ REM Reemplazar el archivo app.conf con una versión que funcione
 echo Creando archivo de configuración app.conf para Nginx...
 echo server { > nginx\conf.d\app.conf
 echo     listen 80; >> nginx\conf.d\app.conf
-echo     server_name spaininsideapp.nl www.spaininsideapp.nl; >> nginx\conf.d\app.conf
+echo     server_name datqbox.online www.datqbox.online; >> nginx\conf.d\app.conf
 echo     server_tokens off; >> nginx\conf.d\app.conf
 echo. >> nginx\conf.d\app.conf
 echo     location /.well-known/acme-challenge/ { >> nginx\conf.d\app.conf
@@ -96,11 +96,11 @@ echo } >> nginx\conf.d\app.conf
 echo. >> nginx\conf.d\app.conf
 echo server { >> nginx\conf.d\app.conf
 echo     listen 443 ssl; >> nginx\conf.d\app.conf
-echo     server_name spaininsideapp.nl www.spaininsideapp.nl; >> nginx\conf.d\app.conf
+echo     server_name datqbox.online www.datqbox.online; >> nginx\conf.d\app.conf
 echo     server_tokens off; >> nginx\conf.d\app.conf
 echo. >> nginx\conf.d\app.conf
-echo     ssl_certificate /etc/letsencrypt/live/spaininsideapp.nl/fullchain.pem; >> nginx\conf.d\app.conf
-echo     ssl_certificate_key /etc/letsencrypt/live/spaininsideapp.nl/privkey.pem; >> nginx\conf.d\app.conf
+echo     ssl_certificate /etc/letsencrypt/live/datqbox.online/fullchain.pem; >> nginx\conf.d\app.conf
+echo     ssl_certificate_key /etc/letsencrypt/live/datqbox.online/privkey.pem; >> nginx\conf.d\app.conf
 echo     ssl_session_cache shared:le_nginx_SSL:10m; >> nginx\conf.d\app.conf
 echo     ssl_session_timeout 1440m; >> nginx\conf.d\app.conf
 echo     ssl_protocols TLSv1.2 TLSv1.3; >> nginx\conf.d\app.conf

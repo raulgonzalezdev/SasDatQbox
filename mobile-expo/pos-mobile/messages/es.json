@@ -1,0 +1,556 @@
+{
+	"Hero": {
+		"title": "Bienvenido",
+		"subtitle": "Transforma tu consulta con telemedicina y gestión clínica",
+		"cta": "Comenzar"
+	},
+	"Navbar": {
+		"features": "Funcionalidades",
+		"pricing": "Precios",
+		"blog": "Blog",
+		"help": "Ayuda",
+		"dashboard": "Panel",
+		"logout": "Cerrar sesión",
+		"login": "Iniciar sesión",
+		"downloadApp": "Descargar App"
+	},
+	"Footer": {
+		"product": "Producto",
+		"features": "Funcionalidades",
+		"pricing": "Precios",
+		"company": "Compañía",
+		"about": "Sobre Nosotros",
+		"blog": "Blog",
+		"legal": "Legal",
+		"security": "Seguridad",
+		"contact": "Contacto",
+		"contactSales": "Contactar Ventas"
+		,"rights": "Todos los derechos reservados."
+	},
+	"Pricing": {
+		"title": "Planes de Precios Flexibles",
+		"subtitle": "Elige el plan que mejor se adapte a tu práctica médica. Sin compromisos a largo plazo.",
+		"mostPopular": "Más Popular",
+		"subscribe": "Suscribirse",
+		"contactSales": "Contactar Ventas",
+		"perMonth": "/mes",
+		"plans": [
+			{
+				"name": "Gratis",
+				"description": "Ideal para empezar a digitalizar tu consulta. 15 pacientes máximo.",
+				"price": 0,
+				"buttonText": "Suscribirse",
+				"action": "subscribe"
+			},
+			{
+				"name": "Estándar",
+				"description": "Todas las funcionalidades, hasta 500 pacientes y consultas ilimitadas.",
+				"price": 49,
+				"isPopular": true,
+				"buttonText": "Suscribirse",
+				"action": "subscribe"
+			},
+			{
+				"name": "Premium",
+				"description": "Para clínicas con múltiples consultorios y asistentes. Pacientes ilimitados.",
+				"price": 199,
+				"buttonText": "Suscribirse",
+				"action": "subscribe"
+			},
+			{
+				"name": "Corporativo",
+				"description": "Solución a medida para hospitales y grandes organizaciones.",
+				"price": "Contactar",
+				"buttonText": "Contactar Ventas",
+				"action": "contact"
+			}
+		]
+	},
+	"Blog": {
+		"title": "Nuestro Blog",
+		"subtitle": "Consejos, noticias y mejores prácticas para profesionales de la salud en la era digital.",
+		"continueReading": "Continuar leyendo"
+	}
+	,
+	"FAQ": {
+		"title": "Preguntas Frecuentes",
+		"questions": [
+			{
+				"question": "¿BoxDoctor es seguro y cumple con la normativa HIPAA?",
+				"answer": "Sí, BoxDoctor está diseñado para cumplir con HIPAA: cifrado de extremo a extremo, canales seguros de video y audio, autenticación de dos factores opcional y controles de acceso detallados protegen la información de salud del paciente y ayudan a su clínica a mantener el cumplimiento normativo. La seguridad se implementa en toda la plataforma para ayudar a proveedores y pacientes a conectarse con confianza."
+			},
+			{
+				"question": "¿Cómo se integrará BoxDoctor con mis sistemas actuales?",
+				"answer": "Nuestra plataforma está diseñada para ser flexible. Proporcionamos una API robusta y trabajaremos con su equipo de TI para asegurar una integración fluida con sus sistemas de Registros Médicos Electrónicos (EHR) y otros software de gestión que ya use."
+			},
+			{
+				"question": "¿Puedo lanzarlo bajo mi marca?",
+				"answer": "¡Absolutamente! Ofrecemos soluciones de marca blanca que le permiten personalizar la plataforma con su propio logo, colores y dominio, reforzando la marca de su clínica y la confianza de sus pacientes."
+			},
+			{
+				"question": "¿Cuáles son los beneficios de implementar la telesalud con BoxDoctor?",
+				"answer": "Los beneficios incluyen reducción de costos operativos, mayor eficiencia, acceso a más pacientes sin barreras geográficas, mejor continuidad de la atención y mayor satisfacción para pacientes y profesionales."
+			},
+			{
+				"question": "¿Qué tipos de telesalud admite BoxDoctor?",
+				"answer": "Soportamos una amplia gama de servicios, incluyendo videoconsultas en tiempo real, monitoreo remoto de pacientes, mensajería segura asincrónica y consultas de tipo store-and-forward que permiten enviar información médica para revisión posterior."
+			},
+			{
+				"question": "¿Cómo se mejora la participación del paciente?",
+				"answer": "Facilitamos la participación mediante recordatorios automáticos de citas, un portal del paciente intuitivo para acceder a historiales y recetas, y herramientas de comunicación directa y segura con los clínicos — todo accesible desde el hogar del paciente."
+			}
+		]
+	}
+	,
+	"Features": {
+		"title": "Servicios de telemedicina de vanguardia",
+		"subtitle": "Experimente la telemedicina avanzada, diseñada para las necesidades de salud actuales.",
+		"items": [
+			{ "title": "Consultas por vídeo" },
+			{ "title": "Integración de EMR y EHR" },
+			{ "title": "Herramientas para el paciente" },
+			{ "title": "Compatibilidad de idiomas" },
+			{ "title": "Programación de citas" },
+			{ "title": "Gestión de recetas" },
+			{ "title": "Mensajería en tiempo real" },
+			{ "title": "Procesamiento de pagos" }
+		]
+	},
+	"SocialProof": {
+		"stats": [
+			{ "value": "10.000+", "label": "Consultas por vídeo realizadas" },
+			{ "value": "4.9 ★", "label": "Clasificación de Play Store" },
+			{ "value": "500+", "label": "Profesionales de la salud" },
+			{ "value": "50+", "label": "Productos de marca blanca" }
+		]
+	},
+	"LogoCloud": {
+		"trustedBy": "Con la confianza de clínicas, empresas emergentes y líderes del sector salud"
+	}
+	,
+	"Testimonials": {
+		"title": "Nuestros usuarios nos aman",
+		"subtitle": "Cientos de miles de usuarios de todo el mundo confían en BoxDoctor",
+		"items": [
+			{ "name": "Mariana López", "initial": "M", "rating": 5, "quote": "Gran iniciativa, muy útil y sencilla, deseando que llegue la tarjeta física pronto." },
+			{ "name": "Carlos", "initial": "C", "rating": 4.5, "quote": "La aplicación funciona muy bien, hasta ahora no he podido tener ningún problema." },
+			{ "name": "Pipo", "initial": "P", "rating": 5, "quote": "Me salva full pa pagos." }
+		]
+	}
+	,
+	"Security": {
+		"title": "Seguridad y Cumplimiento",
+		"subtitle": "En BoxDoctor, la seguridad y la privacidad de sus datos y los de sus pacientes es nuestra máxima prioridad.",
+		"p1": "Nuestra plataforma está diseñada desde cero para cumplir con los más altos estándares de la industria, incluyendo la normativa HIPAA (Health Insurance Portability and Accountability Act). Utilizamos cifrado de extremo a extremo para todas las comunicaciones, asegurando que solo usted y sus pacientes tengan acceso a la información compartida.",
+		"p2": "Además, nuestros servidores están alojados en infraestructuras seguras que cumplen con certificaciones como ISO 27001 y SOC 2, garantizando la integridad y disponibilidad de sus datos en todo momento. Realizamos auditorías de seguridad periódicas y estamos comprometidos con la mejora continua de nuestras prácticas para proteger su información contra cualquier amenaza."
+	},
+	"ContactDrawer": {
+		"title": "Contactar a Ventas",
+		"subtitle": "Déjanos tus datos y nos pondremos en contacto contigo para una demostración.",
+		"form": {
+			"name": "Nombre Completo",
+			"email": "Email de Trabajo",
+			"message": "¿Cómo podemos ayudarte?",
+			"submit": "Enviar Mensaje"
+		},
+		"successMessage": "¡Gracias por tu mensaje! Te contactaremos pronto.",
+		"errors": {
+			"nameRequired": "El nombre es requerido.",
+			"invalidEmail": "Debe ser un email válido.",
+			"messageMin": "El mensaje debe tener al menos 10 caracteres."
+		}
+	},
+	"SupportChat": {
+		"welcomeMessage": "¡Hola! Bienvenido al soporte. ¿En qué podemos ayudarte?",
+		"responseMessage": "Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto.",
+		"assistantName": "¡Hola, soy SIA!",
+		"assistantSubtitle": "Tu asistente virtual.",
+		"placeholder": "Escribe aquí...",
+		"menu": {
+			"register": "Registrarse",
+			"login": "Iniciar Sesión"
+		}
+	},
+	"ThemeToggle": {
+		"lightMode": "Cambiar a modo claro",
+		"darkMode": "Cambiar a modo oscuro"
+	},
+	"About": {
+		"missionTitle": "Nuestra Misión",
+		"missionSubtitle": "Transformar la atención médica a través de la tecnología innovadora",
+		"aboutBoxDoctorTitle": "Sobre BoxDoctor",
+		"aboutBoxDoctorP1": "BoxDoctor es una plataforma integral de telemedicina diseñada para conectar profesionales de la salud con pacientes de manera segura y eficiente. Nuestra tecnología de vanguardia permite consultas virtuales de alta calidad, gestión de recetas, programación de citas y comunicación en tiempo real, todo mientras mantenemos los más altos estándares de seguridad y cumplimiento HIPAA.",
+		"ourTeamTitle": "Nuestro Equipo",
+		"ourTeamP1": "Somos un equipo apasionado de desarrolladores, profesionales de la salud y expertos en tecnología comprometidos con revolucionar la forma en que se brinda la atención médica. Nuestra experiencia combinada en medicina, tecnología y experiencia del usuario nos permite crear soluciones que realmente marcan la diferencia en la vida de médicos y pacientes."
+	},
+	"Dashboard": {
+		"title": "Panel de Control",
+		"stats": {
+			"totalPatients": "Total de Pacientes",
+			"totalAppointments": "Citas Totales",
+			"todayAppointments": "Citas de Hoy",
+			"todayRevenue": "Ingresos de Hoy",
+			"activeConversations": "Conversaciones Activas"
+		},
+		"chart": {
+			"title": "Ingresos Mensuales",
+			"revenue": "Ingresos",
+			"expenses": "Gastos"
+		},
+		"months": [
+			"Enero",
+			"Febrero",
+			"Marzo",
+			"Abril",
+			"Mayo",
+			"Junio",
+			"Julio",
+			"Agosto",
+			"Septiembre",
+			"Octubre",
+			"Noviembre",
+			"Diciembre"
+		],
+		"menu": {
+			"dashboard": "Panel",
+			"patients": "Pacientes",
+			"appointments": "Agenda",
+			"consultations": "Consultas",
+			"prescriptions": "Recetas",
+			"chat": "Chat",
+			"payments": "Pagos",
+			"statistics": "Estadísticas",
+			"mainSite": "Sitio Principal",
+			"blog": "Blog",
+			"settings": "Configuración",
+			"logout": "Cerrar Sesión"
+		},
+		"navbar": {
+			"user": "Usuario",
+			"doctor": "Médico",
+			"profile": "Mi Perfil",
+			"logout": "Cerrar Sesión"
+		},
+		"footer": {
+			"rights": "Todos los derechos reservados.",
+			"about": "Sobre Nosotros",
+			"security": "Seguridad",
+			"blog": "Blog"
+		},
+		"appointments": {
+			"title": "Agenda de Citas",
+			"noAppointments": "No hay citas este día",
+			"newAppointment": "Agendar nueva cita",
+			"today": "Hoy",
+			"week": "Semana",
+			"months": {
+				"january": "Enero",
+				"february": "Febrero",
+				"march": "Marzo",
+				"april": "Abril",
+				"may": "Mayo",
+				"june": "Junio",
+				"july": "Julio",
+				"august": "Agosto",
+				"september": "Septiembre",
+				"october": "Octubre",
+				"november": "Noviembre",
+				"december": "Diciembre"
+			},
+			"days": {
+				"monday": "Lunes",
+				"tuesday": "Martes",
+				"wednesday": "Miércoles",
+				"thursday": "Jueves",
+				"friday": "Viernes",
+				"saturday": "Sábado",
+				"sunday": "Domingo"
+			}
+		},
+		"patients": {
+			"title": "Pacientes",
+			"addPatient": "Agregar paciente",
+			"searchPlaceholder": "Buscar por apellido de paciente...",
+			"totalPatients": "Total de pacientes",
+			"womenPercentage": "% Mujeres",
+			"menPercentage": "% Hombres",
+			"tableHeaders": {
+				"patient": "PACIENTE",
+				"age": "EDAD",
+				"gender": "SEXO",
+				"phone": "TELÉFONO",
+				"lastConsultation": "ÚLTIMA CONSULTA",
+				"nextConsultation": "PRÓXIMA CONSULTA",
+				"actions": "ACCIONES"
+			},
+			"age": "años",
+			"continueConsultation": "Continuar consulta",
+			"startConsultation": "Iniciar consulta",
+			"editPatient": "Editar paciente",
+			"deletePatient": "Eliminar paciente",
+			"confirmDelete": "Confirmar eliminación",
+			"confirmDeleteMessage": "¿Estás seguro de que quieres eliminar al paciente",
+			"confirmDeleteWarning": "Esta acción no se puede deshacer.",
+			"cancel": "Cancelar",
+			"save": "Guardar",
+			"delete": "Eliminar",
+			"newPatient": {
+				"title": "Registrar Nuevo Paciente",
+				"description": "Completa los siguientes campos para añadir un nuevo paciente a tu lista.",
+				"createPatient": "Crear Paciente",
+				"saveChanges": "Guardar Cambios"
+			},
+			"form": {
+				"firstName": "Nombre *",
+				"lastName": "Apellido *",
+				"dateOfBirth": "Fecha de nacimiento *",
+				"gender": "Sexo *",
+				"male": "Masculino",
+				"female": "Femenino",
+				"email": "Email",
+				"phone": "Teléfono *",
+				"notes": "Notas"
+			}
+		},
+		"consultation": {
+			"title": "Consulta Médica",
+			"patientNotFound": "Paciente no encontrado",
+			"editInfo": "Editar información",
+			"finishConsultation": "Terminar consulta",
+			"tabs": {
+				"file": "Ficha",
+				"medicalHistory": "Historia clínica",
+				"consultation": "Consulta",
+				"history": "Historial",
+				"studies": "Estudios"
+			},
+			"patientInfo": {
+				"personalInfo": "Información personal",
+				"emergencyContact": "Contacto de emergencia",
+				"billingInfo": "Datos de facturación",
+				"notes": "Notas",
+				"notesPlaceholder": "Notas adicionales sobre el paciente...",
+				"fields": {
+					"address": "Dirección",
+					"birthState": "Estado de nacimiento",
+					"nationality": "Nacionalidad",
+					"birthCity": "Ciudad de nacimiento",
+					"relationship": "Parentesco",
+					"bloodType": "Grupo Sanguíneo",
+				"education": "Escolaridad",
+				"profession": "Profesión/Ocupación",
+				"religion": "Religión",
+				"maritalStatus": "Estado civil",
+				"phone": "Teléfono",
+				"email": "Email",
+				"fullName": "Nombre y apellido",
+				"taxRegime": "Régimen fiscal",
+				"cfdiUse": "Uso de CFDI",
+				"rfc": "RFC"
+				}
+			},
+			"medicalHistory": {
+				"hereditaryFamily": "Antecedentes heredo-familiares",
+				"nonPathological": "Antecedentes no patológicos",
+				"pathological": "Antecedentes patológicos",
+				"systemsInterrogation": "Interrogatorio por aparatos y sistemas",
+				"yes": "Sí",
+				"no": "No",
+				"details": "Detalles...",
+				"conditions": {
+					"diabetes": "Diabetes",
+					"hypertension": "Hipertensión",
+					"cardiovascular": "Cardiovascular",
+					"thyroid": "Tiroides",
+					"cancer": "Cáncer",
+					"renal": "Renal",
+					"lupus": "Lupus",
+					"parkinson": "Parkinson",
+					"alzheimer": "Alzheimer",
+					"activeMedications": "Medicamentos activos",
+					"other": "Otros",
+					"smoking": "Tabaquismo",
+				"alcohol": "Alcohol",
+				"drugs": "Drogas",
+				"exercise": "Ejercicio",
+				"diet": "Dieta",
+				"sleep": "Sueño",
+				"stress": "Estrés",
+				"surgeries": "Cirugías",
+				"hospitalizations": "Hospitalizaciones",
+				"allergies": "Alergias",
+				"chronicDiseases": "Enfermedades crónicas",
+				"medications": "Medicamentos",
+				"respiratory": "Respiratorio",
+				"digestive": "Digestivo",
+				"genitourinary": "Genitourinario",
+				"musculoskeletal": "Musculoesquelético",
+				"neurological": "Neurológico",
+				"endocrine": "Endocrino",
+				"skin": "Piel"
+				}
+			},
+			"inDevelopment": {
+				"consultation": "Consulta en desarrollo...",
+				"history": "Historial en desarrollo...",
+				"studies": "Estudios médicos en desarrollo..."
+			},
+			"videoCall": {
+				"patientVideo": "Video del Paciente",
+				"myVideo": "Mi Video"
+			}
+		},
+		"prescriptions": {
+			"title": "Gestión de Recetas",
+			"newPrescription": "Nueva Receta",
+			"stats": {
+				"totalPrescriptions": "Recetas Totales",
+				"activePrescriptions": "Recetas Activas",
+				"completedPrescriptions": "Completadas",
+				"prescribedMedications": "Medicamentos Recetados"
+			},
+			"status": {
+				"active": "Activa",
+				"completed": "Completada",
+				"expired": "Expirada"
+			},
+			"actions": {
+				"view": "Ver",
+				"edit": "Editar",
+				"print": "Imprimir",
+				"delete": "Eliminar",
+				"close": "Cerrar",
+				"cancel": "Cancelar",
+				"back": "Atrás",
+				"next": "Siguiente",
+				"createPrescription": "Crear Receta"
+			},
+			"prescription": {
+				"title": "Receta",
+				"patientInfo": "Información del Paciente",
+				"name": "Nombre",
+				"id": "ID",
+				"doctor": "Médico",
+				"date": "Fecha",
+				"status": "Estado",
+				"notes": "Notas",
+				"medications": "Medicamentos",
+				"medicationCount": "medicamento(s)"
+			},
+			"medication": {
+				"name": "Medicamento",
+				"dosage": "Dosis",
+				"frequency": "Frecuencia",
+				"duration": "Duración",
+				"instructions": "Instrucciones"
+			},
+			"newPrescriptionForm": {
+				"title": "Nueva Receta",
+				"steps": {
+					"patientInfo": "Información del Paciente",
+					"medications": "Medicamentos",
+					"instructions": "Instrucciones",
+					"review": "Revisión"
+				},
+				"selectPatient": "Seleccionar Paciente",
+				"addMedications": "Añadir Medicamentos",
+				"additionalNotes": "Notas adicionales",
+				"reviewInfo": "Revisa la información antes de crear la receta...",
+				"medicationsWillBeAdded": "Los medicamentos se agregarán en el siguiente paso..."
+			}
+		},
+		"chat": {
+			"title": "Chat y Conversaciones",
+			"stats": {
+				"totalConversations": "Conversaciones Totales",
+				"medicalConsultations": "Consultas Médicas",
+				"technicalSupport": "Soporte Técnico",
+				"generalConversations": "Conversaciones Generales"
+			},
+			"conversations": {
+				"title": "Conversaciones",
+				"noConversations": "No hay conversaciones disponibles",
+				"selectConversation": "Selecciona una conversación para comenzar a chatear",
+				"noMessages": "No hay mensajes en esta conversación",
+				"writeMessage": "Escribe un mensaje...",
+				"created": "Creada"
+			},
+			"types": {
+				"medical_consultation": "Consulta Médica",
+				"support": "Soporte",
+				"general": "General"
+			}
+		},
+		"payments": {
+			"title": "Gestión de Pagos",
+			"newPayment": "Nuevo Pago",
+			"paymentMethod": "Método de Pago",
+			"stats": {
+				"totalRevenue": "Ingresos Totales",
+				"totalTransactions": "Transacciones Totales",
+				"pendingPayments": "Pagos Pendientes",
+				"failedPayments": "Pagos Fallidos"
+			},
+			"status": {
+				"completed": "Completado",
+				"pending": "Pendiente",
+				"failed": "Fallido",
+				"refunded": "Reembolsado"
+			},
+			"paymentMethods": {
+				"title": "Métodos de Pago",
+				"creditCard": "Tarjeta de Crédito",
+				"bankTransfer": "Transferencia Bancaria",
+				"cash": "Efectivo",
+				"insurance": "Seguro Médico",
+				"bankAccount": "Cuenta Bancaria",
+				"default": "Predeterminado"
+			},
+			"actions": {
+				"view": "Ver",
+				"edit": "Editar",
+				"delete": "Eliminar",
+				"download": "Descargar",
+				"close": "Cerrar",
+				"cancel": "Cancelar",
+				"add": "Agregar",
+				"processPayment": "Procesar Pago"
+			},
+			"payment": {
+				"title": "Pago",
+				"detail": "Detalle del Pago",
+				"patientInfo": "Información del Paciente",
+				"paymentInfo": "Información del Pago",
+				"name": "Nombre",
+				"id": "ID",
+				"invoice": "Factura",
+				"amount": "Monto",
+				"date": "Fecha",
+				"description": "Descripción",
+				"receipt": "Recibo"
+			},
+			"form": {
+				"addPaymentMethod": "Agregar Método de Pago",
+				"newPayment": "Nuevo Pago",
+				"methodType": "Tipo de Método",
+				"cardNumber": "Número de Tarjeta",
+				"expiryDate": "Fecha de Vencimiento",
+				"cvv": "CVV",
+				"patient": "Paciente",
+				"amount": "Monto",
+				"paymentMethod": "Método de Pago",
+				"description": "Descripción",
+				"descriptionPlaceholder": "Descripción del pago..."
+			},
+			"recentPayments": "Pagos Recientes",
+			"tableHeaders": {
+				"patient": "Paciente",
+				"amount": "Monto",
+				"method": "Método",
+				"status": "Estado",
+				"date": "Fecha",
+				"actions": "Acciones"
+			}
+		}
+	}
+}

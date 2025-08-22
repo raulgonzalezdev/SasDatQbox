@@ -1,79 +1,86 @@
 'use client';
 
-import Button from '@/components/ui/Button';
-import Link from 'next/link';
-import { signInWithEmail } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Box, TextField, Button, CircularProgress, InputAdornment, IconButton } from '@mui/material';
+import { useAuth } from '@/hooks/useAuth';
+import React from 'react';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// Define prop type with allowPassword boolean
-interface EmailSignInProps {
-  allowPassword: boolean;
-  redirectMethod: string;
-  disableButton?: boolean;
-}
+export default function EmailSignIn() {
+  const { login, isLoggingIn } = useAuth();
+  const [showPassword, setShowPassword] = React.useState(false);
 
-export default function EmailSignIn({
-  allowPassword,
-  redirectMethod,
-  disableButton
-}: EmailSignInProps) {
-  const router = redirectMethod === 'client' ? useRouter() : null;
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    setIsSubmitting(true); // Disable the button while the request is being handled
-    await handleRequest(e, signInWithEmail, router);
-    setIsSubmitting(false);
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    
+    const payload = {
+      username: formData.get('email') as string,
+      password: formData.get('password') as string,
+    };
+    
+    login({ payload }); // Llamamos a la mutación con el formato correcto
   };
 
   return (
-    <div className="my-8">
-      <form
-        noValidate={true}
-        className="mb-4"
-        onSubmit={(e) => handleSubmit(e)}
+    <Box 
+      component="form" 
+      onSubmit={handleSubmit} 
+      sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        mt: 3 
+      }}
+    >
+      <TextField
+        required
+        fullWidth
+        id="email"
+        label="Correo Electrónico"
+        name="email"
+        autoComplete="email"
+        autoFocus
+        disabled={isLoggingIn}
+      />
+      <TextField
+        required
+        fullWidth
+        name="password"
+        label="Contraseña"
+        type={showPassword ? 'text' : 'password'}
+        id="password"
+        autoComplete="current-password"
+        disabled={isLoggingIn}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowPassword}
+                onMouseDown={handleMouseDownPassword}
+                edge="end"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        disabled={isLoggingIn}
+        sx={{ mt: 3, mb: 2 }}
       >
-        <div className="grid gap-2">
-          <div className="grid gap-1">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              placeholder="name@example.com"
-              type="email"
-              name="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              className="w-full p-3 rounded-md bg-zinc-800"
-            />
-          </div>
-          <Button
-            variant="slim"
-            type="submit"
-            className="mt-1"
-            loading={isSubmitting}
-            disabled={disableButton}
-          >
-            Sign in
-          </Button>
-        </div>
-      </form>
-      {allowPassword && (
-        <>
-          <p>
-            <Link href="/signin/password_signin" className="font-light text-sm">
-              Sign in with email and password
-            </Link>
-          </p>
-          <p>
-            <Link href="/signin/signup" className="font-light text-sm">
-              Don't have an account? Sign up
-            </Link>
-          </p>
-        </>
-      )}
-    </div>
+        {isLoggingIn ? <CircularProgress size={24} /> : 'Iniciar Sesión'}
+      </Button>
+    </Box>
   );
 }

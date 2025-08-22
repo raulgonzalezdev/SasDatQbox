@@ -7,14 +7,15 @@ Este proyecto implementa un sistema POS (Point of Sale) completo como SaaS (Soft
 - **sass_front/**: Frontend web con Next.js
 - **mobile-lynx/**: Aplicación móvil con Lynx
 - **supabase/**: Configuración y migraciones de Supabase
+- **fastapi_backend/**: Nuevo backend con FastAPI y PostgreSQL
 
 ## Tecnologías Utilizadas
 
-- **Backend**: Supabase (PostgreSQL, Auth, Storage, Functions)
-- **API**: RESTful con Next.js API Routes
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Functions) / **FastAPI (Python) con PostgreSQL**
+- **API**: RESTful con Next.js API Routes / **FastAPI**
 - **Web Frontend**: Next.js, Material UI, Tailwind CSS
 - **Mobile**: Lynx (React para móviles)
-- **Base de Datos**: PostgreSQL (Supabase)
+- **Base de Datos**: PostgreSQL (Supabase) / **PostgreSQL**
 
 ## Configuración del Entorno de Desarrollo
 
@@ -24,6 +25,7 @@ Este proyecto implementa un sistema POS (Point of Sale) completo como SaaS (Soft
 - npm o pnpm
 - Supabase CLI
 - Git
+- Docker y Docker Compose
 
 ### Instalación
 
@@ -45,13 +47,13 @@ Este proyecto implementa un sistema POS (Point of Sale) completo como SaaS (Soft
    npm install
    ```
 
-4. Configurar Supabase local:
+4. Configurar Supabase local (si aún se utiliza):
    ```
    cd ../../
    npx supabase start
    ```
 
-### Ejecución
+### Ejecución (Antiguo Backend Supabase)
 
 1. Iniciar el frontend web:
    ```
@@ -66,6 +68,62 @@ Este proyecto implementa un sistema POS (Point of Sale) completo como SaaS (Soft
    ```
 
 3. Acceder a la aplicación web en [http://localhost:3000](http://localhost:3000)
+
+## Ejecución y Despliegue Local (Nuevo Backend FastAPI)
+
+Para levantar el nuevo backend de FastAPI y la base de datos PostgreSQL utilizando Docker Compose, sigue estos pasos:
+
+### 1. Configuración del Entorno
+
+Asegúrate de tener un archivo `.env` en la raíz del proyecto con las variables de entorno necesarias para la base de datos y el backend. Por ejemplo:
+
+```
+POSTGRES_DB=sasdatqbox
+POSTGRES_USER=sas_user
+POSTGRES_PASSWORD=ML!gsx90l02
+DATABASE_URL="postgresql://sas_user:ML!gsx90l02@db:5432/sasdatqbox"
+SECRET_KEY=super-secret-jwt-token-with-at-least-32-characters-long
+```
+
+### 2. Levantar los Contenedores
+
+Desde la raíz del proyecto, ejecuta el siguiente comando para construir y levantar los servicios definidos en `docker-compose.yml`:
+
+```bash
+docker-compose up --build -d
+```
+
+Esto iniciará el contenedor de PostgreSQL (`db`) y el contenedor del backend de FastAPI (`fastapi_backend`).
+
+### 3. Ejecutar Migraciones de Base de Datos
+
+Una vez que los contenedores estén levantados, puedes ejecutar las migraciones de Alembic para aplicar el esquema de la base de datos. Primero, asegúrate de que el servicio `db` esté completamente inicializado antes de ejecutar las migraciones.
+
+Para ejecutar las migraciones, puedes acceder al contenedor de `fastapi_backend` y ejecutar los comandos de Alembic:
+
+```bash
+docker-compose exec fastapi_backend alembic upgrade head
+```
+
+Este comando aplicará todas las migraciones pendientes a tu base de datos PostgreSQL.
+
+### 4. Acceso a la API
+
+Una vez que el backend esté corriendo y las migraciones aplicadas, la API de FastAPI estará disponible. Puedes acceder a la documentación interactiva de Swagger UI en:
+
+`http://localhost:8000/docs`
+
+Y a la documentación de ReDoc en:
+
+`http://localhost:8000/redoc`
+
+### 5. Detener los Contenedores
+
+Para detener y remover los contenedores, redes y volúmenes creados por `docker-compose`:
+
+```bash
+docker-compose down
+```
 
 ## Estructura de la Base de Datos
 
@@ -91,4 +149,4 @@ El proyecto utiliza una base de datos PostgreSQL gestionada por Supabase con las
 2. Crear una rama para tu funcionalidad (`git checkout -b feature/nueva-funcionalidad`)
 3. Hacer commit de tus cambios (`git commit -am 'Añadir nueva funcionalidad'`)
 4. Hacer push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Crear un Pull Request 
+5. Crear un Pull Request

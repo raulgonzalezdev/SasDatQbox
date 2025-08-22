@@ -1,0 +1,27 @@
+# Ignorar dependencias de Node
+node_modules
+*/node_modules
+
+# Ignorar entorno virtual de Python
+fastapi_backend/venv
+
+# Ignorar directorios de build y logs
+.next/
+*/.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar archivos de sistema y de IDE
+.DS_Store
+.git
+.vscode/
+
+# Ignorar archivos de entorno locales
+.env
+.env.local
+
+# Ignorar directorios obsoletos
+supabase/
+backend/
+src/

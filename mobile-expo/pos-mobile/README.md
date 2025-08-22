@@ -1,251 +1,235 @@
-# POS Mobile App
+# 📱 BoxDoctor Mobile App
 
-Aplicación móvil para el sistema de punto de venta (POS) desarrollada con Expo y React Native.
+Aplicación móvil para el sistema de telemedicina BoxDoctor desarrollada con Expo y React Native.
 
-## Configuración del entorno
+## 🎯 Descripción
 
-### Variables de entorno
+BoxDoctor Mobile es una aplicación completa de telemedicina que permite a médicos y pacientes gestionar citas, consultas, recetas y comunicación en tiempo real. La aplicación está diseñada para funcionar tanto en dispositivos móviles como en web.
 
-La aplicación utiliza variables de entorno para configurar la conexión con Supabase y otras APIs. Para configurar estas variables:
+### 🏥 Funcionalidades Principales
+
+#### Para Médicos:
+- 📅 Gestión de citas médicas
+- 👥 Administración de pacientes
+- 💊 Creación y gestión de recetas
+- 🎥 Consultas por videollamada
+- 💬 Chat con pacientes
+- 📊 Dashboard médico
+
+#### Para Pacientes:
+- 📅 Agendar citas médicas
+- 🎥 Consultas virtuales
+- 💬 Chat con médicos
+- 💊 Historial de recetas
+- 💳 Pagos desde la app
+- 📱 Notificaciones push
+
+## 🚀 Configuración del Entorno
+
+### 1. Variables de Entorno
+
+La aplicación utiliza variables de entorno para configurar la conexión con el backend. Para configurar estas variables:
 
 1. Copia el archivo `.env.example` a `.env`:
    ```bash
    cp .env.example .env
    ```
 
-2. Edita el archivo `.env` y reemplaza los valores con tus propias credenciales:
+2. Edita el archivo `.env` con tus configuraciones (ver `CONFIGURATION.md` para detalles completos):
+   ```bash
+   # API Configuration
+   EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8001/api/v1
+   
+   # Authentication
+   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+   JWT_EXPIRES_IN=7d
+   
+   # App Configuration
+   EXPO_PUBLIC_SITE_URL=https://boxdoctor.com
+   EXPO_PUBLIC_DEV_URL=http://localhost:3000
+   
+   # Feature Flags
+   EXPO_PUBLIC_DEV_MODE=true
+   EXPO_PUBLIC_DEBUG_LOGS=true
    ```
-   EXPO_PUBLIC_SUPABASE_URL=tu_url_de_supabase
-   EXPO_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
-   ```
 
-### Configuración de Supabase para diferentes dispositivos
+### 2. Configuración por Dispositivo
 
-La URL de Supabase debe configurarse de manera diferente según el dispositivo que estés utilizando:
-
-#### Emulador Android
-```
-EXPO_PUBLIC_SUPABASE_URL=http://10.0.2.2:54321
-```
-
-#### Simulador iOS
-```
-EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
-```
-
-#### Dispositivo físico
-Debes usar la dirección IP de tu computadora en la red local:
-```
-EXPO_PUBLIC_SUPABASE_URL=http://192.168.1.X:54321
-```
-Reemplaza `192.168.1.X` con la IP real de tu computadora. Puedes encontrarla con:
-- Windows: Ejecuta `ipconfig` en CMD y busca "IPv4 Address"
-- Mac/Linux: Ejecuta `ifconfig` en Terminal y busca "inet" (no "inet6")
-
-También puedes usar nuestro script para encontrar tu IP local:
+#### 📱 Emulador Android
 ```bash
-npm run find-ip
-# o
-yarn find-ip
+EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8001/api/v1
 ```
 
-#### Usando ngrok (recomendado para dispositivos físicos)
-Puedes usar ngrok para exponer tu servidor Supabase local a internet y hacerlo accesible desde cualquier dispositivo:
-
-1. Asegúrate de tener ngrok instalado (https://ngrok.com/download)
-2. Configura la ruta a ngrok en `scripts/supabase-ngrok.js` (por defecto es `C:\\ngrok\\ngrok.exe`)
-3. Ejecuta el script:
+#### 🍎 Simulador iOS
 ```bash
-npm run supabase-ngrok
-# o
-yarn supabase-ngrok
+EXPO_PUBLIC_API_BASE_URL=http://localhost:8001/api/v1
 ```
-4. El script iniciará ngrok, obtendrá la URL pública y actualizará automáticamente tu archivo `.env`
-5. Reinicia tu aplicación Expo para que tome la nueva URL
 
-También puedes iniciar ngrok y Expo al mismo tiempo:
+#### 📱 Dispositivo Físico
 ```bash
-npm run start-with-ngrok
-# o
-yarn start-with-ngrok
+# Reemplaza 192.168.1.X con tu IP local
+EXPO_PUBLIC_API_BASE_URL=http://192.168.1.X:8001/api/v1
 ```
 
-#### Supabase en la nube
-Si estás usando Supabase en la nube (no localmente), usa la URL proporcionada por Supabase:
+#### 🌐 Desarrollo Web
+```bash
+EXPO_PUBLIC_API_BASE_URL=http://localhost:8001/api/v1
 ```
-EXPO_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-```
 
-### Supabase
+## 🔧 Requisitos del Backend
 
-La aplicación utiliza Supabase para la autenticación y el almacenamiento de datos. Para configurar Supabase:
+La aplicación requiere un backend ejecutándose en el puerto `8001` con los siguientes endpoints:
 
-1. Crea una cuenta en [Supabase](https://supabase.io/)
-2. Crea un nuevo proyecto
-3. Obtén la URL y la clave anónima de tu proyecto
-4. Configura estas credenciales en el archivo `.env`
+### Autenticación
+- `POST /api/v1/auth/register` - Registro de usuarios
+- `POST /api/v1/auth/login` - Inicio de sesión
+- `POST /api/v1/auth/logout` - Cierre de sesión
+- `GET /api/v1/auth/me` - Obtener usuario actual
+- `PUT /api/v1/auth/profile` - Actualizar perfil
 
-## Instalación
+### Funcionalidades Médicas
+- Citas médicas (`/api/v1/appointments`)
+- Pacientes (`/api/v1/patients`)
+- Consultas (`/api/v1/consultations`)
+- Recetas (`/api/v1/prescriptions`)
+- Chat (`/api/v1/chat`)
+- Pagos (`/api/v1/payments`)
+
+## 📦 Instalación
 
 ```bash
 # Instalar dependencias
 npm install
 
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus configuraciones
+
 # Iniciar la aplicación en modo desarrollo
 npm start
 ```
 
-## Desarrollo
+## 🚀 Desarrollo
 
-### Estructura del proyecto
-
-- `app/`: Pantallas de la aplicación (usando Expo Router)
-- `components/`: Componentes reutilizables
-  - `auth/`: Componentes de autenticación
-  - `pos/`: Componentes del punto de venta
-  - `ui/`: Componentes de interfaz de usuario
-- `services/`: Servicios para interactuar con APIs y Supabase
-- `config/`: Archivos de configuración
-- `constants/`: Constantes utilizadas en la aplicación
-- `assets/`: Recursos estáticos (imágenes, fuentes, etc.)
-- `constants/`: Constantes y configuración
-- `hooks/`: Hooks personalizados
-- `scripts/`: Scripts de utilidad
-
-### Autenticación
-
-La aplicación utiliza Supabase para la autenticación. Los servicios de autenticación se encuentran en `services/auth.ts`.
-
-### Modo de demostración
-
-La aplicación incluye un modo de demostración que permite probar las funcionalidades sin necesidad de registrarse. Para acceder al modo de demostración, utiliza las siguientes credenciales:
-
-- Email: `demo@free.com` (plan gratuito) o `demo@premium.com` (plan premium)
-- Contraseña: `123456`
-
-## Requisitos
-
-- Node.js (v14 o superior)
-- npm o yarn
-- Expo CLI
-- Expo Go (aplicación móvil para probar la app)
-
-## Ejecución
-
-Hay varias formas de ejecutar la aplicación:
-
-### Modo estándar (LAN)
+### Comandos Disponibles
 
 ```bash
+# Iniciar Expo
 npm start
-# o
-yarn start
+
+# Ejecutar en Android
+npm run android
+
+# Ejecutar en iOS
+npm run ios
+
+# Ejecutar en web
+npm run web
+
+# Ejecutar en dispositivo físico
+npm run device
 ```
 
-### Modo tunnel (para acceder desde redes externas)
+### Estructura del Proyecto
 
-```bash
-npm run start-tunnel
-# o
-yarn start-tunnel
+```
+mobile-expo/pos-mobile/
+├── app/                    # Navegación y pantallas principales
+│   ├── (tabs)/            # Navegación por pestañas
+│   ├── auth/              # Pantallas de autenticación
+│   └── landing.tsx        # Página de inicio
+├── components/            # Componentes reutilizables
+│   ├── ui/               # Componentes de UI
+│   └── forms/            # Formularios
+├── config/               # Configuración
+│   └── env.ts            # Variables de entorno
+├── constants/            # Constantes y endpoints
+│   └── api.ts            # Endpoints de la API
+├── services/             # Servicios
+│   └── auth.ts           # Servicio de autenticación
+├── store/                # Estado global (Zustand)
+│   └── appStore.ts       # Store principal
+└── assets/               # Recursos estáticos
 ```
 
-### Modo offline (sin conexión a internet)
+## 🔍 Depuración
 
-```bash
-npm run start-offline
-# o
-yarn start-offline
+### Logs de Configuración
+Los logs de configuración se muestran automáticamente en desarrollo:
+
+```
+📱 ========================================
+📱 CONFIGURACIÓN DE ENTORNO - BOXDOCTOR MOBILE
+📱 ========================================
+📱 Entorno de ejecución: bare
+📱 Plataforma: android
+🔌 API Base URL: http://10.0.2.2:8001/api/v1
+🔌 Site URL: https://boxdoctor.com
+🔌 Dev Mode: true
+🔌 Debug Logs: true
+📱 ========================================
 ```
 
-### Limpiar caché y reiniciar
+### Verificar Conexión
+```javascript
+import { checkApiConnection } from '../config/env';
 
-Si tienes problemas con la aplicación, puedes limpiar la caché y reiniciar:
-
-```bash
-npm run start-clear
-# o
-yarn start-clear
+const checkConnection = async () => {
+  const result = await checkApiConnection();
+  console.log('Conexión API:', result);
+};
 ```
 
-### Reinicio completo
+## 🛠️ Troubleshooting
 
-Para un reinicio completo (limpia caché, reinstala dependencias y reinicia):
+### Error de Conexión
+1. Verifica que el backend esté ejecutándose en el puerto 8001
+2. Confirma que la IP en `.env` sea correcta para tu dispositivo
+3. Verifica que no haya firewall bloqueando la conexión
 
-```bash
-npm run reset-app
-# o
-yarn reset-app
-```
+### Error de Autenticación
+1. Verifica que `JWT_SECRET` coincida con el backend
+2. Confirma que los endpoints de autenticación estén disponibles
+3. Revisa los logs del backend para errores
 
-## Solución de problemas
+### Error en Dispositivo Físico
+1. Asegúrate de usar tu IP local en `EXPO_PUBLIC_API_BASE_URL`
+2. Verifica que el dispositivo y el servidor estén en la misma red
+3. Confirma que el puerto 8001 esté abierto
 
-### Error "TypeError: fetch failed"
+## 📱 Características Técnicas
 
-Este error puede ocurrir cuando hay problemas de conexión con los servidores de Expo. Prueba las siguientes soluciones:
+- **Framework**: React Native con Expo
+- **Navegación**: Expo Router
+- **Estado**: Zustand
+- **Almacenamiento**: AsyncStorage
+- **Autenticación**: JWT
+- **API**: RESTful con fetch
+- **UI**: React Native Paper
+- **Iconos**: Expo Vector Icons
 
-1. Ejecuta la aplicación en modo offline:
-   ```bash
-   npm run start-offline
-   ```
+## 🔐 Seguridad
 
-2. Limpia la caché y reinicia:
-   ```bash
-   npm run start-clear
-   ```
+- Autenticación JWT
+- Tokens de acceso y refresco
+- Almacenamiento seguro en AsyncStorage
+- Validación de entrada en formularios
+- Headers de autorización en todas las peticiones
 
-3. Reinicia completamente la aplicación:
-   ```bash
-   npm run reset-app
-   ```
+## 📄 Documentación Adicional
 
-### Problemas con ngrok
+- [CONFIGURATION.md](./CONFIGURATION.md) - Configuración detallada
+- [API Endpoints](./constants/api.ts) - Documentación de endpoints
+- [Environment Variables](./config/env.ts) - Variables de entorno
 
-#### Error "address already in use"
+## 🤝 Contribución
 
-Este error ocurre cuando ya hay una instancia de ngrok ejecutándose. Para solucionarlo:
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-1. Cierra todas las ventanas de terminal donde se esté ejecutando ngrok
-2. En Windows, abre el Administrador de tareas y finaliza cualquier proceso de ngrok
-3. Intenta ejecutar el script nuevamente
+## 📄 Licencia
 
-#### Error "tunnel session failed"
-
-Este error puede ocurrir si has excedido el límite de sesiones de ngrok en la cuenta gratuita. Para solucionarlo:
-
-1. Espera unos minutos e intenta nuevamente
-2. Reinicia tu computadora
-3. Considera actualizar a una cuenta de pago si necesitas usar ngrok con frecuencia
-
-#### La URL de ngrok no funciona en la aplicación
-
-Si la aplicación no puede conectarse a la URL de ngrok:
-
-1. Asegúrate de que la URL en el archivo `.env` comienza con `https://` (no `http://`)
-2. Reinicia la aplicación Expo después de actualizar el archivo `.env`
-3. Verifica que ngrok sigue ejecutándose (la ventana de terminal debe estar abierta)
-4. Intenta generar una nueva URL de ngrok ejecutando el script nuevamente
-
-### Error "Too many screens defined"
-
-Este error puede ocurrir cuando hay rutas duplicadas en la configuración de navegación. Asegúrate de que no haya rutas duplicadas en los archivos `_layout.tsx`.
-
-## Estructura del proyecto
-
-- `app/`: Contiene las pantallas y la configuración de navegación
-  - `(tabs)/`: Pestañas principales de la aplicación
-  - `auth/`: Pantallas de autenticación
-  - `pos/`: Pantallas del punto de venta
-- `components/`: Componentes reutilizables
-  - `auth/`: Componentes de autenticación
-  - `pos/`: Componentes del punto de venta
-  - `ui/`: Componentes de interfaz de usuario
-- `assets/`: Recursos estáticos (imágenes, fuentes, etc.)
-- `constants/`: Constantes y configuración
-- `hooks/`: Hooks personalizados
-- `scripts/`: Scripts de utilidad
-- `config/`: Archivos de configuración
-
-## Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.

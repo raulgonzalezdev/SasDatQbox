@@ -1,88 +1,82 @@
 'use client';
 
-import Button from '@/components/ui/Button';
-import Link from 'next/link';
-import { signInWithPassword } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
+import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
 
-// Define prop type with allowEmail boolean
-interface PasswordSignInProps {
-  allowEmail: boolean;
-  redirectMethod: string;
-}
+const formSchema = z.object({
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(1, 'La contraseña es requerida'),
+});
 
-export default function PasswordSignIn({
-  allowEmail,
-  redirectMethod
-}: PasswordSignInProps) {
-  const router = redirectMethod === 'client' ? useRouter() : null;
-  const [isSubmitting, setIsSubmitting] = useState(false);
+type FormData = z.infer<typeof formSchema>;
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    setIsSubmitting(true); // Disable the button while the request is being handled
-    await handleRequest(e, signInWithPassword, router);
-    setIsSubmitting(false);
+export default function PasswordSignIn() {
+  const { login, isLoggingIn } = useAuth();
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = (data: FormData) => {
+    const payload = {
+      username: data.email,
+      password: data.password,
+    };
+    login({ payload });
   };
 
   return (
-    <div className="my-8">
-      <form
-        noValidate={true}
-        className="mb-4"
-        onSubmit={(e) => handleSubmit(e)}
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
+      <TextField
+        margin="normal"
+        required
+        fullWidth
+        id="email"
+        label="Correo Electrónico"
+        autoComplete="email"
+        autoFocus
+        {...register('email')}
+        error={!!errors.email}
+        helperText={errors.email?.message}
+        disabled={isLoggingIn}
+      />
+      <TextField
+        margin="normal"
+        required
+        fullWidth
+        name="password"
+        label="Contraseña"
+        type="password"
+        id="password"
+        autoComplete="current-password"
+        {...register('password')}
+        error={!!errors.password}
+        helperText={errors.password?.message}
+        disabled={isLoggingIn}
+      />
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, mb: 2 }}
+        disabled={isLoggingIn}
       >
-        <div className="grid gap-2">
-          <div className="grid gap-1">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              placeholder="name@example.com"
-              type="email"
-              name="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              className="w-full p-3 rounded-md bg-zinc-800"
-            />
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              placeholder="Password"
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              className="w-full p-3 rounded-md bg-zinc-800"
-            />
-          </div>
-          <Button
-            variant="slim"
-            type="submit"
-            className="mt-1"
-            loading={isSubmitting}
-          >
-            Sign in
-          </Button>
-        </div>
-      </form>
-      <p>
-        <Link href="/signin/forgot_password" className="font-light text-sm">
-          Forgot your password?
+        {isLoggingIn ? <CircularProgress size={24} /> : 'Iniciar Sesión'}
+      </Button>
+      <Typography variant="body2" sx={{ mt: 2 }}>
+        <Link href="/signin/forgot_password" passHref>
+          ¿Olvidaste tu contraseña?
         </Link>
-      </p>
-      {allowEmail && (
-        <p>
-          <Link href="/signin/email_signin" className="font-light text-sm">
-            Sign in via magic link
-          </Link>
-        </p>
-      )}
-      <p>
-        <Link href="/signin/signup" className="font-light text-sm">
-          Don't have an account? Sign up
+      </Typography>
+      <Typography variant="body2" sx={{ mt: 1 }}>
+        <Link href="/signin/signup" passHref>
+          ¿No tienes una cuenta? Regístrate
         </Link>
-      </p>
-    </div>
+      </Typography>
+    </Box>
   );
 }

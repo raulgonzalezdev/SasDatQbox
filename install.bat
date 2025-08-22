@@ -41,7 +41,7 @@ if not exist .env (
         echo STRIPE_WEBHOOK_SECRET= >> .env.example
         echo. >> .env.example
         echo # Sitio web >> .env.example
-        echo NEXT_PUBLIC_SITE_URL=https://spaininsideapp.nl >> .env.example
+        echo NEXT_PUBLIC_SITE_URL=https://datqbox.online >> .env.example
     )
     
     copy .env.example .env
@@ -63,7 +63,7 @@ echo Iniciando servicios...
 docker compose up -d
 
 echo === Despliegue completado con exito ===
-echo La aplicacion ahora esta disponible en: https://spaininsideapp.nl
+echo La aplicacion ahora esta disponible en: https://datqbox.online
 echo.
 echo Para verificar el estado de los contenedores: docker compose ps
 echo Para ver logs: docker compose logs -f 

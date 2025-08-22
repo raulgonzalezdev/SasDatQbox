@@ -6,7 +6,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}=== Generador de certificados SSL para spaininsideapp.nl ===${NC}"
+echo -e "${GREEN}=== Generador de certificados SSL para datqbox.online ===${NC}"
 
 # Verificar si docker está instalado
 if ! [ -x "$(command -v docker)" ]; then
@@ -47,7 +47,7 @@ EOL
 cat > nginx/conf.d/nginx-http.conf << EOL
 server {
     listen 80;
-    server_name spaininsideapp.nl www.spaininsideapp.nl;
+    server_name datqbox.online www.datqbox.online;
     location ^~ /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
@@ -66,21 +66,21 @@ sleep 5
 
 # Solicitar certificado con Certbot
 echo -e "${YELLOW}Solicitando certificado SSL con Certbot...${NC}"
-docker run --rm -v $(pwd)/certbot/conf:/etc/letsencrypt -v $(pwd)/certbot/www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot --email gq.raul@gmail.com --agree-tos --no-eff-email -d spaininsideapp.nl -d www.spaininsideapp.nl
+docker run --rm -v $(pwd)/certbot/conf:/etc/letsencrypt -v $(pwd)/certbot/www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot --email gq.raul@gmail.com --agree-tos --no-eff-email -d datqbox.online -d www.datqbox.online
 
 # Detener Nginx
 echo -e "${YELLOW}Deteniendo Nginx temporal...${NC}"
 docker stop nginx-ssl
 
 # Verificar si se generaron los certificados
-if [ -f certbot/conf/live/spaininsideapp.nl/fullchain.pem ]; then
+if [ -f certbot/conf/live/datqbox.online/fullchain.pem ]; then
     echo -e "${GREEN}¡Certificados generados con éxito!${NC}"
-    echo -e "Los certificados están en la carpeta ${YELLOW}certbot/conf/live/spaininsideapp.nl/${NC}"
+    echo -e "Los certificados están en la carpeta ${YELLOW}certbot/conf/live/datqbox.online/${NC}"
     echo ""
     echo -e "Para completar la configuración, ejecuta: ${YELLOW}docker compose up -d${NC}"
 else
     echo -e "${RED}ERROR: No se pudieron generar los certificados SSL.${NC}"
-    echo -e "Verifica que el dominio spaininsideapp.nl apunte a esta máquina"
+    echo -e "Verifica que el dominio datqbox.online apunte a esta máquina"
     echo -e "y que el puerto 80 esté abierto en el firewall."
 fi
 
@@ -89,7 +89,7 @@ echo -e "${YELLOW}Creando archivo de configuración app.conf para Nginx...${NC}"
 cat > nginx/conf.d/app.conf << EOL
 server {
     listen 80;
-    server_name spaininsideapp.nl www.spaininsideapp.nl;
+    server_name datqbox.online www.datqbox.online;
     server_tokens off;
 
     location /.well-known/acme-challenge/ {
@@ -103,11 +103,11 @@ server {
 
 server {
     listen 443 ssl;
-    server_name spaininsideapp.nl www.spaininsideapp.nl;
+    server_name datqbox.online www.datqbox.online;
     server_tokens off;
 
-    ssl_certificate /etc/letsencrypt/live/spaininsideapp.nl/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/spaininsideapp.nl/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/datqbox.online/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/datqbox.online/privkey.pem;
     ssl_session_cache shared:le_nginx_SSL:10m;
     ssl_session_timeout 1440m;
     ssl_protocols TLSv1.2 TLSv1.3;

@@ -1,65 +1,84 @@
-# Configuración de servicios para SasDatQbox
-# Compatible con Cloudflare Tunnel
-
+# docker-compose.yml
 services:
-  app:
+  # # Servicio del Frontend (Next.js)
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: frontend-production
+  #     args:
+  #       # Pasar la URL de la API como argumento en tiempo de construcción
+  #       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+  #   restart: always
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+  #     - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - fastapi_backend
+
+  # Servicio del Backend (FastAPI)
+  fastapi_backend:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-        - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-        - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-        - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-        - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      target: backend-production
     restart: always
+    env_file:
+      - .env # Cargar variables desde el archivo .env
     ports:
-      - "3000:3000"  # Exponer el puerto 3000 directamente
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_SITE_URL=https://datqbox.online
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - "8000:8000" # Exponer puerto para pruebas directas
     networks:
       - app-network
-
-  nginx:
-    image: nginx:alpine
-    restart: always
-    ports:
-      - "80:80"      # Puerto HTTP estándar
-      - "8090:80"    # Puerto alternativo por si necesitas acceso directo
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/html:/usr/share/nginx/html
-      - ./certbot/www:/var/www/certbot
-      - /dev/null:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
-    networks:
-      - app-network
+      - db
 
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
+  # Servicio de Base de Datos (PostgreSQL + pgvector)
+  db:
+    image: pgvector/pgvector:pg16
+    restart: always
+    env_file:
+      - .env # Cargar variables desde el archivo .env
     volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - app-network
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
+  # # Nginx como proxy inverso
+  # nginx:
+  #   image: nginx:alpine
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx/conf.d:/etc/nginx/conf.d
+  #   depends_on:
+  #     - app
+  #     - fastapi_backend
+  #   networks:
+  #     - app-network
+
+  # Cloudflare Tunnel
   cloudflared:
     image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    network_mode: "host"  # Usar la red del host en lugar de la red Docker
-    command: tunnel run --token eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiODUyNWNlMjgtOTE3Ny00YzFlLWFkNGQtYzJmZjU4MmY4YzI4IiwicyI6Ill6Y3dNRFkxWVRNdFpHTTRZeTAwT1RsakxUazJOVGN0Wm1ZME9XSTBPVFpqT0RkbSJ9
+    restart: always
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./config.yml:/etc/cloudflared/config.yml
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiYzMzYWJjZTc5NWQ2MjMxYjE2MWQ1OWYyMmQ0NGRlZTUiLCJ0IjoiM2Q5Yjk4MjItOWFiYS00YzMyLTkyOGItNzc4MjNjYjE1NjcyIiwicyI6IlpqVTJZV1UwWWpJdFltSXpPQzAwT0RCa0xXRmhNREl0WVdNd1l6Z3lPRGxrTmpabSJ9
+    depends_on:
+      - fastapi_backend
+    networks:
+      - app-network
 
 networks:
   app-network:
-    driver: bridge 
+    driver: bridge
+
+volumes:
+  postgres_data:

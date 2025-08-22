@@ -2,20 +2,21 @@ import { StyleSheet } from 'react-native';
 
 // Colores principales de la aplicación
 export const Colors = {
-  primary: '#FFD700', // Amarillo dorado para el encabezado
-  primaryDark: '#E6C200', // Versión más oscura del amarillo
-  secondary: '#1E3A8A', // Azul oscuro para botones y acentos
-  secondaryLight: '#3B82F6', // Azul más claro
-  success: '#4CAF50', // Verde para elementos positivos
-  danger: '#F44336', // Rojo para elementos negativos
-  warning: '#FF9800', // Naranja para advertencias
-  info: '#2196F3', // Azul claro para información
-  dark: '#333333', // Gris oscuro para texto principal
-  darkGray: '#666666', // Gris medio para texto secundario
-  lightGray: '#EEEEEE', // Gris claro para bordes
+  primary: '#007AFF', // Azul primario brillante
+  primaryDark: '#0056b3', // Azul oscuro para gradiente y estados presionados
+  primaryLight: '#409cff', // Azul claro para gradiente
+  secondary: '#FF9500', // Naranja como color de acento
+  secondaryLight: '#FFB74D', // Naranja claro
+  success: '#34C759', // Verde iOS
+  danger: '#FF3B30', // Rojo iOS
+  warning: '#FFCC00', // Amarillo iOS
+  info: '#007AFF', // Igual que el primario
+  dark: '#1c1c1e', // Negro casi puro para texto (iOS)
+  darkGray: '#8e8e93', // Gris medio para texto secundario (iOS)
+  lightGray: '#e5e5ea', // Gris claro para bordes y fondos (iOS)
   white: '#FFFFFF', // Blanco
-  background: '#F9FAFB', // Fondo gris muy claro
-  tabBar: '#333333', // Color de la barra de pestañas
+  background: '#F2F2F7', // Fondo de sistema iOS
+  tabBar: '#F7F7F7', // Color de la barra de pestañas casi blanco
 };
 
 // Tipografía

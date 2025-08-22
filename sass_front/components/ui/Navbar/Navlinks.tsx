@@ -1,51 +1,250 @@
 'use client';
 
+import {useTranslations} from 'next-intl';
 import Link from 'next/link';
-import { SignOut } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import Logo from '@/components/icons/Logo';
 import { usePathname, useRouter } from 'next/navigation';
-import { getRedirectMethod } from '@/utils/auth-helpers/settings';
-import s from './Navbar.module.css';
+import { useState } from 'react';
+import { 
+  Button, 
+  Box, 
+  IconButton, 
+  Select, 
+  MenuItem, 
+  FormControl, 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import LanguageIcon from '@mui/icons-material/Language';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import Logo from '@/components/icons/Logo';
 
-interface NavlinksProps {
-  user?: any;
+interface User {
+  id: string;
+  email: string;
 }
 
-export default function Navlinks({ user }: NavlinksProps) {
-  const router = getRedirectMethod() === 'client' ? useRouter() : null;
+interface NavlinksProps {
+  user: User | null;
+  isAuthenticated: boolean;
+  logout: () => void;
+}
+
+export default function Navlinks({ user, isAuthenticated, logout }: NavlinksProps) {
+  const t = useTranslations('Navbar');
+  const router = useRouter();
+  const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const handleChangeLocale = (event: any) => {
+    const newLocale = event.target.value;
+    // Extrae la ruta base sin el locale actual
+    const newPathname = pathname.startsWith('/en') ? pathname.substring(3) : pathname.substring(3);
+    router.push(`/${newLocale}${newPathname || '/'}`);
+  };
+
+  const currentLocale = pathname.startsWith('/en') ? 'en' : 'es';
+
+  const buttonStyles = {
+    textTransform: 'none',
+    fontSize: '1rem',
+  };
+
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const navigationItems = [
+    { text: t('features'), href: '/#features' },
+    { text: t('pricing'), href: '/#pricing' },
+    { text: t('blog'), href: '/blog' },
+    { text: t('help'), href: '/#help' },
+  ];
+
+  const mobileMenu = (
+    <Drawer
+      anchor="right"
+      open={mobileMenuOpen}
+      onClose={handleMobileMenuClose}
+      sx={{
+        '& .MuiDrawer-paper': {
+          width: 280,
+          pt: 2,
+        },
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 2 }}>
+        <Logo />
+        <IconButton onClick={handleMobileMenuClose}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Divider />
+      <List>
+        {navigationItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton 
+              component={Link} 
+              href={item.href}
+              onClick={handleMobileMenuClose}
+            >
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+        <Divider />
+        {isAuthenticated ? (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton 
+                component={Link} 
+                href="/account"
+                onClick={handleMobileMenuClose}
+              >
+                <ListItemText primary={t('dashboard')} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => { logout(); handleMobileMenuClose(); }}>
+                <ListItemText primary={t('logout')} />
+              </ListItemButton>
+            </ListItem>
+          </>
+        ) : (
+          <ListItem disablePadding>
+            <ListItemButton 
+              component={Link} 
+              href="/signin"
+              onClick={handleMobileMenuClose}
+            >
+              <ListItemText primary={t('login')} />
+            </ListItemButton>
+          </ListItem>
+        )}
+        <Divider />
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemText primary={t('downloadApp')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
+          <FormControl fullWidth size="small" variant="outlined">
+            <Select
+              value={currentLocale}
+              onChange={handleChangeLocale}
+              IconComponent={LanguageIcon}
+            >
+              <MenuItem value="es">ES</MenuItem>
+              <MenuItem value="en">EN</MenuItem>
+            </Select>
+          </FormControl>
+        </ListItem>
+      </List>
+    </Drawer>
+  );
 
   return (
-    <div className="relative flex flex-row justify-between py-4 align-center md:py-6">
-      <div className="flex items-center flex-1">
-        <Link href="/" className={s.logo} aria-label="Logo">
-          <Logo />
-        </Link>
-        <nav className="ml-6 space-x-2 lg:block">
-          <Link href="/" className={s.link}>
-            Pricing
+    <>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Link href="/" passHref>
+            <Logo />
           </Link>
-          {user && (
-            <Link href="/account" className={s.link}>
-              Account
-            </Link>
+          {!isMobile && (
+            <>
+              <Button color="inherit" component={Link} href="/#features" sx={buttonStyles}>
+                {t('features')}
+              </Button>
+              <Button color="inherit" component={Link} href="/#pricing" sx={buttonStyles}>
+                {t('pricing')}
+              </Button>
+              <Button color="inherit" component={Link} href="/blog" sx={buttonStyles}>
+                {t('blog')}
+              </Button>
+              <Button color="inherit" component={Link} href="/#help" sx={buttonStyles}>
+                {t('help')}
+              </Button>
+            </>
           )}
-        </nav>
-      </div>
-      <div className="flex justify-end space-x-8">
-        {user ? (
-          <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
-            <input type="hidden" name="pathName" value={usePathname()} />
-            <button type="submit" className={s.link}>
-              Sign out
-            </button>
-          </form>
-        ) : (
-          <Link href="/signin" className={s.link}>
-            Sign In
-          </Link>
-        )}
-      </div>
-    </div>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {!isMobile && (
+            <>
+              {isAuthenticated ? (
+                <>
+                  <Button color="inherit" component={Link} href="/account" sx={buttonStyles}>
+                    {t('dashboard')}
+                  </Button>
+                  <Button color="inherit" onClick={logout} sx={buttonStyles}>
+                    {t('logout')}
+                  </Button>
+                </>
+              ) : (
+                <Button color="inherit" component={Link} href="/signin" sx={buttonStyles}>
+                  {t('login')}
+                </Button>
+              )}
+              <Button variant="contained" color="primary" sx={{ ...buttonStyles, borderRadius: '20px' }}>
+                {t('downloadApp')}
+              </Button>
+            </>
+          )}
+          {isMobile && (
+            <>
+              {isAuthenticated ? (
+                <Button color="inherit" component={Link} href="/account" sx={buttonStyles}>
+                  {t('dashboard')}
+                </Button>
+              ) : (
+                <Button color="inherit" component={Link} href="/signin" sx={buttonStyles}>
+                  {t('login')}
+                </Button>
+              )}
+              <IconButton onClick={handleMobileMenuToggle} color="inherit">
+                <MenuIcon />
+              </IconButton>
+            </>
+          )}
+          {!isMobile && (
+            <FormControl size="small" variant="outlined" sx={{ minWidth: 60 }}>
+              <Select
+                value={currentLocale}
+                onChange={handleChangeLocale}
+                IconComponent={LanguageIcon}
+                sx={{
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
+                  },
+                  '& .MuiSelect-select': {
+                    padding: '8px',
+                  },
+                }}
+              >
+                <MenuItem value="es">ES</MenuItem>
+                <MenuItem value="en">EN</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        </Box>
+      </Box>
+      {mobileMenu}
+    </>
   );
 }

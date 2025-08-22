@@ -41,8 +41,7 @@ if (!found) {
   console.log('\n❌ No se encontraron direcciones IP locales.');
   console.log('   Asegúrate de estar conectado a una red.');
 } else {
-  console.log('\n✅ Usa una de estas direcciones IP en tu archivo .env:');
-  console.log('   EXPO_PUBLIC_SUPABASE_URL=http://TU_IP_AQUÍ:54321');
+  
 }
 
 console.log('\n'); 

@@ -1,6 +1,7 @@
-tunnel: 2b59f68e-27b4-4738-afa9-12894418b128
-credentials-file: /etc/cloudflared/creds.json
+tunnel: 3d9b9822-9aba-4c32-928b-77823cb15672
+
+
 ingress:
-  - hostname: simuladorparametrica.com
-    service: http://nginx:80
-  - service: http_status:404 
+  - hostname: apidoctor.datqbox.online
+    service: http://fastapi_backend:8000
+  - service: http_status:404
