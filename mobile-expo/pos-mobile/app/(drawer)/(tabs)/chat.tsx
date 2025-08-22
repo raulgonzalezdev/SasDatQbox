@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     },
     emptyTitle: {
         fontSize: Typography.fontSizes.lg,
-        fontWeight: Typography.fontWeights.bold,
+        fontWeight: Typography.fontWeights.bold as any,
         color: Colors.dark,
         textAlign: 'center',
     },

@@ -230,19 +230,30 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
 
   return (
     <View style={styles.fullScreenContainer}>
-      {/* Header de la conversación */}
-      <SafeAreaView style={styles.headerSafeArea}>
-        <ConversationHeader
-          conversation={conversation}
-          onBack={onBack}
-          onVideoCall={handleStartVideoCall}
-          onAudioCall={handleStartAudioCall}
-          onPatientInfo={() => {
-            // Navegar a información del paciente
-            console.log('👤 Ver información del paciente');
-          }}
-        />
-      </SafeAreaView>
+      {/* Header simplificado sin SafeAreaView */}
+      <View style={styles.simpleHeader}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <Ionicons name="arrow-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        
+        <View style={styles.headerInfo}>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {conversation.title || 'Chat Médico'}
+          </Text>
+          <Text style={styles.headerSubtitle}>
+            {conversation.participants.find(p => p.id !== user?.id)?.first_name || 'Paciente'}
+          </Text>
+        </View>
+        
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.actionBtn} onPress={handleStartAudioCall}>
+            <Ionicons name="call" size={20} color={Colors.white} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={handleStartVideoCall}>
+            <Ionicons name="videocam" size={20} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {/* Lista de mensajes */}
       <FlatList
@@ -359,8 +370,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  headerSafeArea: {
+  simpleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    height: 60,
+    ...BordersAndShadows.shadows.sm,
+  },
+  backButton: {
+    padding: Spacing.xs,
+    marginRight: Spacing.md,
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.white,
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    fontSize: Typography.fontSizes.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: Spacing.sm,
   },
   emptyState: {
     flex: 1,

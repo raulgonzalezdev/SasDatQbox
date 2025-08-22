@@ -11,7 +11,7 @@ import {
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import { Colors, Spacing, Typography } from '@/constants/GlobalStyles';
+import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -278,79 +278,48 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   }
 
   return (
-    <View style={styles.recordingOverlay}>
-      {/* Área principal de grabación estilo WhatsApp */}
-      <View style={styles.recordingBar}>
-        {/* Icono del micrófono */}
-        <View style={styles.microphoneIcon}>
-          <Ionicons name="mic" size={20} color={Colors.danger} />
-        </View>
-        
-        {/* Forma de onda compacta */}
-        <View style={styles.compactWaveform}>
-          {renderWaveform()}
-        </View>
-        
-        {/* Tiempo de grabación */}
-        <View style={styles.timeContainer}>
-          <Text style={styles.recordingTimeCompact}>{recordingTime}</Text>
-        </View>
-        
-        {/* Botón de cancelar */}
-        <TouchableOpacity
-          style={styles.cancelButtonCompact}
-          onPress={handleCancelRecording}
-        >
-          <Ionicons name="close" size={20} color={Colors.darkGray} />
-        </TouchableOpacity>
-      </View>
-      
-      {/* Texto de instrucción arriba */}
-      <View style={styles.instructionContainer}>
-        <Text style={styles.instructionText}>
-          <Ionicons name="chevron-up" size={14} color={Colors.lightGray} /> Desliza hacia arriba para cancelar
-        </Text>
-      </View>
-      
-      {/* Área de botones de acción */}
-      <View style={styles.actionArea}>
-        {/* Botón de grabación principal (grande como WhatsApp) */}
-        <PanGestureHandler
-          onGestureEvent={handleGestureEvent}
-          onHandlerStateChange={handleGestureStateChange}
-        >
-          <Animated.View
-            style={[
-              styles.mainRecordButton,
-              {
-                transform: [
-                  { translateX: slideAnimation },
-                  { scale: Animated.multiply(scaleAnimation, pulseAnimation) },
-                ],
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={styles.mainRecordButtonInner}
-              onPress={canSend ? handleSendRecording : undefined}
-              disabled={!canSend}
-            >
-              <Ionicons
-                name={canSend ? "send" : "mic"}
-                size={28}
-                color={Colors.white}
-              />
-            </TouchableOpacity>
-          </Animated.View>
-        </PanGestureHandler>
-        
-        {/* Indicador de deslizar para enviar */}
-        {canSend && (
-          <View style={styles.sendIndicator}>
-            <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
-            <Text style={styles.sendText}>Desliza para enviar</Text>
+    <View style={styles.compactRecordingInterface}>
+      {/* Barra de grabación simplificada y accesible */}
+      <View style={styles.recordingBarSimple}>
+        {/* Tiempo e información */}
+        <View style={styles.recordingInfo}>
+          <View style={styles.micIcon}>
+            <Ionicons name="mic" size={16} color={Colors.danger} />
           </View>
-        )}
+          <Text style={styles.recordingTimeText}>{recordingTime}</Text>
+          <View style={styles.miniWaveform}>
+            {renderWaveform()}
+          </View>
+        </View>
+        
+        {/* Botones de acción grandes y accesibles */}
+        <View style={styles.recordingControls}>
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={handleCancelRecording}
+          >
+            <Ionicons name="trash" size={18} color={Colors.white} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
+            onPress={canSend ? handleSendRecording : undefined}
+            disabled={!canSend}
+          >
+            <Ionicons 
+              name="send" 
+              size={18} 
+              color={canSend ? Colors.white : Colors.darkGray} 
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      {/* Indicador de estado */}
+      <View style={styles.statusIndicator}>
+        <Text style={styles.statusText}>
+          {canSend ? '✓ Listo para enviar' : '🎙️ Grabando...'}
+        </Text>
       </View>
     </View>
   );
@@ -367,17 +336,96 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
   
-  // Nueva interfaz estilo WhatsApp
-  recordingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.xl,
+  // Nueva interfaz compacta y accesible
+  compactRecordingInterface: {
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
+  },
+  
+  recordingBarSimple: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.lightGray,
+    borderRadius: 20,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  
+  recordingInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  micIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  
+  recordingTimeText: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold,
+    color: Colors.dark,
+    marginRight: Spacing.md,
+    fontFamily: 'monospace',
+  },
+  
+  miniWaveform: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 20,
+    marginRight: Spacing.md,
+  },
+  
+  recordingControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  cancelBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.danger,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
+  },
+  
+  sendBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...BordersAndShadows.shadows.sm,
+  },
+  
+  sendBtnDisabled: {
+    backgroundColor: Colors.lightGray,
+  },
+  
+  statusIndicator: {
+    alignItems: 'center',
+  },
+  
+  statusText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    fontStyle: 'italic',
   },
   
   recordingBar: {

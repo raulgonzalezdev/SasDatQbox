@@ -42,7 +42,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const renderMessageContent = () => {
     switch (message.message_type) {
       case 'text':
-        return <Text style={styles.messageText}>{message.content}</Text>;
+        return (
+          <Text style={[
+            styles.messageText,
+            isOwnMessage ? styles.ownMessageText : styles.otherMessageText
+          ]}>
+            {message.content}
+          </Text>
+        );
       
       case 'voice':
         return (
@@ -83,7 +90,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               </TouchableOpacity>
             ))}
             {message.content && (
-              <Text style={styles.imageCaption}>{message.content}</Text>
+              <Text style={[
+                styles.imageCaption,
+                isOwnMessage ? styles.ownMessageText : styles.otherMessageText
+              ]}>
+                {message.content}
+              </Text>
             )}
           </View>
         );
@@ -155,7 +167,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         );
       
       default:
-        return <Text style={styles.messageText}>{message.content}</Text>;
+        return (
+          <Text style={[
+            styles.messageText,
+            isOwnMessage ? styles.ownMessageText : styles.otherMessageText
+          ]}>
+            {message.content}
+          </Text>
+        );
     }
   };
 
@@ -363,8 +382,13 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: Typography.fontSizes.md,
-    color: Colors.white,
     lineHeight: 20,
+  },
+  ownMessageText: {
+    color: Colors.white,
+  },
+  otherMessageText: {
+    color: Colors.dark,
   },
   messageFooter: {
     flexDirection: 'row',

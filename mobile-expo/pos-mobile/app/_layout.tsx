@@ -12,6 +12,7 @@ import { CustomStatusBar } from '@/components/ui/CustomStatusBar';
 import { Colors } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
 import { checkAuthStatus } from '@/services/auth';
+import CustomSplashScreen from '@/components/ui/SplashScreen';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -20,6 +21,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, setAuthenticated, setUser } = useAppStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [showCustomSplash, setShowCustomSplash] = useState(true);
   
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -32,7 +34,10 @@ export default function RootLayout() {
         const authStatus = await checkAuthStatus();
         if (authStatus.isAuthenticated && authStatus.user) {
           setAuthenticated(true);
-          setUser(authStatus.user);
+          setUser({
+            ...authStatus.user,
+            isPremium: authStatus.user.isPremium || false
+          });
         }
       } catch (error) {
         console.log('Error checking auth status:', error);
@@ -47,8 +52,16 @@ export default function RootLayout() {
     }
   }, [loaded, setAuthenticated, setUser]);
 
+  const handleSplashFinish = () => {
+    setShowCustomSplash(false);
+  };
+
   if (!loaded || isLoading) {
     return null;
+  }
+
+  if (showCustomSplash) {
+    return <CustomSplashScreen onFinish={handleSplashFinish} />;
   }
 
   return (
