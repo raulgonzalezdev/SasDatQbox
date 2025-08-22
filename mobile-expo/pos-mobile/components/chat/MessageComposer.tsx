@@ -247,7 +247,18 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   };
 
   const handleVoiceMessage = (audioFile: any) => {
-    onSendMessage('Nota de voz', 'voice', [audioFile]);
+    console.log('📤 Enviando nota de voz:', audioFile);
+    // Crear el archivo de media para el mensaje
+    const mediaFile = {
+      id: `voice_${Date.now()}`,
+      name: audioFile.name || `voice_message_${Date.now()}.m4a`,
+      url: audioFile.uri,
+      type: 'audio' as const,
+      size: audioFile.size || 0,
+      mime_type: audioFile.mimeType || 'audio/m4a',
+    };
+    
+    onSendMessage('🎙️ Nota de voz', 'voice', [mediaFile]);
     setShowVoiceRecorder(false);
   };
 

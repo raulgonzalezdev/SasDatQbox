@@ -67,11 +67,6 @@ export default function PatientsScreen() {
     },
   ];
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':

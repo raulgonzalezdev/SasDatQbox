@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
 import { ChatMessage, MediaFile } from '@/store/chatStore';
 
@@ -53,24 +55,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       
       case 'voice':
         return (
-          <View style={styles.voiceMessage}>
-            <TouchableOpacity style={styles.playButton}>
-              <Ionicons name="play" size={20} color={Colors.white} />
-            </TouchableOpacity>
-            <View style={styles.voiceWaveform}>
-              {/* Simulación de forma de onda */}
-              {Array.from({ length: 12 }).map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.waveBar,
-                    { height: Math.random() * 20 + 10 }
-                  ]}
-                />
-              ))}
-            </View>
-            <Text style={styles.voiceDuration}>0:30</Text>
-          </View>
+          <VoiceMessagePlayer 
+            message={message}
+            isOwnMessage={isOwnMessage}
+          />
         );
       
       case 'image':
@@ -420,34 +408,117 @@ const styles = StyleSheet.create({
   // Voice message styles
   voiceMessage: {
     flexDirection: 'row',
-    alignItems: 'center',
-    minWidth: 200,
+    alignItems: 'flex-start',
+    minWidth: 250,
+    maxWidth: 320,
+    marginVertical: Spacing.xs,
   },
-  playButton: {
+  ownVoiceMessage: {
+    backgroundColor: Colors.primary,
+    borderRadius: 18,
+    borderBottomRightRadius: 4,
+    padding: Spacing.md,
+  },
+  otherVoiceMessage: {
+    backgroundColor: Colors.white,
+    borderRadius: 18,
+    borderBottomLeftRadius: 4,
+    padding: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
+  },
+  voiceAvatar: {
+    marginRight: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  avatarCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Spacing.sm,
+  },
+  avatarText: {
+    color: Colors.white,
+    fontSize: Typography.fontSizes.sm,
+    fontWeight: Typography.fontWeights.bold,
+  },
+  voiceContent: {
+    flex: 1,
+  },
+  senderName: {
+    fontSize: Typography.fontSizes.xs,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeights.medium,
+    marginBottom: Spacing.xs,
+  },
+  voiceControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  playButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
   },
   voiceWaveform: {
     flex: 1,
+    position: 'relative',
+    height: 24,
+    marginRight: Spacing.md,
+    justifyContent: 'center',
+  },
+  waveformBars: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 30,
-    marginRight: Spacing.sm,
+    height: '100%',
   },
   waveBar: {
-    width: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 1,
+    width: 3,
+    borderRadius: 2,
+    marginHorizontal: 1,
   },
   voiceDuration: {
     fontSize: Typography.fontSizes.xs,
     color: 'rgba(255, 255, 255, 0.7)',
+  },
+  playButtonDisabled: {
+    opacity: 0.6,
+  },
+  progressBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 10,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+  },
+  voiceInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  speedButton: {
+    marginLeft: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  speedText: {
+    fontSize: Typography.fontSizes.xs,
+    fontWeight: Typography.fontWeights.bold,
   },
   
   // Image styles
@@ -560,5 +631,321 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.medium,
   },
 });
+
+// Componente para reproducir notas de voz
+interface VoiceMessagePlayerProps {
+  message: ChatMessage;
+  isOwnMessage: boolean;
+}
+
+const VoiceMessagePlayer: React.FC<VoiceMessagePlayerProps> = ({ message, isOwnMessage }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [isFinished, setIsFinished] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const positionUpdateInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const formatTime = (milliseconds: number) => {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const startPositionUpdates = () => {
+    stopPositionUpdates();
+    positionUpdateInterval.current = setInterval(async () => {
+      if (soundRef.current) {
+        try {
+          const status = await soundRef.current.getStatusAsync();
+          if (status.isLoaded && status.positionMillis !== undefined) {
+            setCurrentPosition(status.positionMillis);
+          }
+        } catch (error) {
+          console.error('Error obteniendo posición:', error);
+        }
+      }
+    }, 100);
+  };
+
+  const stopPositionUpdates = () => {
+    if (positionUpdateInterval.current) {
+      clearInterval(positionUpdateInterval.current);
+      positionUpdateInterval.current = null;
+    }
+  };
+
+  const changePlaybackSpeed = async () => {
+    const speeds = [1.0, 1.25, 1.5, 2.0];
+    const currentIndex = speeds.indexOf(playbackSpeed);
+    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+    
+    setPlaybackSpeed(nextSpeed);
+    
+    if (soundRef.current) {
+      try {
+        await soundRef.current.setRateAsync(nextSpeed, true);
+      } catch (error) {
+        console.error('Error cambiando velocidad:', error);
+      }
+    }
+  };
+
+  const playPauseAudio = async () => {
+    try {
+      if (!soundRef.current) {
+        // Crear y cargar el audio por primera vez
+        setIsLoading(true);
+        
+        // Obtener la URI real del archivo de audio
+        const audioUri = message.media_files?.[0]?.url;
+        
+        if (!audioUri) {
+          Alert.alert('Error', 'No se encontró el archivo de audio');
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('🎵 Intentando reproducir audio desde:', audioUri);
+
+        // Verificar si el archivo existe (solo para archivos locales)
+        if (audioUri.startsWith('file://')) {
+          try {
+            const fileInfo = await FileSystem.getInfoAsync(audioUri);
+            console.log('📁 Información del archivo local:', fileInfo);
+            
+            if (!fileInfo.exists) {
+              Alert.alert('Error', 'El archivo de audio no existe en el dispositivo. Esto puede ocurrir si grabaste el audio y luego reiniciaste la app en Expo.');
+              setIsLoading(false);
+              return;
+            }
+          } catch (fileError) {
+            console.log('⚠️ No se pudo verificar el archivo local:', fileError);
+            Alert.alert('Error', 'No se pudo acceder al archivo de audio');
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          console.log('🌐 Intentando reproducir desde URL remota:', audioUri);
+        }
+
+        // Configurar modo de audio para reproducción
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          // Usar configuración compatible
+          staysActiveInBackground: false,
+        });
+
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: audioUri },
+          { 
+            shouldPlay: false,
+            rate: playbackSpeed,
+            shouldCorrectPitch: true,
+          },
+          (status) => {
+            if (status.isLoaded) {
+              if (status.durationMillis && duration === 0) {
+                setDuration(status.durationMillis);
+              }
+              if (status.positionMillis !== undefined) {
+                setCurrentPosition(status.positionMillis);
+              }
+              if (status.didJustFinish) {
+                console.log('🔚 Audio terminó de reproducirse');
+                setIsPlaying(false);
+                setIsFinished(true);
+                setCurrentPosition(0);
+                stopPositionUpdates();
+                soundRef.current?.setPositionAsync(0);
+              }
+            } else if (status.error) {
+              console.error('❌ Error en el estado del audio:', status.error);
+            }
+          }
+        );
+
+        soundRef.current = sound;
+        setIsLoading(false);
+      }
+
+      if (isPlaying) {
+        // Pausar
+        await soundRef.current.pauseAsync();
+        setIsPlaying(false);
+        stopPositionUpdates();
+      } else {
+        // Reproducir o continuar
+        if (isFinished) {
+          // Si terminó, reiniciar desde el principio
+          await soundRef.current.setPositionAsync(0);
+          setCurrentPosition(0);
+          setIsFinished(false);
+        }
+        
+        await soundRef.current.playAsync();
+        setIsPlaying(true);
+        startPositionUpdates();
+      }
+    } catch (error) {
+      console.error('Error al reproducir audio:', error);
+      setIsLoading(false);
+      
+      // Manejo específico de errores
+      if (error.message?.includes('interruptionModeIOS')) {
+        console.log('🔄 Reintentando con configuración simplificada...');
+        try {
+          // Intentar con configuración mínima
+          await Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+          });
+          
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: audioUri },
+            { shouldPlay: false }
+          );
+          
+          soundRef.current = sound;
+          setIsLoading(false);
+          
+          // Intentar reproducir inmediatamente
+          await sound.playAsync();
+          setIsPlaying(true);
+          return;
+        } catch (retryError) {
+          console.error('Error en segundo intento:', retryError);
+        }
+      }
+      
+      Alert.alert(
+        'Error de Reproducción', 
+        'No se pudo reproducir la nota de voz. Esto puede ocurrir en el entorno de desarrollo de Expo.'
+      );
+    }
+  };
+
+  // Limpiar al desmontar
+  React.useEffect(() => {
+    return () => {
+      stopPositionUpdates();
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
+
+  return (
+    <View style={[styles.voiceMessage, isOwnMessage ? styles.ownVoiceMessage : styles.otherVoiceMessage]}>
+      {/* Avatar del remitente (solo para mensajes de otros) */}
+      {!isOwnMessage && (
+        <View style={styles.voiceAvatar}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarText}>
+              {message.sender.first_name.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        </View>
+      )}
+      
+      <View style={styles.voiceContent}>
+        {/* Información del remitente */}
+        {!isOwnMessage && (
+          <Text style={styles.senderName}>
+            {message.sender.first_name}
+          </Text>
+        )}
+        
+        <View style={styles.voiceControls}>
+          {/* Botón de play/pause */}
+          <TouchableOpacity 
+            style={[
+              styles.playButton,
+              isLoading && styles.playButtonDisabled
+            ]}
+            onPress={playPauseAudio}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Ionicons name="sync" size={20} color={Colors.white} />
+            ) : (
+              <Ionicons 
+                name={isPlaying ? "pause" : "play"} 
+                size={20} 
+                color={Colors.white} 
+              />
+            )}
+          </TouchableOpacity>
+          
+          {/* Forma de onda y progreso */}
+          <View style={styles.voiceWaveform}>
+            {/* Barra de progreso visual */}
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: duration > 0 ? `${(currentPosition / duration) * 100}%` : '0%' }
+                ]} 
+              />
+            </View>
+            
+            {/* Forma de onda simulada */}
+            <View style={styles.waveformBars}>
+              {Array.from({ length: 20 }).map((_, i) => {
+                const progress = duration > 0 ? currentPosition / duration : 0;
+                const isActive = i < (progress * 20);
+                return (
+                  <View
+                    key={i}
+                    style={[
+                      styles.waveBar,
+                      { 
+                        height: Math.random() * 20 + 8,
+                        backgroundColor: isActive 
+                          ? (isOwnMessage ? Colors.white : Colors.primary)
+                          : 'rgba(255, 255, 255, 0.3)'
+                      }
+                    ]}
+                  />
+                );
+              })}
+            </View>
+          </View>
+          
+          {/* Tiempo y velocidad */}
+          <View style={styles.voiceInfo}>
+            <Text style={[
+              styles.voiceDuration,
+              isOwnMessage ? styles.ownMessageText : styles.otherMessageText
+            ]}>
+              {isPlaying || currentPosition > 0 
+                ? formatTime(currentPosition) 
+                : formatTime(duration || (message.call_duration || 0) * 1000)
+              }
+            </Text>
+            
+            {/* Botón de velocidad (solo cuando se está reproduciendo) */}
+            {(isPlaying || isFinished) && (
+              <TouchableOpacity 
+                style={styles.speedButton}
+                onPress={changePlaybackSpeed}
+              >
+                <Text style={[
+                  styles.speedText,
+                  isOwnMessage ? styles.ownMessageText : styles.otherMessageText
+                ]}>
+                  {playbackSpeed}x
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 export default MessageBubble;

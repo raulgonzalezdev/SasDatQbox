@@ -95,12 +95,12 @@ const MedicalChatInterface: React.FC<MedicalChatInterfaceProps> = ({
       content: content.trim(),
       message_type: type,
       media_files: files?.map(file => ({
-        id: `file_${Date.now()}`,
+        id: file.id || `file_${Date.now()}`,
         name: file.name,
-        url: file.uri,
+        url: file.url || file.uri, // Usar file.url si existe, sino file.uri como fallback
         type: file.type,
         size: file.size,
-        mime_type: file.mimeType,
+        mime_type: file.mime_type || file.mimeType,
       })),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

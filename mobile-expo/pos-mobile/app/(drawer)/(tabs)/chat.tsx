@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, SafeAreaView, StyleSheet, Text, FlatList, TouchableOpacity, RefreshControl, BackHandler } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { CommonStyles, Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
 import { useAppStore } from '@/store/appStore';
@@ -26,6 +27,24 @@ const MedicalChatView = () => {
             }
         };
     }, []); // Solo se ejecuta una vez
+
+    // Manejar botón de retroceso del móvil
+    const handleBackPress = useCallback(() => {
+        if (isInChat && currentChatId) {
+            // Si estamos en un chat, salir del chat
+            handleBackFromChat();
+            return true; // Evitar comportamiento por defecto
+        }
+        return false; // Permitir comportamiento por defecto
+    }, [isInChat, currentChatId]);
+
+    // Configurar listener del botón de retroceso cuando el componente tiene foco
+    useFocusEffect(
+        useCallback(() => {
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+            return () => backHandler.remove();
+        }, [handleBackPress])
+    );
 
     const initializeMockData = () => {
         // Datos simulados más realistas para el sistema médico

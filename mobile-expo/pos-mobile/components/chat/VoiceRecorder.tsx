@@ -11,6 +11,7 @@ import {
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import { Colors, Spacing, Typography, BordersAndShadows } from '@/constants/GlobalStyles';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -127,6 +128,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
       });
 
       const { recording } = await Audio.Recording.createAsync(
@@ -167,20 +169,44 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     if (!recording || !canSend) return;
 
     try {
-      await stopRecording();
+      setIsRecording(false);
+      await recording.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+
       const uri = recording.getURI();
+      console.log('🎙️ Audio grabado en URI:', uri);
       
       if (uri) {
+        // Obtener información del archivo
+        let fileSize = 0;
+        try {
+          const fileInfo = await FileSystem.getInfoAsync(uri);
+          if (fileInfo.exists) {
+            fileSize = fileInfo.size || 0;
+            console.log('📁 Tamaño del archivo:', fileSize, 'bytes');
+          }
+        } catch (e) {
+          console.log('⚠️ No se pudo obtener información del archivo:', e);
+        }
+
         const audioFile = {
+          id: `voice_${Date.now()}`,
           uri,
+          url: uri, // Asegurar que ambos campos estén disponibles
           name: `voice_message_${Date.now()}.m4a`,
           type: 'audio',
           mimeType: 'audio/m4a',
-          size: 0,
+          mime_type: 'audio/m4a', // Doble formato para compatibilidad
+          size: fileSize,
           duration: recordingDuration,
         };
         
+        console.log('📤 Enviando archivo de audio:', audioFile);
         onSendVoiceMessage(audioFile);
+      } else {
+        Alert.alert('Error', 'No se pudo obtener el archivo de audio');
       }
       
       // Limpiar estado
@@ -191,6 +217,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       setCanSend(false);
     } catch (error) {
       console.error('Error al enviar grabación:', error);
+      Alert.alert('Error', 'No se pudo enviar la nota de voz');
     }
   };
 
