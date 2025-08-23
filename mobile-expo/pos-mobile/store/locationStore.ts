@@ -104,18 +104,44 @@ const calculateHaversineDistance = (from: Coordinates, to: Coordinates): number 
   return R * c;
 };
 
-// Datos mock de doctores para desarrollo
+// Especialidades médicas disponibles en Venezuela
+export const MEDICAL_SPECIALTIES = [
+  'Medicina General',
+  'Cardiología',
+  'Pediatría',
+  'Ginecología',
+  'Dermatología',
+  'Neurología',
+  'Psiquiatría',
+  'Oftalmología',
+  'Traumatología',
+  'Gastroenterología',
+  'Endocrinología',
+  'Urología',
+  'Otorrinolaringología',
+  'Neumología',
+  'Oncología',
+  'Medicina Interna',
+  'Psicología',
+  'Nutrición',
+  'Fisioterapia',
+  'Emergencia Médica'
+] as const;
+
+// Datos mock de doctores realistas para Venezuela
 const getMockDoctors = (): DoctorLocation[] => [
+  // CARACAS - Doctores principales
   {
-    id: 'doc-1',
+    id: 'doc-001',
     doctorId: 'doctor-001',
-    doctorName: 'Dr. María González',
+    doctorName: 'Dr. María González Pérez',
     specialty: 'Medicina General',
     rating: 4.8,
-    latitude: 10.4806, // Caracas
+    latitude: 10.4806, // Altamira, Caracas
     longitude: -66.9036,
+    avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face',
     address: {
-      street: 'Av. Francisco de Miranda, Centro Comercial Lido',
+      street: 'Av. Francisco de Miranda, Centro Comercial Lido, Torre A, Piso 3',
       city: 'Caracas',
       state: 'Distrito Capital',
       country: 'Venezuela',
@@ -128,15 +154,16 @@ const getMockDoctors = (): DoctorLocation[] => [
     serviceRadius: 15
   },
   {
-    id: 'doc-2',
+    id: 'doc-002',
     doctorId: 'doctor-002',
-    doctorName: 'Dr. Carlos Rodríguez',
+    doctorName: 'Dr. Carlos Rodríguez Mendoza',
     specialty: 'Cardiología',
     rating: 4.9,
-    latitude: 10.4880,
+    latitude: 10.4880, // Las Mercedes, Caracas
     longitude: -66.8790,
+    avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face',
     address: {
-      street: 'Centro Médico de Caracas, Piso 5',
+      street: 'Centro Médico de Caracas, Av. Los Erasos, Piso 5',
       city: 'Caracas',
       state: 'Distrito Capital',
       country: 'Venezuela',
@@ -149,15 +176,16 @@ const getMockDoctors = (): DoctorLocation[] => [
     serviceRadius: 10
   },
   {
-    id: 'doc-3',
+    id: 'doc-003',
     doctorId: 'doctor-003',
-    doctorName: 'Dra. Ana Martínez',
+    doctorName: 'Dra. Ana Martínez Herrera',
     specialty: 'Pediatría',
     rating: 4.7,
-    latitude: 10.4750,
+    latitude: 10.4750, // San Bernardino, Caracas
     longitude: -66.9150,
+    avatar: 'https://images.unsplash.com/photo-1594824019870-a8be8e3b8d14?w=300&h=300&fit=crop&crop=face',
     address: {
-      street: 'Hospital de Niños J.M. de los Ríos',
+      street: 'Hospital de Niños J.M. de los Ríos, Av. Volteador',
       city: 'Caracas',
       state: 'Distrito Capital',
       country: 'Venezuela',
@@ -168,6 +196,210 @@ const getMockDoctors = (): DoctorLocation[] => [
     priceRange: { min: 30, max: 70 },
     workingHours: { start: '07:00', end: '15:00' },
     serviceRadius: 20
+  },
+  {
+    id: 'doc-004',
+    doctorId: 'doctor-004',
+    doctorName: 'Dr. José Fernández Silva',
+    specialty: 'Dermatología',
+    rating: 4.6,
+    latitude: 10.4950, // Chacao, Caracas
+    longitude: -66.8530,
+    avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Centro Comercial Ciudad Tamanaco, Torre Oeste, Piso 2',
+      city: 'Caracas',
+      state: 'Distrito Capital',
+      country: 'Venezuela',
+      postalCode: '1060'
+    },
+    isAvailable: true,
+    consultationTypes: ['virtual', 'in_person'],
+    priceRange: { min: 40, max: 85 },
+    workingHours: { start: '10:00', end: '19:00' },
+    serviceRadius: 12
+  },
+  {
+    id: 'doc-005',
+    doctorId: 'doctor-005',
+    doctorName: 'Dra. Carmen Delgado López',
+    specialty: 'Ginecología',
+    rating: 4.9,
+    latitude: 10.4600, // La Candelaria, Caracas
+    longitude: -66.9200,
+    avatar: 'https://images.unsplash.com/photo-1588152850700-3635b83fc065?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Clínica El Avila, Av. San Martín, Torre B, Piso 4',
+      city: 'Caracas',
+      state: 'Distrito Capital',
+      country: 'Venezuela',
+      postalCode: '1010'
+    },
+    isAvailable: true,
+    consultationTypes: ['virtual', 'in_person', 'home_visit'],
+    priceRange: { min: 50, max: 100 },
+    workingHours: { start: '08:30', end: '16:30' },
+    serviceRadius: 18
+  },
+  {
+    id: 'doc-006',
+    doctorId: 'doctor-006',
+    doctorName: 'Dr. Rafael Morales Castro',
+    specialty: 'Neurología',
+    rating: 4.8,
+    latitude: 10.4900, // Sabana Grande, Caracas
+    longitude: -66.8850,
+    avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Hospital Universitario de Caracas, Pabellón de Neurología',
+      city: 'Caracas',
+      state: 'Distrito Capital',
+      country: 'Venezuela',
+      postalCode: '1040'
+    },
+    isAvailable: false,
+    consultationTypes: ['in_person'],
+    priceRange: { min: 80, max: 150 },
+    workingHours: { start: '07:00', end: '14:00' },
+    serviceRadius: 8
+  },
+  
+  // VALENCIA - Doctores regionales
+  {
+    id: 'doc-007',
+    doctorId: 'doctor-007',
+    doctorName: 'Dr. Luis Ramírez Gutiérrez',
+    specialty: 'Medicina General',
+    rating: 4.5,
+    latitude: 10.1621, // Valencia, Carabobo
+    longitude: -67.9073,
+    avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Centro Médico Valencia, Av. Bolívar Norte',
+      city: 'Valencia',
+      state: 'Carabobo',
+      country: 'Venezuela',
+      postalCode: '2001'
+    },
+    isAvailable: true,
+    consultationTypes: ['virtual', 'in_person', 'home_visit'],
+    priceRange: { min: 20, max: 45 },
+    workingHours: { start: '06:00', end: '14:00' },
+    serviceRadius: 25
+  },
+  {
+    id: 'doc-008',
+    doctorId: 'doctor-008',
+    doctorName: 'Dra. Patricia Vásquez Torres',
+    specialty: 'Psiquiatría',
+    rating: 4.7,
+    latitude: 10.1800, // Valencia Centro
+    longitude: -67.9300,
+    avatar: 'https://images.unsplash.com/photo-1594824019870-a8be8e3b8d14?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Policlínica Valencia, Torre Médica, Piso 6',
+      city: 'Valencia',
+      state: 'Carabobo',
+      country: 'Venezuela',
+      postalCode: '2003'
+    },
+    isAvailable: true,
+    consultationTypes: ['virtual', 'in_person'],
+    priceRange: { min: 35, max: 75 },
+    workingHours: { start: '09:00', end: '17:00' },
+    serviceRadius: 15
+  },
+  
+  // MARACAIBO - Doctores del Zulia
+  {
+    id: 'doc-009',
+    doctorId: 'doctor-009',
+    doctorName: 'Dr. Alberto Chávez Medina',
+    specialty: 'Traumatología',
+    rating: 4.6,
+    latitude: 10.6666, // Maracaibo, Zulia
+    longitude: -71.6125,
+    avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Hospital Universitario de Maracaibo, Servicio de Traumatología',
+      city: 'Maracaibo',
+      state: 'Zulia',
+      country: 'Venezuela',
+      postalCode: '4001'
+    },
+    isAvailable: true,
+    consultationTypes: ['in_person', 'home_visit'],
+    priceRange: { min: 45, max: 90 },
+    workingHours: { start: '08:00', end: '16:00' },
+    serviceRadius: 20
+  },
+  {
+    id: 'doc-010',
+    doctorId: 'doctor-010',
+    doctorName: 'Dra. Isabel Romero Peña',
+    specialty: 'Oftalmología',
+    rating: 4.8,
+    latitude: 10.6400, // Maracaibo Centro
+    longitude: -71.6400,
+    avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Centro Oftalmológico de Maracaibo, Av. 15 con Calle 70',
+      city: 'Maracaibo',
+      state: 'Zulia',
+      country: 'Venezuela',
+      postalCode: '4002'
+    },
+    isAvailable: true,
+    consultationTypes: ['virtual', 'in_person'],
+    priceRange: { min: 55, max: 110 },
+    workingHours: { start: '07:30', end: '15:30' },
+    serviceRadius: 12
+  },
+  
+  // DOCTORES ESPECIALIZADOS EN EMERGENCIAS
+  {
+    id: 'doc-011',
+    doctorId: 'doctor-011',
+    doctorName: 'Dr. Manuel Guerrero Rivas',
+    specialty: 'Emergencia Médica',
+    rating: 4.9,
+    latitude: 10.4700, // Caracas - Emergencias móviles
+    longitude: -66.9000,
+    avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Servicio Móvil de Emergencias - Cobertura Metropolitana',
+      city: 'Caracas',
+      state: 'Distrito Capital',
+      country: 'Venezuela',
+      postalCode: '1000'
+    },
+    isAvailable: true,
+    consultationTypes: ['home_visit'],
+    priceRange: { min: 100, max: 200 },
+    workingHours: { start: '00:00', end: '23:59' }, // 24 horas
+    serviceRadius: 30 // Cobertura amplia para emergencias
+  },
+  {
+    id: 'doc-012',
+    doctorId: 'doctor-012',
+    doctorName: 'Psic. Andrea Salinas Vargas',
+    specialty: 'Psicología',
+    rating: 4.7,
+    latitude: 10.4820,
+    longitude: -66.8680,
+    avatar: 'https://images.unsplash.com/photo-1594824019870-a8be8e3b8d14?w=300&h=300&fit=crop&crop=face',
+    address: {
+      street: 'Centro de Salud Mental Integral, Av. Urdaneta',
+      city: 'Caracas',
+      state: 'Distrito Capital',
+      country: 'Venezuela',
+      postalCode: '1020'
+    },
+    isAvailable: true,
+    consultationTypes: ['virtual', 'in_person'],
+    priceRange: { min: 25, max: 60 },
+    workingHours: { start: '10:00', end: '18:00' },
+    serviceRadius: 0 // Solo virtual e in-person
   }
 ];
 

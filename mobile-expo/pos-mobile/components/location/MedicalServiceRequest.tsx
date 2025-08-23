@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -7,12 +7,16 @@ import {
   Modal, 
   TextInput,
   Alert,
-  Text
+  Text,
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
-import { DoctorLocation } from './DoctorMapSearch';
+import { DoctorLocation } from '@/store/locationStore';
+import { useMedicalLocation } from '@/hooks/useMedicalLocation';
+import { useServiceTrackingStore } from '@/store/serviceTrackingStore';
 
 export interface ServiceRequest {
   serviceType: 'virtual' | 'in_person' | 'home_visit';
@@ -40,12 +44,43 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
   selectedDoctor,
   onRequestSubmitted,
 }) => {
+  // Estados del formulario
   const [serviceType, setServiceType] = useState<'virtual' | 'in_person' | 'home_visit'>('virtual');
   const [symptoms, setSymptoms] = useState('');
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high' | 'emergency'>('medium');
   const [preferredTime, setPreferredTime] = useState('today');
   const [notes, setNotes] = useState('');
-  const [showTimeOptions, setShowTimeOptions] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Hooks
+  const {
+    userLocation,
+    canDoctorVisitHome,
+    getEstimatedArrivalTime,
+    isDoctorAvailableNow,
+  } = useMedicalLocation();
+  
+  const { createServiceRequest } = useServiceTrackingStore();
+
+  // Resetear formulario cuando se abre el modal
+  useEffect(() => {
+    if (visible && selectedDoctor) {
+      // Auto-seleccionar el tipo de servicio más apropiado
+      if (selectedDoctor.consultationTypes.includes('virtual')) {
+        setServiceType('virtual');
+      } else if (selectedDoctor.consultationTypes.includes('in_person')) {
+        setServiceType('in_person');
+      } else if (selectedDoctor.consultationTypes.includes('home_visit')) {
+        setServiceType('home_visit');
+      }
+      
+      // Limpiar formulario
+      setSymptoms('');
+      setNotes('');
+      setUrgency('medium');
+      setPreferredTime('today');
+    }
+  }, [visible, selectedDoctor]);
 
   const serviceTypes = [
     {
@@ -85,32 +120,170 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
     { id: 'this_week', label: 'Esta semana', description: 'En los próximos 7 días' },
   ];
 
-  const handleSubmit = () => {
+  // Calcular precio estimado
+  const calculateEstimatedPrice = (): { min: number; max: number; currency: string } => {
+    if (!selectedDoctor) return { min: 0, max: 0, currency: 'USD' };
+    
+    let baseMin = selectedDoctor.priceRange.min;
+    let baseMax = selectedDoctor.priceRange.max;
+    
+    // Multiplicadores según tipo de servicio
+    switch (serviceType) {
+      case 'virtual':
+        // Virtual es el precio base (más económico)
+        break;
+      case 'in_person':
+        // Presencial tiene un ligero incremento
+        baseMin *= 1.2;
+        baseMax *= 1.2;
+        break;
+      case 'home_visit':
+        // Visita domiciliaria es más costosa
+        baseMin *= 1.5;
+        baseMax *= 1.5;
+        break;
+    }
+    
+    // Multiplicador por urgencia
+    switch (urgency) {
+      case 'low':
+        // Precio estándar
+        break;
+      case 'medium':
+        baseMin *= 1.1;
+        baseMax *= 1.1;
+        break;
+      case 'high':
+        baseMin *= 1.3;
+        baseMax *= 1.3;
+        break;
+      case 'emergency':
+        baseMin *= 2.0;
+        baseMax *= 2.0;
+        break;
+    }
+    
+    return {
+      min: Math.round(baseMin),
+      max: Math.round(baseMax),
+      currency: 'USD'
+    };
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedDoctor) {
+      Alert.alert('Error', 'No hay doctor seleccionado');
+      return;
+    }
+
     if (!symptoms.trim()) {
       Alert.alert('Error', 'Por favor describe tus síntomas');
       return;
     }
 
     if (symptoms.trim().length < 10) {
-      Alert.alert('Error', 'Por favor proporciona más detalles sobre tus síntomas');
+      Alert.alert('Error', 'Por favor proporciona más detalles sobre tus síntomas (mínimo 10 caracteres)');
       return;
     }
 
-    const request: ServiceRequest = {
-      serviceType,
-      symptoms: symptoms.trim(),
-      urgency,
-      preferredTime,
-      notes: notes.trim() || undefined,
-      patientLocation: serviceType === 'home_visit' ? {
-        latitude: 10.4806,
-        longitude: -66.9036,
-        address: 'Caracas, Venezuela', // Mock location
-      } : undefined,
-    };
+    // Validar que el doctor ofrezca el tipo de servicio seleccionado
+    if (!selectedDoctor.consultationTypes.includes(serviceType)) {
+      Alert.alert(
+        'Servicio no disponible', 
+        `El Dr. ${selectedDoctor.doctorName} no ofrece ${
+          serviceType === 'virtual' ? 'consultas virtuales' : 
+          serviceType === 'in_person' ? 'consultas presenciales' : 
+          'visitas domiciliarias'
+        }`
+      );
+      return;
+    }
 
-    console.log('📋 Enviando solicitud de servicio:', request);
-    onRequestSubmitted(request);
+    // Validar visita domiciliaria
+    if (serviceType === 'home_visit' && !canDoctorVisitHome(selectedDoctor)) {
+      Alert.alert(
+        'Fuera del área de servicio',
+        `El Dr. ${selectedDoctor.doctorName} no puede realizar visitas domiciliarias en tu ubicación (máximo ${selectedDoctor.serviceRadius}km)`
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const estimatedPrice = calculateEstimatedPrice();
+      
+      const request: ServiceRequest = {
+        serviceType,
+        symptoms: symptoms.trim(),
+        urgency,
+        preferredTime,
+        notes: notes.trim() || undefined,
+        patientLocation: (serviceType === 'home_visit' && userLocation) ? {
+          latitude: userLocation.coordinates.latitude,
+          longitude: userLocation.coordinates.longitude,
+          address: userLocation.address?.street || 'Ubicación del paciente',
+        } : undefined,
+      };
+
+      console.log('📋 Enviando solicitud de servicio médico:', {
+        request,
+        doctor: selectedDoctor.doctorName,
+        estimatedPrice,
+        eta: serviceType === 'home_visit' ? getEstimatedArrivalTime(selectedDoctor) : null
+      });
+
+      // Crear solicitud en el tracking store
+      const serviceId = await createServiceRequest({
+        patientId: 'patient-001', // Mock ID
+        doctorId: selectedDoctor.doctorId,
+        serviceType,
+        symptoms: symptoms.trim(),
+        urgency,
+        preferredTime,
+        notes: notes.trim(),
+        estimatedPrice,
+        patientLocation: request.patientLocation,
+        doctorLocation: {
+          latitude: selectedDoctor.latitude,
+          longitude: selectedDoctor.longitude,
+          address: selectedDoctor.address.street,
+        }
+      });
+
+      console.log('✅ Solicitud creada con ID:', serviceId);
+      
+      // Mostrar confirmación
+      Alert.alert(
+        '✅ Solicitud Enviada',
+        `Tu solicitud ha sido enviada al Dr. ${selectedDoctor.doctorName}.\n\nTipo: ${
+          serviceType === 'virtual' ? 'Consulta Virtual' : 
+          serviceType === 'in_person' ? 'Consulta Presencial' : 
+          'Visita Domiciliaria'
+        }\nPrecio estimado: $${estimatedPrice.min} - $${estimatedPrice.max} USD${
+          serviceType === 'home_visit' ? `\nTiempo estimado: ~${getEstimatedArrivalTime(selectedDoctor)} min` : ''
+        }`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              onRequestSubmitted(request);
+              onClose();
+            }
+          }
+        ]
+      );
+
+    } catch (error) {
+      console.error('❌ Error creando solicitud:', error);
+      Alert.alert(
+        'Error',
+        'No se pudo enviar la solicitud. Por favor intenta nuevamente.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectedServiceType = serviceTypes.find(st => st.id === serviceType);
@@ -137,16 +310,80 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
           {/* Doctor seleccionado */}
           {selectedDoctor && (
             <View style={styles.doctorCard}>
-              <View style={styles.doctorAvatar}>
-                <Ionicons name="person" size={24} color={Colors.white} />
+              <View style={styles.doctorHeader}>
+                <View style={styles.doctorAvatar}>
+                  {selectedDoctor.avatar ? (
+                    <Image source={{ uri: selectedDoctor.avatar }} style={styles.avatarImage} />
+                  ) : (
+                    <Ionicons name="person" size={32} color={Colors.white} />
+                  )}
+                </View>
+                <View style={styles.doctorInfo}>
+                  <ThemedText style={styles.doctorName}>{selectedDoctor.doctorName}</ThemedText>
+                  <Text style={styles.doctorSpecialty}>{selectedDoctor.specialty}</Text>
+                  <View style={styles.doctorMeta}>
+                    <View style={styles.metaItem}>
+                      <Ionicons name="star" size={14} color={Colors.warning} />
+                      <Text style={styles.metaText}>{selectedDoctor.rating}</Text>
+                    </View>
+                    <View style={styles.metaItem}>
+                      <Ionicons name="location" size={14} color={Colors.info} />
+                      <Text style={styles.metaText}>{selectedDoctor.distance?.toFixed(1)} km</Text>
+                    </View>
+                    <View style={styles.metaItem}>
+                      <Ionicons 
+                        name={isDoctorAvailableNow(selectedDoctor) ? "checkmark-circle" : "time"} 
+                        size={14} 
+                        color={isDoctorAvailableNow(selectedDoctor) ? Colors.success : Colors.warning} 
+                      />
+                      <Text style={[
+                        styles.metaText, 
+                        { color: isDoctorAvailableNow(selectedDoctor) ? Colors.success : Colors.warning }
+                      ]}>
+                        {isDoctorAvailableNow(selectedDoctor) ? 'Disponible' : 'No disponible'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
               </View>
-              <View style={styles.doctorInfo}>
-                <ThemedText style={styles.doctorName}>{selectedDoctor.doctorName}</ThemedText>
-                <Text style={styles.doctorSpecialty}>{selectedDoctor.specialty}</Text>
-                <View style={styles.doctorMeta}>
-                  <Ionicons name="star" size={14} color={Colors.warning} />
-                  <Text style={styles.doctorRating}>{selectedDoctor.rating}</Text>
-                  <Text style={styles.doctorDistance}> • {selectedDoctor.distance} km</Text>
+
+              {/* Servicios disponibles */}
+              <View style={styles.availableServices}>
+                <Text style={styles.servicesTitle}>Servicios disponibles:</Text>
+                <View style={styles.servicesList}>
+                  {selectedDoctor.consultationTypes.map((type) => (
+                    <View key={type} style={styles.serviceChip}>
+                      <Ionicons 
+                        name={
+                          type === 'virtual' ? 'videocam' : 
+                          type === 'in_person' ? 'business' : 
+                          'home'
+                        } 
+                        size={12} 
+                        color={Colors.primary} 
+                      />
+                      <Text style={styles.serviceText}>
+                        {type === 'virtual' ? 'Virtual' : 
+                         type === 'in_person' ? 'Presencial' : 
+                         'Domicilio'}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* Precio estimado dinámico */}
+              <View style={styles.priceEstimation}>
+                <Text style={styles.priceTitle}>💰 Precio estimado</Text>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.priceText}>
+                    ${calculateEstimatedPrice().min} - ${calculateEstimatedPrice().max} USD
+                  </Text>
+                  {serviceType === 'home_visit' && canDoctorVisitHome(selectedDoctor) && (
+                    <Text style={styles.etaText}>
+                      ETA: ~{getEstimatedArrivalTime(selectedDoctor)} min
+                    </Text>
+                  )}
                 </View>
               </View>
             </View>
@@ -292,10 +529,26 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
 
         {/* Botón de envío */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <ThemedText style={styles.submitButtonText}>
-              Solicitar Consulta
-            </ThemedText>
+          <TouchableOpacity 
+            style={[
+              styles.submitButton, 
+              isSubmitting && styles.submitButtonDisabled
+            ]} 
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <View style={styles.submitButtonContent}>
+                <ActivityIndicator size="small" color={Colors.white} />
+                <ThemedText style={[styles.submitButtonText, { marginLeft: Spacing.sm }]}>
+                  Enviando...
+                </ThemedText>
+              </View>
+            ) : (
+              <ThemedText style={styles.submitButtonText}>
+                💬 Solicitar Consulta
+              </ThemedText>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -607,11 +860,100 @@ const styles = StyleSheet.create({
     borderRadius: BordersAndShadows.borderRadius.lg,
     padding: Spacing.lg,
     alignItems: 'center',
+    ...BordersAndShadows.shadows.sm,
+  },
+  submitButtonDisabled: {
+    backgroundColor: Colors.lightGray,
+    opacity: 0.6,
+  },
+  submitButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   submitButtonText: {
     fontSize: Typography.fontSizes.lg,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.white,
+  },
+
+  // Estilos mejorados para el doctor
+  doctorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+  },
+  metaText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    marginLeft: Spacing.xs,
+  },
+  availableServices: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+  },
+  servicesTitle: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    marginBottom: Spacing.sm,
+    fontWeight: Typography.fontWeights.medium as any,
+  },
+  servicesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  serviceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 15,
+    gap: Spacing.xs,
+  },
+  serviceText: {
+    fontSize: Typography.fontSizes.xs,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeights.medium as any,
+  },
+  priceEstimation: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+  },
+  priceTitle: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
+    marginBottom: Spacing.sm,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceText: {
+    fontSize: Typography.fontSizes.lg,
+    color: Colors.success,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  etaText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.info,
+    fontWeight: Typography.fontWeights.medium as any,
   },
   // Estilos para el modal de tiempo
   timeOptionsContainer: {
