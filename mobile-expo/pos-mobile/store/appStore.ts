@@ -28,6 +28,10 @@ interface AppState {
   currentLocale: 'es' | 'en';
   forceLanding: boolean; // Flag para forzar landing después de logout
   
+  // Nuevo: modo explorar sin registro
+  isExploring: boolean;
+  hasSeenOnboarding: boolean;
+  
   // Estado de navegación
   isInChat: boolean;
   currentChatId: string | null;
@@ -40,6 +44,10 @@ interface AppState {
   setHidePromotions: (hidePromotions: boolean) => void;
   setLocale: (locale: 'es' | 'en') => void;
   setForceLanding: (force: boolean) => void;
+  
+  // Acciones para modo explorar
+  setExploring: (isExploring: boolean) => void;
+  setHasSeenOnboarding: (hasSeenOnboarding: boolean) => void;
   
   // Acciones de navegación
   enterChat: (chatId: string) => void;
@@ -60,6 +68,10 @@ export const useAppStore = create<AppState>()(
       currentLocale: 'es',
       forceLanding: false,
       
+      // Modo explorar inicial
+      isExploring: false,
+      hasSeenOnboarding: false,
+      
       // Estado de navegación inicial
       isInChat: false,
       currentChatId: null,
@@ -74,6 +86,10 @@ export const useAppStore = create<AppState>()(
       setHidePromotions: (hidePromotions) => set({ hidePromotions }),
       setLocale: (currentLocale) => set({ currentLocale }),
       setForceLanding: (forceLanding) => set({ forceLanding }),
+      
+      // Implementaciones para modo explorar
+      setExploring: (isExploring) => set({ isExploring }),
+      setHasSeenOnboarding: (hasSeenOnboarding) => set({ hasSeenOnboarding }),
       
       // Acciones de navegación optimizadas
       enterChat: (chatId) => set({ 

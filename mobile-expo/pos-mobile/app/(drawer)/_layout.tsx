@@ -66,7 +66,7 @@ export default function DrawerLayout() {
   const isDoctor = user?.role === 'doctor';
 
   return (
-    <AuthGuard requireAuth={true}>
+    <AuthGuard requireAuth={false}>
       <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{

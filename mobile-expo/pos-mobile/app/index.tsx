@@ -5,12 +5,23 @@ import { useAppStore } from '@/store/appStore';
 import { Colors } from '@/constants/GlobalStyles';
 
 export default function SplashPage() {
-  const { isAuthenticated, user, forceLanding, setForceLanding } = useAppStore();
+  const { 
+    isAuthenticated, 
+    user, 
+    forceLanding, 
+    setForceLanding,
+    isExploring,
+    hasSeenOnboarding,
+    setExploring,
+    setHasSeenOnboarding 
+  } = useAppStore();
 
   console.log('📱 SplashPage - Estado:', { 
     isAuthenticated, 
     user: !!user, 
-    forceLanding 
+    forceLanding,
+    isExploring,
+    hasSeenOnboarding
   });
 
   useEffect(() => {
@@ -18,33 +29,43 @@ export default function SplashPage() {
       console.log('🔄 Decidiendo redirección...', { 
         isAuthenticated, 
         hasUser: !!user, 
-        forceLanding 
+        forceLanding,
+        isExploring,
+        hasSeenOnboarding
       });
       
       // Pequeño delay para mostrar el splash
       setTimeout(() => {
         // Si hay flag de forzar landing (después de logout)
         if (forceLanding) {
-          console.log('🔄 ForceLanding activo, redirigiendo a landing original...');
+          console.log('🔄 ForceLanding activo, redirigiendo a landing...');
           setForceLanding(false); // Reset del flag
           router.replace('/landing');
           return;
         }
         
+        // PRIORIDAD 1: Usuario autenticado → Ir a app
         if (isAuthenticated && user) {
           console.log('✅ Usuario autenticado, redirigiendo a app principal...');
-          // Si está autenticado, ir a la app principal
           router.replace('/(drawer)');
-        } else {
-          console.log('❌ Usuario no autenticado, redirigiendo a landing original...');
-          // Si no está autenticado, ir a la landing page original (con traducciones corregidas)
-          router.replace('/landing');
+          return;
         }
+        
+        // PRIORIDAD 2: Usuario explorando → Ir a app como invitado
+        if (isExploring && hasSeenOnboarding) {
+          console.log('🔍 Usuario explorando, redirigiendo a app como invitado...');
+          router.replace('/(drawer)');
+          return;
+        }
+        
+        // PRIORIDAD 3: Primera vez → Mostrar landing
+        console.log('🏠 Primera vez o sin sesión, redirigiendo a landing...');
+        router.replace('/landing');
       }, 1000);
     };
 
     redirectToAppropriateScreen();
-  }, [isAuthenticated, user, forceLanding, setForceLanding]);
+  }, [isAuthenticated, user, forceLanding, setForceLanding, isExploring, hasSeenOnboarding]);
 
   return (
     <View style={{ 

@@ -10,36 +10,42 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireAuth = true }) => {
-  const { isAuthenticated, user } = useAppStore();
+  const { isAuthenticated, user, isExploring } = useAppStore();
 
   console.log('🛡️ AuthGuard - Verificando:', { 
     requireAuth, 
     isAuthenticated, 
     hasUser: !!user,
-    userId: user?.id 
+    userId: user?.id,
+    isExploring
   });
 
   useEffect(() => {
-    if (requireAuth && !isAuthenticated) {
-      console.log('🔒 AuthGuard: Usuario no autenticado, redirigiendo a landing original...');
+    // Si requiere autenticación estricta
+    if (requireAuth && !isAuthenticated && !isExploring) {
+      console.log('🔒 AuthGuard: Acceso protegido, redirigiendo a landing...');
       router.replace('/landing');
       return;
     }
 
-    if (requireAuth && (!user || !user.id)) {
-      console.log('👤 AuthGuard: Datos de usuario inválidos, redirigiendo a landing original...');
+    // Si está autenticado, verificar datos válidos
+    if (requireAuth && isAuthenticated && (!user || !user.id)) {
+      console.log('👤 AuthGuard: Datos de usuario inválidos, redirigiendo a landing...');
       console.log('👤 User data:', user);
       router.replace('/landing');
       return;
     }
 
-    if (requireAuth && isAuthenticated && user) {
-      console.log('✅ AuthGuard: Usuario válido, permitiendo acceso');
+    // Log del estado final
+    if (isAuthenticated && user) {
+      console.log('✅ AuthGuard: Usuario autenticado válido');
+    } else if (isExploring) {
+      console.log('🔍 AuthGuard: Modo explorar activo');
     }
-  }, [isAuthenticated, user, requireAuth]);
+  }, [isAuthenticated, user, requireAuth, isExploring]);
 
-  // Si requiere autenticación pero no está autenticado, mostrar loading
-  if (requireAuth && (!isAuthenticated || !user)) {
+  // Si requiere autenticación estricta pero no está autenticado ni explorando
+  if (requireAuth && !isAuthenticated && !isExploring) {
     return (
       <View style={{
         flex: 1,

@@ -12,7 +12,7 @@ import DoctorMapSearch from '@/components/location/DoctorMapSearch';
 import MedicalServiceRequest from '@/components/location/MedicalServiceRequest';
 import ServiceTracker from '@/components/tracking/ServiceTracker';
 import InvestorDashboard from '@/components/investor/InvestorDashboard';
-import { DoctorLocation } from '@/store/locationStore';
+import { DoctorLocation } from '@/components/location/DoctorMapSearch';
 import { useServiceTrackingStore } from '@/store/serviceTrackingStore';
 import { mockUsers } from '@/data/mockUsers';
 
@@ -40,12 +40,15 @@ export default function HomeScreen() {
 
   // Para testing: establecer usuario mock si no hay uno
   useEffect(() => {
+    console.log('🔍 HomeScreen - User check:', { user, role: user?.role });
     if (!user) {
-      // Por defecto, establecer como doctor para testing
-      // Puedes cambiar esto a mockUsers.patient para probar la vista de paciente
-      setUser(mockUsers.doctor);
+      // Por defecto, establecer como paciente para testing
+      console.log('🎭 Setting mock patient user for testing');
+      setUser(mockUsers.patient);
     }
   }, [user, setUser]);
+
+  console.log('🏠 HomeScreen render - isDoctor:', isDoctor, 'isPatient:', isPatient, 'user:', user?.role);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -220,8 +223,8 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Acciones adicionales para demo */}
-      <View style={styles.demoSection}>
+      {/* Acciones adicionales para demo - Comentado temporalmente */}
+      {/* <View style={styles.demoSection}>
         <ThemedText style={styles.demoSectionTitle}>🚀 Demo para Inversionistas</ThemedText>
         <View style={styles.demoActions}>
           <TouchableOpacity
@@ -248,10 +251,10 @@ export default function HomeScreen() {
             <ThemedText style={styles.demoActionText}>Simular Servicio</ThemedText>
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
 
-      {/* Métricas en tiempo real */}
-      {metrics.totalServices > 0 && (
+      {/* Métricas en tiempo real - Comentado temporalmente */}
+      {/* {metrics.totalServices > 0 && (
         <View style={styles.metricsPreview}>
           <ThemedText style={styles.metricsTitle}>📊 Métricas del Negocio</ThemedText>
           <View style={styles.metricsGrid}>
@@ -273,7 +276,7 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-      )}
+      )} */}
 
       {/* Información del marketplace */}
       <View style={styles.marketplaceInfo}>
@@ -336,7 +339,7 @@ export default function HomeScreen() {
             </View>
           </ScrollView>
         )}
-      </ThemedView>
+        </ThemedView>
 
       {/* Modal de búsqueda de doctores */}
       <Modal
@@ -409,7 +412,7 @@ export default function HomeScreen() {
         visible={showInvestorDashboard}
         onClose={() => setShowInvestorDashboard(false)}
       />
-    </SafeAreaView>
+      </SafeAreaView>
   );
 }
 

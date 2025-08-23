@@ -1,50 +1,77 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
   Modal,
+  Dimensions,
+  Text
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
-import { useServiceTrackingStore } from '@/store/serviceTrackingStore';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
-
-const { width } = Dimensions.get('window');
-const chartWidth = width - (Spacing.lg * 2);
 
 interface InvestorDashboardProps {
   visible: boolean;
   onClose: () => void;
 }
 
-const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
-  visible,
-  onClose,
-}) => {
-  const {
-    metrics,
-    completedServices,
-    updateMetrics,
-    getRevenueProjection,
-    getGrowthMetrics,
-    generateMockData,
-  } = useServiceTrackingStore();
+interface BusinessMetrics {
+  totalRevenue: number;
+  monthlyGrowth: number;
+  activeUsers: number;
+  completedServices: number;
+  averageRating: number;
+  platformRevenue: number;
+  doctorRetention: number;
+  patientSatisfaction: number;
+}
 
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
-  const [showProjections, setShowProjections] = useState(false);
+interface ChartData {
+  month: string;
+  revenue: number;
+  services: number;
+}
 
+const { width } = Dimensions.get('window');
+
+const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ visible, onClose }) => {
+  const [selectedPeriod, setSelectedPeriod] = useState<'3M' | '6M' | '1Y'>('6M');
+  const [metrics, setMetrics] = useState<BusinessMetrics>({
+    totalRevenue: 125000,
+    monthlyGrowth: 15.4,
+    activeUsers: 2847,
+    completedServices: 1250,
+    averageRating: 4.7,
+    platformRevenue: 18750, // 15% de comisión
+    doctorRetention: 89,
+    patientSatisfaction: 94,
+  });
+
+  const [chartData] = useState<ChartData[]>([
+    { month: 'Ene', revenue: 45000, services: 180 },
+    { month: 'Feb', revenue: 52000, services: 210 },
+    { month: 'Mar', revenue: 61000, services: 245 },
+    { month: 'Abr', revenue: 74000, services: 295 },
+    { month: 'May', revenue: 89000, services: 360 },
+    { month: 'Jun', revenue: 125000, services: 500 },
+  ]);
+
+  // Simular actualización de métricas en tiempo real
   useEffect(() => {
-    if (visible) {
-      updateMetrics();
-      // Generar datos mock si no hay suficientes datos
-      if (completedServices.length < 10) {
-        generateMockData();
-      }
-    }
+    if (!visible) return;
+
+    const interval = setInterval(() => {
+      setMetrics(prev => ({
+        ...prev,
+        totalRevenue: prev.totalRevenue + Math.floor(Math.random() * 500),
+        completedServices: prev.completedServices + Math.floor(Math.random() * 3),
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 5),
+      }));
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [visible]);
 
   const formatCurrency = (amount: number) => {
@@ -55,221 +82,89 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
     }).format(amount);
   };
 
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`;
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('es-VE').format(num);
   };
 
-  // Datos para gráficos
-  const revenueProjection = getRevenueProjection(12);
-  const growthMetrics = getGrowthMetrics();
-
-  // Datos del gráfico de líneas (ingresos mensuales proyectados)
-  const lineChartData = {
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-    datasets: [
-      {
-        data: revenueProjection,
-        color: (opacity = 1) => `rgba(${Colors.primary.replace('#', '').match(/.{2}/g)?.map(x => parseInt(x, 16)).join(', ')}, ${opacity})`,
-        strokeWidth: 3,
-      },
-    ],
+  const calculateROI = () => {
+    const investmentAmount = 150000; // Inversión inicial
+    const currentValue = metrics.totalRevenue * 12; // Proyección anual
+    return ((currentValue - investmentAmount) / investmentAmount) * 100;
   };
 
-  // Datos del gráfico de barras (servicios por tipo)
-  const barChartData = {
-    labels: ['Virtual', 'Presencial', 'Domicilio'],
-    datasets: [
-      {
-        data: [metrics.virtualConsults, metrics.inPersonConsults, metrics.homeVisits],
-      },
-    ],
+  const getGrowthProjection = () => {
+    const currentMonthly = metrics.totalRevenue;
+    const growthRate = metrics.monthlyGrowth / 100;
+    
+    return [
+      { period: 'Q3 2024', value: currentMonthly * 3 * (1 + growthRate) },
+      { period: 'Q4 2024', value: currentMonthly * 3 * (1 + growthRate) ** 2 },
+      { period: 'Q1 2025', value: currentMonthly * 3 * (1 + growthRate) ** 3 },
+      { period: 'Q2 2025', value: currentMonthly * 3 * (1 + growthRate) ** 4 },
+    ];
   };
 
-  // Datos del gráfico circular (distribución de ingresos)
-  const pieChartData = [
-    {
-      name: 'Consultas Virtuales',
-      population: metrics.virtualConsults * 50, // Precio promedio
-      color: Colors.primary,
-      legendFontColor: Colors.dark,
-      legendFontSize: 12,
-    },
-    {
-      name: 'Consultas Presenciales',
-      population: metrics.inPersonConsults * 75,
-      color: Colors.success,
-      legendFontColor: Colors.dark,
-      legendFontSize: 12,
-    },
-    {
-      name: 'Visitas Domiciliarias',
-      population: metrics.homeVisits * 112,
-      color: Colors.warning,
-      legendFontColor: Colors.dark,
-      legendFontSize: 12,
-    },
-  ];
-
-  const chartConfig = {
-    backgroundGradientFrom: Colors.white,
-    backgroundGradientFromOpacity: 1,
-    backgroundGradientTo: Colors.white,
-    backgroundGradientToOpacity: 1,
-    color: (opacity = 1) => `rgba(51, 102, 255, ${opacity})`,
-    strokeWidth: 2,
-    barPercentage: 0.7,
-    useShadowColorFromDataset: false,
-    decimalPlaces: 0,
-    propsForLabels: {
-      fontSize: 12,
-      fontFamily: 'System',
-    },
-  };
-
-  const kpiCards = [
-    {
-      title: 'Ingresos Totales',
-      value: formatCurrency(metrics.totalRevenue),
-      subtitle: 'Último mes',
-      icon: 'cash',
-      color: Colors.success,
-      growth: '+23.5%',
-    },
-    {
-      title: 'Comisión Plataforma',
-      value: formatCurrency(metrics.platformRevenue),
-      subtitle: '15% por transacción',
-      icon: 'trending-up',
-      color: Colors.primary,
-      growth: '+28.2%',
-    },
-    {
-      title: 'Servicios Completados',
-      value: metrics.completedServices.toString(),
-      subtitle: 'Total histórico',
-      icon: 'checkmark-circle',
-      color: Colors.info,
-      growth: '+15.7%',
-    },
-    {
-      title: 'Rating Promedio',
-      value: metrics.averageRating.toFixed(1),
-      subtitle: 'Satisfacción usuarios',
-      icon: 'star',
-      color: Colors.warning,
-      growth: '+2.1%',
-    },
-    {
-      title: 'Tiempo Promedio',
-      value: `${Math.round(metrics.averageServiceTime)} min`,
-      subtitle: 'Por consulta',
-      icon: 'time',
-      color: Colors.darkGray,
-      growth: '-8.3%',
-    },
-    {
-      title: 'Servicios Hoy',
-      value: metrics.dailyServices.toString(),
-      subtitle: 'Actividad diaria',
-      icon: 'today',
-      color: Colors.secondary,
-      growth: '+41.2%',
-    },
-  ];
-
-  const renderKPICard = (kpi: typeof kpiCards[0], index: number) => (
-    <View key={index} style={styles.kpiCard}>
-      <View style={styles.kpiHeader}>
-        <View style={[styles.kpiIcon, { backgroundColor: kpi.color }]}>
-          <Ionicons name={kpi.icon as any} size={20} color={Colors.white} />
+  const MetricCard = ({ title, value, subtitle, icon, color, trend }: {
+    title: string;
+    value: string;
+    subtitle: string;
+    icon: string;
+    color: string;
+    trend?: number;
+  }) => (
+    <View style={styles.metricCard}>
+      <View style={styles.metricHeader}>
+        <View style={[styles.metricIcon, { backgroundColor: color }]}>
+          <Ionicons name={icon as any} size={20} color={Colors.white} />
         </View>
-        <View style={[styles.growthBadge, {
-          backgroundColor: kpi.growth.startsWith('+') ? Colors.success : Colors.danger,
-        }]}>
-          <ThemedText style={styles.growthText}>{kpi.growth}</ThemedText>
-        </View>
+        {trend !== undefined && (
+          <View style={[styles.trendBadge, { backgroundColor: trend >= 0 ? Colors.success : Colors.danger }]}>
+            <Ionicons 
+              name={trend >= 0 ? 'trending-up' : 'trending-down'} 
+              size={12} 
+              color={Colors.white} 
+            />
+            <Text style={styles.trendText}>{Math.abs(trend)}%</Text>
+          </View>
+        )}
       </View>
-      <ThemedText style={styles.kpiValue}>{kpi.value}</ThemedText>
-      <ThemedText style={styles.kpiTitle}>{kpi.title}</ThemedText>
-      <ThemedText style={styles.kpiSubtitle}>{kpi.subtitle}</ThemedText>
+      <ThemedText style={styles.metricValue}>{value}</ThemedText>
+      <Text style={styles.metricTitle}>{title}</Text>
+      <Text style={styles.metricSubtitle}>{subtitle}</Text>
     </View>
   );
 
-  const renderProjectionModal = () => (
-    <Modal
-      visible={showProjections}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={() => setShowProjections(false)}
-    >
-      <View style={styles.projectionContainer}>
-        <View style={styles.projectionHeader}>
-          <ThemedText style={styles.projectionTitle}>Proyecciones de Ingresos</ThemedText>
-          <TouchableOpacity onPress={() => setShowProjections(false)}>
-            <Ionicons name="close" size={24} color={Colors.dark} />
-          </TouchableOpacity>
-        </View>
-        
-        <ScrollView style={styles.projectionContent}>
-          {/* Proyección anual */}
-          <View style={styles.projectionSection}>
-            <ThemedText style={styles.sectionTitle}>Crecimiento Proyectado (15% mensual)</ThemedText>
-            <LineChart
-              data={lineChartData}
-              width={chartWidth}
-              height={220}
-              chartConfig={chartConfig}
-              bezier
-              style={styles.chart}
-            />
-          </View>
-
-          {/* Métricas clave de proyección */}
-          <View style={styles.projectionMetrics}>
-            <View style={styles.projectionMetricCard}>
-              <ThemedText style={styles.projectionMetricValue}>
-                {formatCurrency(revenueProjection.reduce((a, b) => a + b, 0))}
-              </ThemedText>
-              <ThemedText style={styles.projectionMetricLabel}>Ingresos Anuales Proyectados</ThemedText>
-            </View>
+  const SimpleChart = ({ data, type }: { data: ChartData[], type: 'revenue' | 'services' }) => {
+    const maxValue = Math.max(...data.map(d => type === 'revenue' ? d.revenue : d.services));
+    
+    return (
+      <View style={styles.chartContainer}>
+        <View style={styles.chartBars}>
+          {data.map((item, index) => {
+            const value = type === 'revenue' ? item.revenue : item.services;
+            const height = (value / maxValue) * 100;
             
-            <View style={styles.projectionMetricCard}>
-              <ThemedText style={styles.projectionMetricValue}>
-                {formatCurrency(revenueProjection.reduce((a, b) => a + b, 0) * 0.15)}
-              </ThemedText>
-              <ThemedText style={styles.projectionMetricLabel}>Comisiones Proyectadas</ThemedText>
-            </View>
-          </View>
-
-          {/* Escenarios de inversión */}
-          <View style={styles.investmentScenarios}>
-            <ThemedText style={styles.sectionTitle}>Escenarios de Inversión</ThemedText>
-            
-            {[
-              { investment: 100000, multiplier: 1.2, label: 'Conservador' },
-              { investment: 250000, multiplier: 1.5, label: 'Moderado' },
-              { investment: 500000, multiplier: 2.0, label: 'Agresivo' },
-            ].map((scenario, index) => (
-              <View key={index} style={styles.scenarioCard}>
-                <View style={styles.scenarioHeader}>
-                  <ThemedText style={styles.scenarioLabel}>{scenario.label}</ThemedText>
-                  <ThemedText style={styles.scenarioInvestment}>
-                    {formatCurrency(scenario.investment)}
-                  </ThemedText>
+            return (
+              <View key={index} style={styles.chartBarContainer}>
+                <View style={styles.chartBarWrapper}>
+                  <View 
+                    style={[
+                      styles.chartBar, 
+                      { 
+                        height: `${height}%`,
+                        backgroundColor: type === 'revenue' ? Colors.primary : Colors.success,
+                      }
+                    ]} 
+                  />
                 </View>
-                <ThemedText style={styles.scenarioReturn}>
-                  ROI Proyectado: {formatCurrency(scenario.investment * scenario.multiplier)}
-                </ThemedText>
-                <ThemedText style={styles.scenarioMultiplier}>
-                  {scenario.multiplier}x en 24 meses
-                </ThemedText>
+                <Text style={styles.chartLabel}>{item.month}</Text>
               </View>
-            ))}
-          </View>
-        </ScrollView>
+            );
+          })}
+        </View>
       </View>
-    </Modal>
-  );
+    );
+  };
 
   return (
     <Modal
@@ -281,130 +176,187 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={Colors.white} />
+          <TouchableOpacity onPress={onClose} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={Colors.dark} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Dashboard Inversionistas</ThemedText>
-          <TouchableOpacity 
-            onPress={() => setShowProjections(true)}
-            style={styles.projectionsButton}
-          >
-            <Ionicons name="trending-up" size={20} color={Colors.white} />
+          <ThemedText style={styles.title}>Dashboard Inversionistas</ThemedText>
+          <TouchableOpacity style={styles.exportButton}>
+            <Ionicons name="download" size={20} color={Colors.primary} />
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* KPIs Grid */}
-          <View style={styles.kpiSection}>
-            <ThemedText style={styles.sectionTitle}>Métricas Clave del Negocio</ThemedText>
-            <View style={styles.kpiGrid}>
-              {kpiCards.map((kpi, index) => renderKPICard(kpi, index))}
-            </View>
-          </View>
-
-          {/* Gráfico de ingresos */}
-          <View style={styles.chartSection}>
-            <ThemedText style={styles.sectionTitle}>Proyección de Ingresos (12 meses)</ThemedText>
-            <View style={styles.chartContainer}>
-              <LineChart
-                data={lineChartData}
-                width={chartWidth}
-                height={200}
-                chartConfig={chartConfig}
-                bezier
-                style={styles.chart}
+          {/* KPIs principales */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>KPIs Clave</ThemedText>
+            <View style={styles.metricsGrid}>
+              <MetricCard
+                title="Ingresos Totales"
+                value={formatCurrency(metrics.totalRevenue)}
+                subtitle="Este mes"
+                icon="trending-up"
+                color={Colors.primary}
+                trend={metrics.monthlyGrowth}
+              />
+              <MetricCard
+                title="Usuarios Activos"
+                value={formatNumber(metrics.activeUsers)}
+                subtitle="Doctores y pacientes"
+                icon="people"
+                color={Colors.success}
+                trend={12.3}
+              />
+              <MetricCard
+                title="Servicios Completados"
+                value={formatNumber(metrics.completedServices)}
+                subtitle="Este mes"
+                icon="medical"
+                color={Colors.info}
+                trend={8.7}
+              />
+              <MetricCard
+                title="Ingresos Plataforma"
+                value={formatCurrency(metrics.platformRevenue)}
+                subtitle="Comisión (15%)"
+                icon="card"
+                color={Colors.warning}
+                trend={15.4}
               />
             </View>
           </View>
 
-          {/* Distribución de servicios */}
-          <View style={styles.chartSection}>
-            <ThemedText style={styles.sectionTitle}>Distribución de Servicios</ThemedText>
-            <View style={styles.chartContainer}>
-              <BarChart
-                data={barChartData}
-                width={chartWidth}
-                height={200}
-                chartConfig={chartConfig}
-                style={styles.chart}
-                showValuesOnTopOfBars
-              />
+          {/* Gráficos de crecimiento */}
+          <View style={styles.section}>
+            <View style={styles.chartHeader}>
+              <ThemedText style={styles.sectionTitle}>Crecimiento</ThemedText>
+              <View style={styles.periodSelector}>
+                {(['3M', '6M', '1Y'] as const).map((period) => (
+                  <TouchableOpacity
+                    key={period}
+                    style={[
+                      styles.periodButton,
+                      selectedPeriod === period && styles.periodButtonActive
+                    ]}
+                    onPress={() => setSelectedPeriod(period)}
+                  >
+                    <Text style={[
+                      styles.periodButtonText,
+                      selectedPeriod === period && styles.periodButtonTextActive
+                    ]}>
+                      {period}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
-
-          {/* Distribución de ingresos por tipo */}
-          <View style={styles.chartSection}>
-            <ThemedText style={styles.sectionTitle}>Ingresos por Tipo de Servicio</ThemedText>
-            <View style={styles.chartContainer}>
-              <PieChart
-                data={pieChartData}
-                width={chartWidth}
-                height={200}
-                chartConfig={chartConfig}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                style={styles.chart}
-              />
-            </View>
-          </View>
-
-          {/* Métricas de mercado */}
-          <View style={styles.marketSection}>
-            <ThemedText style={styles.sectionTitle}>Oportunidad de Mercado</ThemedText>
             
-            <View style={styles.marketCard}>
-              <ThemedText style={styles.marketTitle}>Mercado Venezolano</ThemedText>
-              <View style={styles.marketStats}>
-                <View style={styles.marketStat}>
-                  <ThemedText style={styles.marketStatValue}>28M</ThemedText>
-                  <ThemedText style={styles.marketStatLabel}>Población</ThemedText>
+            <View style={styles.chartsContainer}>
+              <View style={styles.chartCard}>
+                <Text style={styles.chartTitle}>Ingresos Mensuales</Text>
+                <SimpleChart data={chartData} type="revenue" />
+              </View>
+              
+              <View style={styles.chartCard}>
+                <Text style={styles.chartTitle}>Servicios Completados</Text>
+                <SimpleChart data={chartData} type="services" />
+              </View>
+            </View>
+          </View>
+
+          {/* Métricas de calidad */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Métricas de Calidad</ThemedText>
+            <View style={styles.qualityMetrics}>
+              <View style={styles.qualityItem}>
+                <View style={styles.qualityCircle}>
+                  <Text style={styles.qualityValue}>{metrics.averageRating}</Text>
+                  <Text style={styles.qualityLabel}>★ Rating</Text>
                 </View>
-                <View style={styles.marketStat}>
-                  <ThemedText style={styles.marketStatValue}>45K</ThemedText>
-                  <ThemedText style={styles.marketStatLabel}>Médicos</ThemedText>
+              </View>
+              
+              <View style={styles.qualityItem}>
+                <View style={styles.qualityCircle}>
+                  <Text style={styles.qualityValue}>{metrics.doctorRetention}%</Text>
+                  <Text style={styles.qualityLabel}>Retención Dr.</Text>
                 </View>
-                <View style={styles.marketStat}>
-                  <ThemedText style={styles.marketStatValue}>$2.1B</ThemedText>
-                  <ThemedText style={styles.marketStatLabel}>Mercado Salud</ThemedText>
+              </View>
+              
+              <View style={styles.qualityItem}>
+                <View style={styles.qualityCircle}>
+                  <Text style={styles.qualityValue}>{metrics.patientSatisfaction}%</Text>
+                  <Text style={styles.qualityLabel}>Satisfacción</Text>
                 </View>
               </View>
             </View>
+          </View>
 
-            <View style={styles.competitiveAdvantage}>
-              <ThemedText style={styles.advantageTitle}>Ventajas Competitivas</ThemedText>
-              {[
-                'Primer marketplace médico con geolocalización en Venezuela',
-                'Modelo de comisión sin costos fijos para doctores',
-                'Sistema de reputación y financiamiento integrado',
-                'Visitas domiciliarias como Uber médico',
-                'Tecnología móvil nativa con UX familiar',
-              ].map((advantage, index) => (
-                <View key={index} style={styles.advantageItem}>
-                  <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-                  <ThemedText style={styles.advantageText}>{advantage}</ThemedText>
-                </View>
-              ))}
+          {/* Proyecciones financieras */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Proyecciones Financieras</ThemedText>
+            <View style={styles.projectionCard}>
+              <View style={styles.roiHeader}>
+                <Text style={styles.roiLabel}>ROI Proyectado (12 meses)</Text>
+                <Text style={styles.roiValue}>{calculateROI().toFixed(1)}%</Text>
+              </View>
+              
+              <View style={styles.projectionsList}>
+                {getGrowthProjection().map((proj, index) => (
+                  <View key={index} style={styles.projectionItem}>
+                    <Text style={styles.projectionPeriod}>{proj.period}</Text>
+                    <Text style={styles.projectionValue}>{formatCurrency(proj.value)}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
 
-          {/* Call to action para inversión */}
-          <View style={styles.investmentCTA}>
-            <ThemedText style={styles.ctaTitle}>¿Listo para Invertir?</ThemedText>
-            <ThemedText style={styles.ctaSubtitle}>
-              Únete a la revolución de la salud digital en Venezuela
-            </ThemedText>
-            <TouchableOpacity 
-              style={styles.ctaButton}
-              onPress={() => setShowProjections(true)}
-            >
-              <ThemedText style={styles.ctaButtonText}>Ver Proyecciones Detalladas</ThemedText>
-              <Ionicons name="arrow-forward" size={20} color={Colors.white} />
-            </TouchableOpacity>
+          {/* Resumen ejecutivo */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Resumen Ejecutivo</ThemedText>
+            <View style={styles.summaryCard}>
+              <View style={styles.summaryItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.summaryText}>
+                  Crecimiento mensual sostenido del {metrics.monthlyGrowth}%
+                </Text>
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.summaryText}>
+                  Alta satisfacción del cliente ({metrics.patientSatisfaction}%)
+                </Text>
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.summaryText}>
+                  Modelo de negocio escalable con margen del 15%
+                </Text>
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <Ionicons name="trending-up" size={20} color={Colors.primary} />
+                <Text style={styles.summaryText}>
+                  Proyección de break-even en 8 meses
+                </Text>
+              </View>
+            </View>
           </View>
         </ScrollView>
 
-        {renderProjectionModal()}
+        {/* Footer con acciones */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.reportButton}>
+            <Ionicons name="document-text" size={20} color={Colors.primary} />
+            <Text style={styles.reportButtonText}>Generar Reporte</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.shareButton}>
+            <Ionicons name="share" size={20} color={Colors.white} />
+            <Text style={styles.shareButtonText}>Compartir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
@@ -416,277 +368,298 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+    backgroundColor: Colors.white,
   },
-  closeButton: {
-    padding: Spacing.sm,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: Typography.fontSizes.lg,
+  title: {
+    fontSize: Typography.fontSizes.xl,
     fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.white,
+    color: Colors.dark,
   },
-  projectionsButton: {
-    padding: Spacing.sm,
+  exportButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
   },
-  kpiSection: {
+  section: {
     padding: Spacing.lg,
   },
   sectionTitle: {
     fontSize: Typography.fontSizes.lg,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
-  kpiGrid: {
+  metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.md,
+    justifyContent: 'space-between',
   },
-  kpiCard: {
+  metricCard: {
     width: '48%',
     backgroundColor: Colors.white,
     borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    ...BordersAndShadows.shadows.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+    ...BordersAndShadows.shadows.sm,
   },
-  kpiHeader: {
+  metricHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.md,
   },
-  kpiIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  metricIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  growthBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BordersAndShadows.borderRadius.sm,
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
-  growthText: {
+  trendText: {
     fontSize: Typography.fontSizes.xs,
-    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.white,
+    marginLeft: 2,
+    fontWeight: Typography.fontWeights.bold as any,
   },
-  kpiValue: {
+  metricValue: {
     fontSize: Typography.fontSizes.xl,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
-  kpiTitle: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold as any,
+  metricTitle: {
+    fontSize: Typography.fontSizes.sm,
     color: Colors.dark,
+    fontWeight: Typography.fontWeights.bold as any,
     marginBottom: Spacing.xs,
   },
-  kpiSubtitle: {
+  metricSubtitle: {
+    fontSize: Typography.fontSizes.xs,
+    color: Colors.darkGray,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  periodSelector: {
+    flexDirection: 'row',
+    backgroundColor: Colors.lightGray,
+    borderRadius: 20,
+    padding: 2,
+  },
+  periodButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 18,
+  },
+  periodButtonActive: {
+    backgroundColor: Colors.primary,
+  },
+  periodButtonText: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
   },
-  chartSection: {
+  periodButtonTextActive: {
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  chartsContainer: {
+    gap: Spacing.md,
+  },
+  chartCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
     padding: Spacing.lg,
-    paddingTop: 0,
+    ...BordersAndShadows.shadows.sm,
+  },
+  chartTitle: {
+    fontSize: Typography.fontSizes.md,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.dark,
+    marginBottom: Spacing.md,
   },
   chartContainer: {
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.md,
-    ...BordersAndShadows.shadows.sm,
+    height: 120,
   },
-  chart: {
-    borderRadius: BordersAndShadows.borderRadius.md,
-  },
-  marketSection: {
-    padding: Spacing.lg,
-    paddingTop: 0,
-  },
-  marketCard: {
-    backgroundColor: Colors.white,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...BordersAndShadows.shadows.sm,
-  },
-  marketTitle: {
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.dark,
-    marginBottom: Spacing.md,
-  },
-  marketStats: {
+  chartBars: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    height: 100,
   },
-  marketStat: {
+  chartBarContainer: {
     alignItems: 'center',
+    flex: 1,
   },
-  marketStatValue: {
-    fontSize: Typography.fontSizes.xl,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.primary,
-    marginBottom: Spacing.xs,
+  chartBarWrapper: {
+    height: 80,
+    width: 20,
+    justifyContent: 'flex-end',
+    marginBottom: Spacing.sm,
   },
-  marketStatLabel: {
-    fontSize: Typography.fontSizes.sm,
+  chartBar: {
+    width: '100%',
+    borderRadius: 10,
+    minHeight: 4,
+  },
+  chartLabel: {
+    fontSize: Typography.fontSizes.xs,
     color: Colors.darkGray,
   },
-  competitiveAdvantage: {
+  qualityMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     backgroundColor: Colors.white,
     borderRadius: BordersAndShadows.borderRadius.lg,
     padding: Spacing.lg,
     ...BordersAndShadows.shadows.sm,
   },
-  advantageTitle: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.dark,
-    marginBottom: Spacing.md,
-  },
-  advantageItem: {
-    flexDirection: 'row',
+  qualityItem: {
     alignItems: 'center',
-    marginBottom: Spacing.sm,
-    gap: Spacing.sm,
   },
-  advantageText: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-    flex: 1,
-  },
-  investmentCTA: {
+  qualityCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: Colors.primary,
-    margin: Spacing.lg,
-    padding: Spacing.xl,
-    borderRadius: BordersAndShadows.borderRadius.lg,
+    justifyContent: 'center',
     alignItems: 'center',
-    ...BordersAndShadows.shadows.lg,
   },
-  ctaTitle: {
-    fontSize: Typography.fontSizes.xl,
+  qualityValue: {
+    fontSize: Typography.fontSizes.lg,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.white,
-    marginBottom: Spacing.sm,
   },
-  ctaSubtitle: {
-    fontSize: Typography.fontSizes.md,
+  qualityLabel: {
+    fontSize: Typography.fontSizes.xs,
     color: Colors.white,
-    textAlign: 'center',
+    marginTop: 2,
+  },
+  projectionCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    ...BordersAndShadows.shadows.sm,
+  },
+  roiHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: Spacing.lg,
-    opacity: 0.9,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
   },
-  ctaButton: {
-    backgroundColor: Colors.white,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    gap: Spacing.sm,
-  },
-  ctaButtonText: {
+  roiLabel: {
     fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.primary,
-  },
-  // Estilos del modal de proyecciones
-  projectionContainer: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  projectionHeader: {
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-  },
-  projectionTitle: {
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.white,
-  },
-  projectionContent: {
-    flex: 1,
-    padding: Spacing.lg,
-  },
-  projectionSection: {
-    marginBottom: Spacing.xl,
-  },
-  projectionMetrics: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  projectionMetricCard: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    padding: Spacing.lg,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    alignItems: 'center',
-    ...BordersAndShadows.shadows.sm,
-  },
-  projectionMetricValue: {
-    fontSize: Typography.fontSizes.xl,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.primary,
-    marginBottom: Spacing.xs,
-  },
-  projectionMetricLabel: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-    textAlign: 'center',
-  },
-  investmentScenarios: {
-    marginBottom: Spacing.xl,
-  },
-  scenarioCard: {
-    backgroundColor: Colors.white,
-    padding: Spacing.lg,
-    marginBottom: Spacing.md,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    ...BordersAndShadows.shadows.sm,
-  },
-  scenarioHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  scenarioLabel: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
-  },
-  scenarioInvestment: {
-    fontSize: Typography.fontSizes.lg,
     fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.primary,
   },
-  scenarioReturn: {
-    fontSize: Typography.fontSizes.md,
+  roiValue: {
+    fontSize: Typography.fontSizes.xl,
     color: Colors.success,
-    marginBottom: Spacing.xs,
+    fontWeight: Typography.fontWeights.bold as any,
   },
-  scenarioMultiplier: {
-    fontSize: Typography.fontSizes.sm,
+  projectionsList: {
+    gap: Spacing.md,
+  },
+  projectionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  projectionPeriod: {
+    fontSize: Typography.fontSizes.md,
     color: Colors.darkGray,
+  },
+  projectionValue: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  summaryCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    ...BordersAndShadows.shadows.sm,
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  summaryText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
+    marginLeft: Spacing.md,
+    flex: 1,
+  },
+  footer: {
+    flexDirection: 'row',
+    padding: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+    backgroundColor: Colors.white,
+  },
+  reportButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.lightGray,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.md,
+    marginRight: Spacing.md,
+  },
+  reportButtonText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeights.bold as any,
+    marginLeft: Spacing.sm,
+  },
+  shareButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.md,
+  },
+  shareButtonText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold as any,
+    marginLeft: Spacing.sm,
   },
 });
 

@@ -80,6 +80,22 @@ export default function SimpleLandingPage() {
           >
             <ThemedText style={styles.loginLinkText}>¿Ya tienes cuenta? Inicia sesión</ThemedText>
           </TouchableOpacity>
+
+          {/* Botón para explorar sin registro */}
+          <TouchableOpacity 
+            style={styles.exploreButton}
+            onPress={() => {
+              console.log('🔍 Explorando sin registro...');
+              // Activar modo explorar
+              const { setExploring, setHasSeenOnboarding } = useAppStore.getState();
+              setExploring(true);
+              setHasSeenOnboarding(true);
+              router.replace('/(drawer)');
+            }}
+          >
+            <Ionicons name="eye" size={16} color={Colors.darkGray} />
+            <ThemedText style={styles.exploreButtonText}>Explorar sin cuenta</ThemedText>
+          </TouchableOpacity>
         </View>
 
         {/* How It Works Section */}
@@ -345,6 +361,19 @@ const styles = StyleSheet.create({
   loginLinkText: {
     color: Colors.darkGray,
     fontSize: Typography.fontSizes.md,
+    textAlign: 'center',
+  },
+  exploreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+    padding: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  exploreButtonText: {
+    color: Colors.darkGray,
+    fontSize: Typography.fontSizes.sm,
     textAlign: 'center',
   },
   featuresSection: {

@@ -1,27 +1,25 @@
 import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  Alert,
+import { 
+  View, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Modal, 
   TextInput,
+  Alert,
+  Text
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BordersAndShadows, Typography } from '@/constants/GlobalStyles';
-import { useLocationStore, DoctorLocation } from '@/store/locationStore';
+import { DoctorLocation } from './DoctorMapSearch';
 
-type ServiceType = 'virtual' | 'in_person' | 'home_visit';
-type Urgency = 'low' | 'medium' | 'high' | 'emergency';
-
-interface ServiceRequest {
-  serviceType: ServiceType;
-  urgency: Urgency;
+export interface ServiceRequest {
+  serviceType: 'virtual' | 'in_person' | 'home_visit';
   symptoms: string;
-  preferredTime: 'now' | 'today' | 'tomorrow' | 'this_week';
-  notes: string;
+  urgency: 'low' | 'medium' | 'high' | 'emergency';
+  preferredTime: string;
+  notes?: string;
   patientLocation?: {
     latitude: number;
     longitude: number;
@@ -32,8 +30,8 @@ interface ServiceRequest {
 interface MedicalServiceRequestProps {
   visible: boolean;
   onClose: () => void;
-  selectedDoctor?: DoctorLocation;
-  onRequestSubmitted?: (request: ServiceRequest) => void;
+  selectedDoctor: DoctorLocation | null;
+  onRequestSubmitted: (request: ServiceRequest) => void;
 }
 
 const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
@@ -42,153 +40,82 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
   selectedDoctor,
   onRequestSubmitted,
 }) => {
-  const { userLocation } = useLocationStore();
-  
-  const [serviceType, setServiceType] = useState<ServiceType>('virtual');
-  const [urgency, setUrgency] = useState<Urgency>('medium');
+  const [serviceType, setServiceType] = useState<'virtual' | 'in_person' | 'home_visit'>('virtual');
   const [symptoms, setSymptoms] = useState('');
-  const [preferredTime, setPreferredTime] = useState<ServiceRequest['preferredTime']>('today');
+  const [urgency, setUrgency] = useState<'low' | 'medium' | 'high' | 'emergency'>('medium');
+  const [preferredTime, setPreferredTime] = useState('today');
   const [notes, setNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTimeOptions, setShowTimeOptions] = useState(false);
 
   const serviceTypes = [
     {
-      type: 'virtual' as ServiceType,
+      id: 'virtual' as const,
       title: 'Consulta Virtual',
-      subtitle: 'Videollamada desde casa',
+      description: 'Videollamada desde casa',
       icon: 'videocam',
-      available: true,
-      estimatedTime: '5-15 min',
+      price: selectedDoctor ? selectedDoctor.priceRange.min : 45,
     },
     {
-      type: 'in_person' as ServiceType,
+      id: 'in_person' as const,
       title: 'Consulta Presencial',
-      subtitle: 'En el consultorio del doctor',
-      icon: 'medical',
-      available: true,
-      estimatedTime: '30 min - 2 hrs',
+      description: 'En el consultorio del doctor',
+      icon: 'business',
+      price: selectedDoctor ? selectedDoctor.priceRange.max : 65,
     },
     {
-      type: 'home_visit' as ServiceType,
+      id: 'home_visit' as const,
       title: 'Visita Domiciliaria',
-      subtitle: 'El doctor viene a tu casa',
+      description: 'El doctor va a tu hogar',
       icon: 'home',
-      available: selectedDoctor?.consultationTypes.includes('home_visit') || false,
-      estimatedTime: '1-3 hrs',
+      price: selectedDoctor ? selectedDoctor.priceRange.max * 1.5 : 90,
     },
   ];
 
   const urgencyLevels = [
-    {
-      level: 'low' as Urgency,
-      title: 'Consulta de Rutina',
-      subtitle: 'No es urgente',
-      color: Colors.success,
-      icon: 'checkmark-circle',
-    },
-    {
-      level: 'medium' as Urgency,
-      title: 'Consulta Normal',
-      subtitle: 'Síntomas molestos',
-      color: Colors.warning,
-      icon: 'alert-circle',
-    },
-    {
-      level: 'high' as Urgency,
-      title: 'Consulta Prioritaria',
-      subtitle: 'Síntomas preocupantes',
-      color: Colors.danger,
-      icon: 'warning',
-    },
-    {
-      level: 'emergency' as Urgency,
-      title: 'Emergencia',
-      subtitle: 'Requiere atención inmediata',
-      color: Colors.danger,
-      icon: 'medical',
-    },
+    { id: 'low' as const, label: 'Baja', color: Colors.success, description: 'No es urgente' },
+    { id: 'medium' as const, label: 'Media', color: Colors.warning, description: 'Moderadamente urgente' },
+    { id: 'high' as const, label: 'Alta', color: Colors.danger, description: 'Requiere atención pronta' },
+    { id: 'emergency' as const, label: 'Emergencia', color: Colors.danger, description: 'Requiere atención inmediata' },
   ];
 
   const timeOptions = [
-    { value: 'now' as const, label: 'Ahora mismo', subtitle: 'Lo antes posible' },
-    { value: 'today' as const, label: 'Hoy', subtitle: 'En las próximas horas' },
-    { value: 'tomorrow' as const, label: 'Mañana', subtitle: 'Al día siguiente' },
-    { value: 'this_week' as const, label: 'Esta semana', subtitle: 'En los próximos días' },
+    { id: 'now', label: 'Ahora mismo', description: 'Lo más pronto posible' },
+    { id: 'today', label: 'Hoy', description: 'En las próximas horas' },
+    { id: 'tomorrow', label: 'Mañana', description: 'En las próximas 24 horas' },
+    { id: 'this_week', label: 'Esta semana', description: 'En los próximos 7 días' },
   ];
 
-  const handleSubmitRequest = async () => {
+  const handleSubmit = () => {
     if (!symptoms.trim()) {
-      Alert.alert('Información Requerida', 'Por favor describe tus síntomas');
+      Alert.alert('Error', 'Por favor describe tus síntomas');
       return;
     }
 
-    if (serviceType === 'home_visit' && !userLocation) {
-      Alert.alert('Ubicación Requerida', 'Necesitamos tu ubicación para la visita domiciliaria');
+    if (symptoms.trim().length < 10) {
+      Alert.alert('Error', 'Por favor proporciona más detalles sobre tus síntomas');
       return;
     }
 
-    setIsSubmitting(true);
+    const request: ServiceRequest = {
+      serviceType,
+      symptoms: symptoms.trim(),
+      urgency,
+      preferredTime,
+      notes: notes.trim() || undefined,
+      patientLocation: serviceType === 'home_visit' ? {
+        latitude: 10.4806,
+        longitude: -66.9036,
+        address: 'Caracas, Venezuela', // Mock location
+      } : undefined,
+    };
 
-    try {
-      const request: ServiceRequest = {
-        serviceType,
-        urgency,
-        symptoms: symptoms.trim(),
-        preferredTime,
-        notes: notes.trim(),
-        patientLocation: serviceType === 'home_visit' && userLocation ? {
-          latitude: userLocation.coordinates.latitude,
-          longitude: userLocation.coordinates.longitude,
-          address: userLocation.address?.street || 'Dirección no especificada',
-        } : undefined,
-      };
-
-      // Simular envío de solicitud
-      console.log('📋 Enviando solicitud de servicio médico:', request);
-      
-      // Aquí se enviaría la solicitud al backend
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      if (onRequestSubmitted) {
-        onRequestSubmitted(request);
-      }
-
-      Alert.alert(
-        '✅ Solicitud Enviada',
-        `Tu solicitud de ${serviceTypes.find(s => s.type === serviceType)?.title.toLowerCase()} ha sido enviada${selectedDoctor ? ` a ${selectedDoctor.doctorName}` : ''}. Te notificaremos cuando sea confirmada.`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              onClose();
-              // Reset form
-              setSymptoms('');
-              setNotes('');
-              setServiceType('virtual');
-              setUrgency('medium');
-              setPreferredTime('today');
-            },
-          },
-        ]
-      );
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo enviar la solicitud. Intenta de nuevo.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    console.log('📋 Enviando solicitud de servicio:', request);
+    onRequestSubmitted(request);
   };
 
-  const getEstimatedCost = () => {
-    if (!selectedDoctor) return 'A definir';
-    
-    const basePrice = selectedDoctor.priceRange.min;
-    const multiplier = 
-      serviceType === 'home_visit' ? 1.5 :
-      urgency === 'emergency' ? 2 :
-      urgency === 'high' ? 1.3 : 1;
-    
-    return `$${Math.round(basePrice * multiplier)}-${Math.round(selectedDoctor.priceRange.max * multiplier)}`;
-  };
+  const selectedServiceType = serviceTypes.find(st => st.id === serviceType);
+  const selectedUrgency = urgencyLevels.find(ul => ul.id === urgency);
+  const selectedTime = timeOptions.find(to => to.id === preferredTime);
 
   return (
     <Modal
@@ -200,36 +127,27 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
+          <ThemedText style={styles.title}>Solicitar Servicio Médico</ThemedText>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color={Colors.dark} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Solicitar Consulta</ThemedText>
-          <View style={styles.placeholder} />
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Doctor seleccionado */}
           {selectedDoctor && (
-            <View style={styles.selectedDoctorCard}>
-              <View style={styles.doctorInfo}>
-                <View style={styles.doctorAvatar}>
-                  <Ionicons name="person" size={24} color={Colors.white} />
-                </View>
-                <View>
-                  <ThemedText style={styles.doctorName}>{selectedDoctor.doctorName}</ThemedText>
-                  <ThemedText style={styles.doctorSpecialty}>{selectedDoctor.specialty}</ThemedText>
-                  <View style={styles.doctorMeta}>
-                    <Ionicons name="star" size={12} color={Colors.warning} />
-                    <ThemedText style={styles.doctorRating}>{selectedDoctor.rating}</ThemedText>
-                    <ThemedText style={styles.doctorDistance}>
-                      • {selectedDoctor.distance?.toFixed(1)} km
-                    </ThemedText>
-                  </View>
-                </View>
+            <View style={styles.doctorCard}>
+              <View style={styles.doctorAvatar}>
+                <Ionicons name="person" size={24} color={Colors.white} />
               </View>
-              <View style={styles.estimatedCost}>
-                <ThemedText style={styles.costLabel}>Costo estimado</ThemedText>
-                <ThemedText style={styles.costAmount}>{getEstimatedCost()}</ThemedText>
+              <View style={styles.doctorInfo}>
+                <ThemedText style={styles.doctorName}>{selectedDoctor.doctorName}</ThemedText>
+                <Text style={styles.doctorSpecialty}>{selectedDoctor.specialty}</Text>
+                <View style={styles.doctorMeta}>
+                  <Ionicons name="star" size={14} color={Colors.warning} />
+                  <Text style={styles.doctorRating}>{selectedDoctor.rating}</Text>
+                  <Text style={styles.doctorDistance}> • {selectedDoctor.distance} km</Text>
+                </View>
               </View>
             </View>
           )}
@@ -237,102 +155,54 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
           {/* Tipo de servicio */}
           <View style={styles.section}>
             <ThemedText style={styles.sectionTitle}>Tipo de Consulta</ThemedText>
-            <View style={styles.optionsContainer}>
-              {serviceTypes.map((service) => (
-                <TouchableOpacity
-                  key={service.type}
-                  style={[
-                    styles.optionCard,
-                    serviceType === service.type && styles.selectedOptionCard,
-                    !service.available && styles.disabledOptionCard,
-                  ]}
-                  onPress={() => service.available && setServiceType(service.type)}
-                  disabled={!service.available}
-                >
-                  <View style={styles.optionHeader}>
-                    <Ionicons
-                      name={service.icon as any}
-                      size={24}
-                      color={
-                        !service.available ? Colors.lightGray :
-                        serviceType === service.type ? Colors.primary : Colors.darkGray
-                      }
-                    />
-                    <View style={styles.optionInfo}>
-                      <ThemedText style={[
-                        styles.optionTitle,
-                        !service.available && styles.disabledText,
-                      ]}>
-                        {service.title}
-                      </ThemedText>
-                      <ThemedText style={[
-                        styles.optionSubtitle,
-                        !service.available && styles.disabledText,
-                      ]}>
-                        {service.subtitle}
-                      </ThemedText>
-                    </View>
-                    <ThemedText style={[
-                      styles.estimatedTime,
-                      !service.available && styles.disabledText,
-                    ]}>
-                      {service.available ? service.estimatedTime : 'No disponible'}
-                    </ThemedText>
-                  </View>
-                  {serviceType === service.type && (
-                    <View style={styles.selectedIndicator}>
-                      <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Nivel de urgencia */}
-          <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Nivel de Urgencia</ThemedText>
-            <View style={styles.optionsContainer}>
-              {urgencyLevels.map((level) => (
-                <TouchableOpacity
-                  key={level.level}
-                  style={[
-                    styles.urgencyCard,
-                    urgency === level.level && styles.selectedUrgencyCard,
-                  ]}
-                  onPress={() => setUrgency(level.level)}
-                >
-                  <Ionicons
-                    name={level.icon as any}
-                    size={20}
-                    color={urgency === level.level ? Colors.white : level.color}
+            {serviceTypes.map((type) => (
+              <TouchableOpacity
+                key={type.id}
+                style={[
+                  styles.serviceTypeCard,
+                  serviceType === type.id && styles.serviceTypeCardActive
+                ]}
+                onPress={() => setServiceType(type.id)}
+              >
+                <View style={styles.serviceTypeIcon}>
+                  <Ionicons 
+                    name={type.icon as any} 
+                    size={24} 
+                    color={serviceType === type.id ? Colors.white : Colors.primary} 
                   />
-                  <View style={styles.urgencyInfo}>
-                    <ThemedText style={[
-                      styles.urgencyTitle,
-                      urgency === level.level && styles.selectedUrgencyText,
-                    ]}>
-                      {level.title}
-                    </ThemedText>
-                    <ThemedText style={[
-                      styles.urgencySubtitle,
-                      urgency === level.level && styles.selectedUrgencyText,
-                    ]}>
-                      {level.subtitle}
-                    </ThemedText>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
+                </View>
+                <View style={styles.serviceTypeContent}>
+                  <ThemedText style={[
+                    styles.serviceTypeTitle,
+                    serviceType === type.id && styles.serviceTypeTextActive
+                  ]}>
+                    {type.title}
+                  </ThemedText>
+                  <Text style={[
+                    styles.serviceTypeDescription,
+                    serviceType === type.id && styles.serviceTypeTextActive
+                  ]}>
+                    {type.description}
+                  </Text>
+                </View>
+                <View style={styles.serviceTypePrice}>
+                  <Text style={[
+                    styles.priceText,
+                    serviceType === type.id && styles.serviceTypeTextActive
+                  ]}>
+                    ${type.price}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {/* Síntomas */}
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Describe tus Síntomas *</ThemedText>
+            <ThemedText style={styles.sectionTitle}>Describe tus síntomas</ThemedText>
             <TextInput
               style={styles.textArea}
-              placeholder="Describe brevemente qué síntomas tienes y desde cuándo..."
-              placeholderTextColor={Colors.lightGray}
+              placeholder="Describe detalladamente tus síntomas, cuándo comenzaron y qué los empeora o mejora..."
               value={symptoms}
               onChangeText={setSymptoms}
               multiline
@@ -341,70 +211,143 @@ const MedicalServiceRequest: React.FC<MedicalServiceRequestProps> = ({
             />
           </View>
 
-          {/* Tiempo preferido */}
+          {/* Urgencia */}
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>¿Cuándo necesitas la consulta?</ThemedText>
-            <View style={styles.timeOptionsContainer}>
-              {timeOptions.map((option) => (
+            <ThemedText style={styles.sectionTitle}>Nivel de Urgencia</ThemedText>
+            <View style={styles.urgencyContainer}>
+              {urgencyLevels.map((level) => (
                 <TouchableOpacity
-                  key={option.value}
+                  key={level.id}
                   style={[
-                    styles.timeOption,
-                    preferredTime === option.value && styles.selectedTimeOption,
+                    styles.urgencyChip,
+                    urgency === level.id && { backgroundColor: level.color }
                   ]}
-                  onPress={() => setPreferredTime(option.value)}
+                  onPress={() => setUrgency(level.id)}
                 >
-                  <ThemedText style={[
-                    styles.timeOptionLabel,
-                    preferredTime === option.value && styles.selectedTimeOptionText,
+                  <Text style={[
+                    styles.urgencyText,
+                    urgency === level.id && styles.urgencyTextActive
                   ]}>
-                    {option.label}
-                  </ThemedText>
-                  <ThemedText style={[
-                    styles.timeOptionSubtitle,
-                    preferredTime === option.value && styles.selectedTimeOptionText,
-                  ]}>
-                    {option.subtitle}
-                  </ThemedText>
+                    {level.label}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
+            {selectedUrgency && (
+              <Text style={styles.urgencyDescription}>{selectedUrgency.description}</Text>
+            )}
+          </View>
+
+          {/* Tiempo preferido */}
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>¿Cuándo prefieres la consulta?</ThemedText>
+            <TouchableOpacity 
+              style={styles.timeSelector}
+              onPress={() => setShowTimeOptions(true)}
+            >
+              <View style={styles.timeSelectorContent}>
+                <Ionicons name="time" size={20} color={Colors.primary} />
+                <Text style={styles.timeSelectorText}>
+                  {selectedTime?.label || 'Seleccionar tiempo'}
+                </Text>
+              </View>
+              <Ionicons name="chevron-down" size={20} color={Colors.darkGray} />
+            </TouchableOpacity>
+            {selectedTime && (
+              <Text style={styles.timeDescription}>{selectedTime.description}</Text>
+            )}
           </View>
 
           {/* Notas adicionales */}
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Notas Adicionales (Opcional)</ThemedText>
+            <ThemedText style={styles.sectionTitle}>Notas adicionales (opcional)</ThemedText>
             <TextInput
               style={styles.textInput}
-              placeholder="Información adicional que consideres importante..."
-              placeholderTextColor={Colors.lightGray}
+              placeholder="Medicamentos actuales, alergias, información relevante..."
               value={notes}
               onChangeText={setNotes}
               multiline
-              numberOfLines={2}
+              numberOfLines={3}
+              textAlignVertical="top"
             />
+          </View>
+
+          {/* Resumen del costo */}
+          <View style={styles.costSummary}>
+            <View style={styles.costRow}>
+              <Text style={styles.costLabel}>Tipo de consulta:</Text>
+              <Text style={styles.costValue}>{selectedServiceType?.title}</Text>
+            </View>
+            <View style={styles.costRow}>
+              <Text style={styles.costLabel}>Costo estimado:</Text>
+              <Text style={styles.costAmount}>${selectedServiceType?.price}</Text>
+            </View>
+            <View style={styles.costDivider} />
+            <View style={styles.costRow}>
+              <Text style={styles.costTotal}>Total:</Text>
+              <Text style={styles.costTotalAmount}>${selectedServiceType?.price}</Text>
+            </View>
           </View>
         </ScrollView>
 
-        {/* Footer con botón de envío */}
+        {/* Botón de envío */}
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={[styles.submitButton, isSubmitting && styles.disabledSubmitButton]}
-            onPress={handleSubmitRequest}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <ThemedText style={styles.submitButtonText}>Enviando...</ThemedText>
-            ) : (
-              <>
-                <Ionicons name="send" size={20} color={Colors.white} />
-                <ThemedText style={styles.submitButtonText}>
-                  Solicitar Consulta {selectedDoctor ? `($${getEstimatedCost()})` : ''}
-                </ThemedText>
-              </>
-            )}
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <ThemedText style={styles.submitButtonText}>
+              Solicitar Consulta
+            </ThemedText>
           </TouchableOpacity>
         </View>
+
+        {/* Modal de opciones de tiempo */}
+        <Modal
+          visible={showTimeOptions}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowTimeOptions(false)}
+        >
+          <View style={styles.timeOptionsContainer}>
+            <View style={styles.timeOptionsHeader}>
+              <ThemedText style={styles.timeOptionsTitle}>¿Cuándo prefieres la consulta?</ThemedText>
+              <TouchableOpacity onPress={() => setShowTimeOptions(false)}>
+                <Ionicons name="close" size={24} color={Colors.dark} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.timeOptionsList}>
+              {timeOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[
+                    styles.timeOption,
+                    preferredTime === option.id && styles.timeOptionActive
+                  ]}
+                  onPress={() => {
+                    setPreferredTime(option.id);
+                    setShowTimeOptions(false);
+                  }}
+                >
+                  <View style={styles.timeOptionContent}>
+                    <Text style={[
+                      styles.timeOptionLabel,
+                      preferredTime === option.id && styles.timeOptionTextActive
+                    ]}>
+                      {option.label}
+                    </Text>
+                    <Text style={[
+                      styles.timeOptionDescription,
+                      preferredTime === option.id && styles.timeOptionTextActive
+                    ]}>
+                      {option.description}
+                    </Text>
+                  </View>
+                  {preferredTime === option.id && (
+                    <Ionicons name="checkmark" size={20} color={Colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </Modal>
       </View>
     </Modal>
   );
@@ -420,39 +363,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGray,
   },
-  closeButton: {
-    padding: Spacing.sm,
-  },
-  headerTitle: {
-    fontSize: Typography.fontSizes.lg,
+  title: {
+    fontSize: Typography.fontSizes.xl,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
   },
-  placeholder: {
+  closeButton: {
     width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
   },
-  selectedDoctorCard: {
+  doctorCard: {
+    flexDirection: 'row',
     backgroundColor: Colors.white,
-    padding: Spacing.lg,
     borderRadius: BordersAndShadows.borderRadius.lg,
-    marginBottom: Spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    padding: Spacing.md,
+    marginVertical: Spacing.md,
     ...BordersAndShadows.shadows.sm,
-  },
-  doctorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
   },
   doctorAvatar: {
     width: 50,
@@ -463,6 +400,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: Spacing.md,
   },
+  doctorInfo: {
+    flex: 1,
+  },
   doctorName: {
     fontSize: Typography.fontSizes.md,
     fontWeight: Typography.fontWeights.bold as any,
@@ -471,151 +411,247 @@ const styles = StyleSheet.create({
   },
   doctorSpecialty: {
     fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
+    color: Colors.primary,
     marginBottom: Spacing.xs,
   },
   doctorMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
   },
   doctorRating: {
     fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
+    color: Colors.dark,
     marginLeft: Spacing.xs,
   },
   doctorDistance: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
   },
-  estimatedCost: {
-    alignItems: 'flex-end',
-  },
-  costLabel: {
-    fontSize: Typography.fontSizes.xs,
-    color: Colors.darkGray,
-    marginBottom: Spacing.xs,
-  },
-  costAmount: {
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.primary,
-  },
   section: {
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
-    fontSize: Typography.fontSizes.md,
+    fontSize: Typography.fontSizes.lg,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
     marginBottom: Spacing.md,
   },
-  optionsContainer: {
-    gap: Spacing.md,
-  },
-  optionCard: {
+  serviceTypeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.white,
-    padding: Spacing.lg,
     borderRadius: BordersAndShadows.borderRadius.lg,
-    borderWidth: 2,
-    borderColor: Colors.lightGray,
-    position: 'relative',
-  },
-  selectedOptionCard: {
-    borderColor: Colors.primary,
-  },
-  disabledOptionCard: {
-    backgroundColor: Colors.background,
-    opacity: 0.5,
-  },
-  optionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  optionInfo: {
-    flex: 1,
-    marginLeft: Spacing.md,
-  },
-  optionTitle: {
-    fontSize: Typography.fontSizes.md,
-    fontWeight: Typography.fontWeights.bold as any,
-    color: Colors.dark,
-    marginBottom: Spacing.xs,
-  },
-  optionSubtitle: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.darkGray,
-  },
-  estimatedTime: {
-    fontSize: Typography.fontSizes.sm,
-    color: Colors.primary,
-    fontWeight: Typography.fontWeights.bold as any,
-  },
-  disabledText: {
-    color: Colors.lightGray,
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    top: Spacing.sm,
-    right: Spacing.sm,
-  },
-  urgencyCard: {
-    backgroundColor: Colors.white,
     padding: Spacing.md,
-    borderRadius: BordersAndShadows.borderRadius.md,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: Spacing.md,
     borderWidth: 2,
     borderColor: Colors.lightGray,
   },
-  selectedUrgencyCard: {
-    backgroundColor: Colors.primary,
+  serviceTypeCardActive: {
     borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
-  urgencyInfo: {
-    marginLeft: Spacing.md,
+  serviceTypeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+  },
+  serviceTypeContent: {
     flex: 1,
   },
-  urgencyTitle: {
+  serviceTypeTitle: {
     fontSize: Typography.fontSizes.md,
     fontWeight: Typography.fontWeights.bold as any,
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
-  urgencySubtitle: {
+  serviceTypeDescription: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
   },
-  selectedUrgencyText: {
+  serviceTypePrice: {
+    alignItems: 'flex-end',
+  },
+  priceText: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.primary,
+  },
+  serviceTypeTextActive: {
     color: Colors.white,
   },
   textArea: {
     backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.lightGray,
     borderRadius: BordersAndShadows.borderRadius.md,
     padding: Spacing.md,
     fontSize: Typography.fontSizes.md,
     color: Colors.dark,
-    minHeight: 100,
-  },
-  timeOptionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-  },
-  timeOption: {
-    backgroundColor: Colors.white,
-    padding: Spacing.md,
-    borderRadius: BordersAndShadows.borderRadius.md,
     borderWidth: 1,
     borderColor: Colors.lightGray,
-    flex: 1,
-    minWidth: '45%',
+    minHeight: 100,
   },
-  selectedTimeOption: {
+  textInput: {
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    padding: Spacing.md,
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    minHeight: 80,
+  },
+  urgencyContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: Spacing.sm,
+  },
+  urgencyChip: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginRight: Spacing.sm,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+  },
+  urgencyText: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.dark,
+  },
+  urgencyTextActive: {
+    color: Colors.white,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  urgencyDescription: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    fontStyle: 'italic',
+  },
+  timeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.md,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    marginBottom: Spacing.sm,
+  },
+  timeSelectorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeSelectorText: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
+    marginLeft: Spacing.sm,
+  },
+  timeDescription: {
+    fontSize: Typography.fontSizes.sm,
+    color: Colors.darkGray,
+    fontStyle: 'italic',
+  },
+  costSummary: {
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    ...BordersAndShadows.shadows.sm,
+  },
+  costRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  costLabel: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.darkGray,
+  },
+  costValue: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.dark,
+  },
+  costAmount: {
+    fontSize: Typography.fontSizes.md,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeights.bold as any,
+  },
+  costDivider: {
+    height: 1,
+    backgroundColor: Colors.lightGray,
+    marginVertical: Spacing.sm,
+  },
+  costTotal: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.dark,
+  },
+  costTotalAmount: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.primary,
+  },
+  footer: {
+    padding: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+  },
+  submitButton: {
     backgroundColor: Colors.primary,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.white,
+  },
+  // Estilos para el modal de tiempo
+  timeOptionsContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  timeOptionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+  },
+  timeOptionsTitle: {
+    fontSize: Typography.fontSizes.lg,
+    fontWeight: Typography.fontWeights.bold as any,
+    color: Colors.dark,
+  },
+  timeOptionsList: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+  },
+  timeOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: BordersAndShadows.borderRadius.lg,
+    padding: Spacing.lg,
+    marginVertical: Spacing.sm,
+    borderWidth: 2,
+    borderColor: Colors.lightGray,
+  },
+  timeOptionActive: {
     borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
+  },
+  timeOptionContent: {
+    flex: 1,
   },
   timeOptionLabel: {
     fontSize: Typography.fontSizes.md,
@@ -623,45 +659,12 @@ const styles = StyleSheet.create({
     color: Colors.dark,
     marginBottom: Spacing.xs,
   },
-  timeOptionSubtitle: {
+  timeOptionDescription: {
     fontSize: Typography.fontSizes.sm,
     color: Colors.darkGray,
   },
-  selectedTimeOptionText: {
+  timeOptionTextActive: {
     color: Colors.white,
-  },
-  textInput: {
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.lightGray,
-    borderRadius: BordersAndShadows.borderRadius.md,
-    padding: Spacing.md,
-    fontSize: Typography.fontSizes.md,
-    color: Colors.dark,
-  },
-  footer: {
-    padding: Spacing.lg,
-    backgroundColor: Colors.white,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
-  },
-  submitButton: {
-    backgroundColor: Colors.primary,
-    padding: Spacing.lg,
-    borderRadius: BordersAndShadows.borderRadius.lg,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    ...BordersAndShadows.shadows.md,
-  },
-  disabledSubmitButton: {
-    backgroundColor: Colors.lightGray,
-  },
-  submitButtonText: {
-    color: Colors.white,
-    fontSize: Typography.fontSizes.lg,
-    fontWeight: Typography.fontWeights.bold as any,
   },
 });
 

@@ -24,8 +24,10 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ user }) => {
   useEffect(() => {
     if (patientDoctors.length === 0) {
       const mockDoctors = getMockDoctors();
-      // Agregar el primer doctor como primario
-      addDoctorToPatient(mockDoctors[0], true);
+      // Agregar múltiples doctores - el primero como primario
+      addDoctorToPatient(mockDoctors[0], true);  // Dr. María González - Primario
+      addDoctorToPatient(mockDoctors[1], false); // Dr. Carlos Rodríguez - Secundario
+      addDoctorToPatient(mockDoctors[2], false); // Dra. Ana Martínez - Secundario
     }
   }, [patientDoctors.length, addDoctorToPatient]);
 
@@ -186,7 +188,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ user }) => {
         </View>
         
         <View style={styles.doctorsContainer}>
-          {patientDoctors.slice(0, 2).map((patientDoctor) => (
+          {patientDoctors.slice(0, 4).map((patientDoctor) => (
             <View key={patientDoctor.doctor_id} style={styles.doctorCard}>
               <View style={styles.doctorAvatar}>
                 <Ionicons name="person" size={24} color={Colors.white} />
